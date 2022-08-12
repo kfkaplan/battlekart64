@@ -1,4 +1,4 @@
-Battle Kart 64 (v1.0)
+Battle Kart 64 (v1.1)
 by Triclon
 
 Questions, comments, or found a bug?
@@ -77,4 +77,17 @@ Troubleshooting:
 - BATTLE KART 64 REQUIRES THE EXPANSION PAK!  If it doesn't boot first make sure your console has an Expansion Pak installed, or the emulator you are using has it enabled.
 - If you have trouble seeing the text in an emulator, try changing the video plugin your emulator is using.
 - Note that the HP will not display in traditional battle mode if it is set less than or equal to 3.  This is a feature, not a bug.  The game will use the balloons to track your HP.
+
+Change log:
+v1.1
+- Fixed a bug in timed matches where players who have lost during Sudden Death kept exploding.  Now they properly transform into bombs.
+- Made Free For All (FFA) and Teams scoring its own menu item and updated the text for the scoring mode to accommodate.
+- Rewrote a lot of the game scoring and win conditions code to allow for newer and better game modes.  Most of this is under the hood.
+- When you are in a race course, if you go back to the course select screen, it will properly go back to the race courses and not the battle courses.
+- Fixed issue where bots stopped controlling characters if they were bombs.
+- Added collision detection for bots so they turn around more quickly if they run into a wall.
+- Bots will no longer fall of the level.  If they do, they will teleport back to where they were a second or so before.  This makes Big Donut and Skyscraper playable with bots.  This feature can be toggled off in the bots menu.
+-Fixed issue with starting positions in Moo Moo Farm.
+v1.0 
+- Initial release
 

@@ -1,0 +1,17 @@
+.definelabel BattleFlag, 0x08001350
+.definelabel BowserFlag, 0x080026D0
+.definelabel DKFlag, 0x08003A50
+.definelabel LuigiFlag, 0x08004DD0
+.definelabel MarioFlag, 0x08006150
+.definelabel PeachFlag, 0x080074D0
+.definelabel ToadFlag, 0x08008850
+.definelabel WarioFlag, 0x08009BD0
+.definelabel YoshiFlag, 0x0800AF50
+.definelabel ToadMushroom, 0x0800C7C0
+.definelabel LuigiMushroom, 0x0800E030
+.definelabel BowserMushroom, 0x0800F8A0
+.definelabel PeachMushroom, 0x08011110
+.definelabel RedMushroom, 0x08012980
+.definelabel YoshiMushroom, 0x080141F0
+.definelabel WarioMushroom, 0x08015A60
+.definelabel DKMushroom, 0x080172D0

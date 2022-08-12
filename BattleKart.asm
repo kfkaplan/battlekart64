@@ -1,563 +1,80 @@
 .n64
 .open "/Users/kfkaplan/Desktop/N64/unaltered_roms/Mario Kart 64.z64", "BattleKart.z64", 0 //Path to the MK64 rom and output name of battle kart rom
-.include "Core/library/MarioKart.asm"
-.include "Core/library/SubProgram.asm"
-// .include "library/MarioKartStats.asm"
-// .include "library/MarioKartControls.asm"
-// .include "library/OverKart.asm"
+// .open "Mario Kart 64 (U) [!].z64", "BattleKart.z64", 0 //Path to the MK64 rom with custom courses put in and output name of battle kart rom
+// .open "BattleFarm.z64", "BattleKart.z64", 0 //Path to the MK64 rom with custom courses put in and output name of battle kart rom
 
+//LIBRARYBUILD3 needs to be start of file
+//.align 0x10
+.include "Library/LIBRARYBUILD3.asm"
 
-.org 0x10C7E2
-.halfword hi(DisplayHopTable)
-.org 0x10C7EA
-.halfword lo(DisplayHopTable)
-.org 0x10C7D4
-.word 0
-.org 0x10C7D8
-.word 0
 
-.org 0x109AAA
-.halfword hi(CollisionJumpTable)
-.org 0x109AB2
-.halfword lo(CollisionJumpTable)
-.org 0x109A90
-.word 0
-.org 0x109A9C
-.word 0
 
-// .definelabel Max_Object, 2000
-// .definelabel Object_Array, 0x80600000
+.definelabel RAM_END, org(end_label) //For Library/OKHeader.asm
 
-// .org 0x100086
-// .halfword hi(Object_Array)
-// .org 0x10008A
-// .halfword lo(Object_Array)
 
-// .org 0x10012A
-// .halfword hi(Object_Array)
-// .org 0x10012E
-// .halfword lo(Object_Array)
+.definelabel ok_ModelDataRawSize,     0
+//.align 0x10
+.include "Library/GameVariables/NTSC/GameOffsets.asm"
+.include "Library/GameVariables/NTSC/StatsOffsets.asm"
+.include "library/OKHeader.asm"
+.include "Library/GameVariables/NTSC/OKAssembly.asm"
 
-// .org 0x1001E6
-// .halfword hi(Object_Array)
-// .org 0x1001EA
-// .halfword lo(Object_Array)
 
-// .org 0x100282
-// .halfword hi(Object_Array)
-// .org 0x100286
-// .halfword lo(Object_Array)
 
-// .org 0x1062C2
-// .halfword hi(Object_Array)
-// .org 0x1062CE
-// .halfword lo(Object_Array)
+.definelabel FlagModel, 0x08001350
+.definelabel BaseModel, 0x08002BC0
 
-// .org 0x106436
-// .halfword hi(Object_Array)
-// .org 0x106446
-// .halfword lo(Object_Array)
 
-// .org 0x10669A
-// .halfword hi(Object_Array)
-// .org 0x1066AE
-// .halfword lo(Object_Array)
+.definelabel save_key, 0x0001 //Value (2 bytes) to check for if save exists or not, update every new version
 
-// .org 0x106C26
-// .halfword hi(Object_Array)
-// .org 0x106C2E
-// .halfword lo(Object_Array)
+// //Bug check for collisionSphere
+// .org 0x10A40C
+// 	J bug_check
+// .org 0x10A40C
+// JAL MakeBKTest
+// .org 0x10A40C
+// JAL MakeBKTest
 
-// .org 0x106EFE
-// .halfword hi(Object_Array)
-// .org 0x106F0E
-// .halfword lo(Object_Array)
+//Hooks for bomb for killbombkart for zombombs
+.org 0xF9B64
+	//JAL KillBombKartWrapper
+	NOP
+.org 0xF9B6C
+	//JAL KillBombKartWrapper
+	NOP
+.org 0xF9BC4
+	JAL KillBombKartWrapper
+.org 0xF9C2C
+	JAL KillBombKartWrapper
 
-// .org 0x107032
-// .halfword hi(Object_Array)
-// .org 0x10703A
-// .halfword lo(Object_Array)
 
-// .org 0x1070CE
-// .halfword hi(Object_Array)
-// .org 0x1070E2
-// .halfword lo(Object_Array)
 
-// .org 0x10727A
-// .halfword hi(Object_Array)
-// .org 0x10727E
-// .halfword lo(Object_Array)
-
-// .org 0x107EDE
-// .halfword hi(Object_Array)
-// .org 0x107EE2
-// .halfword lo(Object_Array)
-
-// .org 0x1080E2
-// .halfword hi(Object_Array)
-// .org 0x1080E6
-// .halfword lo(Object_Array)
-
-// .org 0x1082D6
-// .halfword hi(Object_Array)
-// .org 0x1082DA
-// .halfword lo(Object_Array)
-
-// .org 0x1094E6
-// .halfword hi(Object_Array)
-// .org 0x1094FE
-// .halfword lo(Object_Array)
-
-// .org 0x10959E
-// .halfword hi(Object_Array)
-// .org 0x1095A2
-// .halfword lo(Object_Array)
-
-// .org 0x109616
-// .halfword hi(Object_Array)
-// .org 0x10961A
-// .halfword lo(Object_Array)
-
-// .org 0x10A386
-// .halfword hi(Object_Array)
-// .org 0x10A39A
-// .halfword lo(Object_Array)
-
-// .org 0x10A49A
-// .halfword hi(Object_Array)
-// .org 0x10A49E
-// .halfword lo(Object_Array)
-
-// .org 0x10A4A6
-// .halfword hi(Object_Array)
-// .org 0x10A4AA
-// .halfword lo(Object_Array)
-
-// .org 0x10A676
-// .halfword hi(Object_Array)
-// .org 0x10A67A
-// .halfword lo(Object_Array)
-
-// .org 0x10AB56
-// .halfword hi(Object_Array)
-// .org 0x10AB5A
-// .halfword lo(Object_Array)
-
-// .org 0x10C56E
-// .halfword hi(Object_Array)
-// .org 0x10C57E
-// .halfword lo(Object_Array)
-
-// .org 0x10C7B2
-// .halfword hi(Object_Array)
-// .org 0x10C7BA
-// .halfword lo(Object_Array)
-
-// .org 0x10CB62
-// .halfword hi(Object_Array)
-// .org 0x10CB6A
-// .halfword lo(Object_Array)
-
-// .org 0x1198CA
-// .halfword hi(Object_Array)
-// .org 0x1198CE
-// .halfword lo(Object_Array)
-
-// .org 0x119A86
-// .halfword hi(Object_Array)
-// .org 0x119AA2
-// .halfword lo(Object_Array)
-
-// .org 0x119B0A
-// .halfword hi(Object_Array)
-// .org 0x119B26
-// .halfword lo(Object_Array)
-
-// .org 0x119BFE
-// .halfword hi(Object_Array)
-// .org 0x119C16
-// .halfword lo(Object_Array)
-
-// .org 0x119C7A
-// .halfword hi(Object_Array)
-// .org 0x119C7E
-// .halfword lo(Object_Array)
-
-// .org 0x119CAA
-// .halfword hi(Object_Array)
-// .org 0x119CAE
-// .halfword lo(Object_Array)
-
-// .org 0x119CDA
-// .halfword hi(Object_Array)
-// .org 0x119CDE
-// .halfword lo(Object_Array)
-
-// .org 0x119D0A
-// .halfword hi(Object_Array)
-// .org 0x119D0E
-// .halfword lo(Object_Array)
-
-// .org 0x119D3A
-// .halfword hi(Object_Array)
-// .org 0x119D3E
-// .halfword lo(Object_Array)
-
-// .org 0x119DCA
-// .halfword hi(Object_Array)
-// .org 0x119DCE
-// .halfword lo(Object_Array)
-
-// .org 0x119DFA
-// .halfword hi(Object_Array)
-// .org 0x119DFE
-// .halfword lo(Object_Array)
-
-// .org 0x119E2A
-// .halfword hi(Object_Array)
-// .org 0x119E2E
-// .halfword lo(Object_Array)
-
-// .org 0x119E5A
-// .halfword hi(Object_Array)
-// .org 0x119E5E
-// .halfword lo(Object_Array)
-
-// .org 0x119E8A
-// .halfword hi(Object_Array)
-// .org 0x119E8E
-// .halfword lo(Object_Array)
-
-// .org 0x11A1E6
-// .halfword hi(Object_Array)
-// .org 0x11A1EE
-// .halfword lo(Object_Array)
-
-// .org 0x11A446
-// .halfword hi(Object_Array)
-// .org 0x11A44A
-// .halfword lo(Object_Array)
-
-// .org 0x11A76E
-// .halfword hi(Object_Array)
-// .org 0x11A776
-// .halfword lo(Object_Array)
-
-// .org 0x11A996
-// .halfword hi(Object_Array)
-// .org 0x11A99A
-// .halfword lo(Object_Array)
-
-// .org 0x11AB02
-// .halfword hi(Object_Array)
-// .org 0x11AB06
-// .halfword lo(Object_Array)
-
-// .org 0x11AEA2
-// .halfword hi(Object_Array)
-// .org 0x11AEA6
-// .halfword lo(Object_Array)
-
-// .org 0x11AF9A
-// .halfword hi(Object_Array)
-// .org 0x11AF9E
-// .halfword lo(Object_Array)
-
-// .org 0x11B11E
-// .halfword hi(Object_Array)
-// .org 0x11B122
-// .halfword lo(Object_Array)
-
-// .org 0x11B1E6
-// .halfword hi(Object_Array)
-// .org 0x11B1EA
-// .halfword lo(Object_Array)
-
-// .org 0x11B3A6
-// .halfword hi(Object_Array)
-// .org 0x11B3AA
-// .halfword lo(Object_Array)
-
-// .org 0x11B552
-// .halfword hi(Object_Array)
-// .org 0x11B556
-// .halfword lo(Object_Array)
-
-// .org 0x11B62E
-// .halfword hi(Object_Array)
-// .org 0x11B63A
-// .halfword lo(Object_Array)
-
-// .org 0x11BD2E
-// .halfword hi(Object_Array)
-// .org 0x11BD32
-// .halfword lo(Object_Array)
-
-// .org 0x11C002
-// .halfword hi(Object_Array)
-// .org 0x11C006
-// .halfword lo(Object_Array)
-
-// .org 0x11C086
-// .halfword hi(Object_Array)
-// .org 0x11C096
-// .halfword lo(Object_Array)
-
-// .org 0x11C33E
-// .halfword hi(Object_Array)
-// .org 0x11C346
-// .halfword lo(Object_Array)
-
-// .org 0x11C486
-// .halfword hi(Object_Array)
-// .org 0x11C48A
-// .halfword lo(Object_Array)
-
-// .org 0x11CBD6
-// .halfword hi(Object_Array)
-// .org 0x11CBDA
-// .halfword lo(Object_Array)
-
-// .org 0x11CCA6
-// .halfword hi(Object_Array)
-// .org 0x11CCAA
-// .halfword lo(Object_Array)
-
-// .org 0x11CD1A
-// .halfword hi(Object_Array)
-// .org 0x11CD1E
-// .halfword lo(Object_Array)
-
-// .org 0x11CF8E
-// .halfword hi(Object_Array)
-// .org 0x11CFAA
-// .halfword lo(Object_Array)
-
-// .org 0x11DB42
-// .halfword hi(Object_Array)
-// .org 0x11DB4A
-// .halfword lo(Object_Array)
-
-// .org 0x11DB4E
-// .halfword hi(Object_Array)
-// .org 0x11DB52
-// .halfword lo(Object_Array)
-
-// .org 0x11DBF6
-// .halfword hi(Object_Array)
-// .org 0x11DBFE
-// .halfword lo(Object_Array)
-
-// .org 0x11DC02
-// .halfword hi(Object_Array)
-// .org 0x11DC06
-// .halfword lo(Object_Array)
-
-// .org 0x11E1AE
-// .halfword hi(Object_Array)
-// .org 0x11E1CA
-// .halfword lo(Object_Array)
-
-// .org 0xFB7A
-// .halfword hi(Object_Array)
-// .org 0xFB92
-// .halfword lo(Object_Array)
-
-// .org 0x13656
-// .halfword hi(Object_Array)
-// .org 0x13666
-// .halfword lo(Object_Array)
-
-// .org 0x1438E
-// .halfword hi(Object_Array)
-// .org 0x143A6
-// .halfword lo(Object_Array)
-
-// .org 0x14AD2
-// .halfword hi(Object_Array)
-// .org 0x14AD6
-// .halfword lo(Object_Array)
-
-// .org 0x1BB3A
-// .halfword hi(Object_Array)
-// .org 0x1BB3E
-// .halfword lo(Object_Array)
-
-// .org 0x1BBDE
-// .halfword hi(Object_Array)
-// .org 0x1BBE2
-// .halfword lo(Object_Array)
-
-// .org 0x1BD1A
-// .halfword hi(Object_Array)
-// .org 0x1BD1E
-// .halfword lo(Object_Array)
-
-// .org 0x1BECA
-// .halfword hi(Object_Array)
-// .org 0x1BECE
-// .halfword lo(Object_Array)
-
-// .org 0x1BFBA
-// .halfword hi(Object_Array)
-// .org 0x1BFBE
-// .halfword lo(Object_Array)
-
-// .org 0x1C12E
-// .halfword hi(Object_Array)
-// .org 0x1C132
-// .halfword lo(Object_Array)
-
-// .org 0x1C1BE
-// .halfword hi(Object_Array)
-// .org 0x1C1C2
-// .halfword lo(Object_Array)
-
-// .org 0x1C2B2
-// .halfword hi(Object_Array)
-// .org 0x1C2B6
-// .halfword lo(Object_Array)
-
-// .org 0x1C346
-// .halfword hi(Object_Array)
-// .org 0x1C34A
-// .halfword lo(Object_Array)
-
-// .org 0x1C43E
-// .halfword hi(Object_Array)
-// .org 0x1C442
-// .halfword lo(Object_Array)
-
-// .org 0x1C516
-// .halfword hi(Object_Array)
-// .org 0x1C522
-// .halfword lo(Object_Array)
-
-// .org 0x1C69E
-// .halfword hi(Object_Array)
-// .org 0x1C6A2
-// .halfword lo(Object_Array)
-
-// .org 0x1C736
-// .halfword hi(Object_Array)
-// .org 0x1C73A
-// .halfword lo(Object_Array)
-
-// .org 0xF98E
-// .halfword hi(Object_Array)
-// .org 0xF996
-// .halfword lo(Object_Array)
-
-// .org 0xF9D6
-// .halfword hi(Object_Array)
-// .org 0xF9DE
-// .halfword lo(Object_Array)
-
-// .org 0xFA1E
-// .halfword hi(Object_Array)
-// .org 0xFA26
-// .halfword lo(Object_Array)
-
-// .org 0x100072
-// .halfword Max_Object
-
-// .org 0x100106
-// .halfword Max_Object
-
-// .org 0x100116
-// .halfword Max_Object
-
-// .org 0x1001C2
-// .halfword Max_Object
-
-// .org 0x1001D2
-// .halfword Max_Object
-
-// .org 0x100262
-// .halfword Max_Object
-
-// .org 0x100272
-// .halfword Max_Object
-
-// .org 0x100306
-// .halfword Max_Object
-
-// .org 0x107EB6
-// .halfword Max_Object
-
-// .org 0x1080A2
-// .halfword Max_Object
-
-// .org 0x1080B2
-// .halfword Max_Object
-
-// .org 0x108276
-// .halfword Max_Object
-
-// .org 0x1082E2
-// .halfword Max_Object
-
-// .org 0x1082AE
-// .halfword Max_Object
-
-// .org 0x10A3AA
-// .halfword Max_Object
-
-// .org 0x10A4FE
-// .halfword Max_Object
-
-// .org 0x10A4B2
-// .halfword Max_Object
-
-// .org 0x10A692
-// .halfword Max_Object + 1
-
-// .org 0x10A46A
-// .halfword Max_Object - 1
-
-// .org 0x10A63A
-// .halfword Max_Object - 1
-
-// .org 0x1070D2
-// .halfword hi(Object_Array + (0x70 * Max_Object))
-
-// .org 0x1070DE
-// .halfword lo(Object_Array + (0x70 * Max_Object))
-
-// .org 0x10C572
-// .halfword hi(Object_Array + (0x70 * Max_Object))
-
-// .org 0x10C57A
-// .halfword lo(Object_Array + (0x70 * Max_Object))
-
-// .org 0x10CAE6
-// .halfword hi(Object_Array + (0x70 * Max_Object))
-
-// .org 0x10CAEA
-// .halfword lo(Object_Array + (0x70 * Max_Object))
-
-// .org 0x10CD02
-// .halfword hi(Object_Array + (0x70 * Max_Object))
-
-// .org 0x10CD06
-// .halfword lo(Object_Array + (0x70 * Max_Object))
-
-
+//Null out function displaying text which might be causing crash in 3 player CTF mode
+.org 0x0F95DC
+	NOP
+//Null out function EraseInfo3P which was causing a crash when 3P mode goes to results
+.org 0xF7AC0
+	NOP
+// .org 0x002950
+// 	NOP
+// .org 0x002984
+// 	NOP
 
 
 //.definelabel PAYLOAD_ROM, 		0x00D00000
 //.definelabel PAYLOAD_RAM, 		0x80600000
-.definelabel PAYLOAD_ROM, 		0x00C00000
-.definelabel PAYLOAD_RAM, 		0x80500000//(overwrite code for GP mode cpus)
+.definelabel PAYLOAD_ROM, 		0x00D00000
+.definelabel PAYLOAD_RAM, 		0x80400000//(overwrite code for GP mode cpus)
 .definelabel DMA_FUNC,    		0x80001158
-.definelabel EXCEPTION_HANDLER, 0xD1DB8
 .definelabel DMA_MAX_LENGTH, 	org(end_label) - PAYLOAD_RAM
-.definelabel VARIABLE_RAM_BASE,  0x80550000// ////Place in ram to store all the battle kart variables
+.definelabel VARIABLE_RAM_SIZE, 0x2000 ////Place in ram to store all the battle kart variables (note: 0x2000 bytes large)
+.definelabel VARIABLE_RAM_BASE,  org(end_label) - VARIABLE_RAM_SIZE // 
+//.definelabel VARIABLE_RAM_BASE,  nicefont + 0x5000// 
 .definelabel ROM_TO_RAM, 0x7ffff400
 .definelabel RAM_TO_ROM, -0x7ffff400
-.definelabel exceptionHandleJumpback,  EXCEPTION_HANDLER + ROM_TO_RAM + 0x8
 
 /* In Game Functions */
+.definelabel DrawRectangle, 0x80098DF8
 .definelabel FUNCTION_PLAY_SOUND, 0x800C8E10
 .definelabel FUNCTION_PLAY_MUSIC, 0x800C8EAC
 .definelabel FUNCTION_LOAD_FONT, 0x80057710
@@ -567,11 +84,22 @@
 .definelabel FUNCTION_FIND_ANGLE, 0x802B5224 //a0=x1 (pointer), a1=y1 (pointer), a2=x2 (pointer), a3=y2 (pointer), v0=returned angle
 .definelabel FUNCTION_RNG, 0x802B7E34 //Random number generator, returns a random int16 in v0 between 0 and a0-1
 .definelabel FUNCTION_MEMCOPY, 0x800D7FE0 //Like DMA but copy from ram -> ram, a0=output, a1=input, a2=length
+//.definelabel executeItem, 0x802B2FA0  //Funciton that uses item, called as executeItem(car)
+.definelabel makeBorder, 0x802A4300 //Function that draws borders between the player screens
+.definelabel checkTriangleZX, 0x802AAE4C//Detect nearby walls
+.definelabel CheckTriangleXY, 0x802AB288//Detect nearby walls
+.definelabel CheckTriangleYZ, 0x802AB6C4//Detect nearby walls
+.definelabel check_bump, 0x802ADDC8 //detect nearby walls
+.definelabel checkTriangleZXV, 0x802AAE4C//Detect nearby walls
+.definelabel CheckTriangleXYV, 0x802AB288//Detect nearby walls
+.definelabel CheckTriangleYZV, 0x802AD278//Detect nearby walls
 
 /* Game variables */
 .definelabel current_screen_state, 0x800DC513 //5 = results screen, 6 = force race to reset
 .definelabel player_item_base, 0x80165F5F //Player has an item
 .definelabel player_item_offset, 0xE0 //Offset between player item structures
+.definelabel player_speed_base, 0x800F6A2C //Word that stores player's speed as a float, offset is 0xDD8
+.definelabel player_collision_base, 0x800F69D5 //Byte that stores if you are colliding or not (0x01 - Going backwards when holding break (combines with 0x8 for 0x9), 0x02 - Turn left, 0x04 - Turn right, 0x08 - Colliding with wall or revering, 0x20 - Accelerating)
 .definelabel player_count, 0x800DC53B //Byte storing number of players (1=1P, 2=2P, 3=3P, 4=4P)
 .definelabel player_count_2, 0x800DC52F //Different byte storing number of players (0=1P, 1=2P, 3=3P or 4P)
 .definelabel random_number_generator, 0x802BA290
@@ -581,7 +109,7 @@
 .definelabel CSTICK_ACTIVATOR_Y_P1, 0x8014F0F3
 .definelabel angle_p1, 0x800F69BE
 .definelabel angle_p2, 0x800F7796
-.definelabel angle_p3, 0x800F856E
+// .definelabel angle_p3, 0x800F856E
 .definelabel angle_p4, 0x800F9346
 .definelabel status_p1, 0x800F6990
 // .definelabel status_p2,
@@ -592,7 +120,9 @@
 .definelabel in_results, 0x800DC5B9 //Byte storing if in the results screen or not (1=in results screen, 0=not in results screen)
 .definelabel in_game, 0x800DC5B9 //Byte storing if in race is running or not (1 = in race, 0 = not in race)
 .definelabel game_paused, 0x800EA16C //Byte storing if game is paused or not (> 0 = paused, 0 = not paused), this really is the game tempo which is zero when game is paused
-
+.definelabel bot_respawn_player_offset, 0x30 //Offset between structures storing player coordinates for respawning bots that fall off the course
+.definelabel insideMenu, 0x8018D9E3  //0x23 main 0x24 character 0x25 course 0 ingame
+.definelabel scaleHeight, 0x800DC608 //Course scale height (float)
 
 /* Battle Kart RAM */
 .definelabel MENU_TAB, VARIABLE_RAM_BASE+0x00
@@ -614,14 +144,11 @@
 .definelabel MENU_Y_OPTIONS, VARIABLE_RAM_BASE+0x10
 .definelabel MENU_Y_PROGRESS, VARIABLE_RAM_BASE+0x11
 .definelabel MENU_X_PROGRESS, VARIABLE_RAM_BASE+0x12
-.definelabel bot_status_p1, VARIABLE_RAM_BASE+0x14 //Bot status (1=ON, 0=OFF)
+.definelabel bot_status_p1, VARIABLE_RAM_BASE+0x14 //Bot status (0=OFF, 1=Mario, 2=Luigi, 3= Yoshi, 4=Toad, 5=DK, 6=Wario, 7=Peach, 8=Bowser)
 .definelabel bot_status_p2, VARIABLE_RAM_BASE+0x15
 .definelabel bot_status_p3, VARIABLE_RAM_BASE+0x16
 .definelabel bot_status_p4, VARIABLE_RAM_BASE+0x17
-.definelabel bot_timer_p1, VARIABLE_RAM_BASE+0x18 //Bot timer
-.definelabel bot_timer_p2, VARIABLE_RAM_BASE+0x19
-.definelabel bot_timer_p3, VARIABLE_RAM_BASE+0x1A
-.definelabel bot_timer_p4, VARIABLE_RAM_BASE+0x1B
+
 .definelabel bot_steering_p1, VARIABLE_RAM_BASE+0x1C //Bot steering state (0 = go straight, 1 = turn left, 2 = turn right)
 .definelabel bot_steering_p2, VARIABLE_RAM_BASE+0x1D
 .definelabel bot_steering_p3, VARIABLE_RAM_BASE+0x1E
@@ -639,7 +166,7 @@
 .definelabel status_options_ludicrousspeed, VARIABLE_RAM_BASE+0x36 //More options toggle  (1=ON, 0=OFF)
 .definelabel status_options_samechars, VARIABLE_RAM_BASE+0x37 //More options toggle  (1=ON, 0=OFF)
 .definelabel game_mode, VARIABLE_RAM_BASE+0x38 //Game mode (0=traditional, 1=hot potato, 2=squish, ect.)
-.definelabel score_mode, VARIABLE_RAM_BASE+0x39 //Scoring mode 0=Stock, 1=Time, 2=Team Points, 3=Team Time)
+.definelabel score_mode, VARIABLE_RAM_BASE+0x39 //Scoring mode 0=Stock/points, 1=Time)
 .definelabel status_respawn, VARIABLE_RAM_BASE+0x3A // Respawn (0=OFF, 1=ON)
 .definelabel max_hp, VARIABLE_RAM_BASE+0x3C // 2 bytes - Max HP
 .definelabel p1_score, VARIABLE_RAM_BASE+0x3E // 2 bytes - P1 HP/score
@@ -652,7 +179,7 @@
 .definelabel hotpotato_countdown_default, VARIABLE_RAM_BASE+0x52 //2 bytes- Hot potato countdown default
 .definelabel boot_flag, VARIABLE_RAM_BASE+0x54 //Flag ran in menu to ensure game has booted and DMA copy of code to expansion pak is complete
 .definelabel test_flag, VARIABLE_RAM_BASE+0x55
-.definelabel bot_rival_p1, VARIABLE_RAM_BASE+0x58 //Stores rival for each bot (0=P1, )
+.definelabel bot_rival_p1, VARIABLE_RAM_BASE+0x58 //Stores rival for each bot (0=P1, 1=P2, 2=P3, 3=P4)
 .definelabel bot_rival_p2, VARIABLE_RAM_BASE+0x59
 .definelabel bot_rival_p3, VARIABLE_RAM_BASE+0x5A
 .definelabel bot_rival_p4, VARIABLE_RAM_BASE+0x5B
@@ -661,41 +188,70 @@
 .definelabel who_was_hit_last, VARIABLE_RAM_BASE+0x5E //Who was hit last (and the hot potato) (0=nobody, 1=P2, 2=P2, 3=P3, 4=P4)
 .definelabel team_1_score, VARIABLE_RAM_BASE+0x60 //2 bytes - Score for Team 1
 .definelabel team_2_score, VARIABLE_RAM_BASE+0x62 //2 bytes - Score for Team 2
-.definelabel max_team_points, VARIABLE_RAM_BASE+0x64 //2 bytes - Max team points (for team point score mode)
+.definelabel max_points, VARIABLE_RAM_BASE+0x64 //2 bytes - Max team points (for team point score mode)
+.definelabel bot_respawn_timer, VARIABLE_RAM_BASE+0x66 //2 bytes, timer for bots when they fall off the course and have to jump back
+.definelabel bot_respawn_index,  VARIABLE_RAM_BASE+0x68 //1 byte, index into 3 element array for bot respawning (either = 0, 0xC, or 0x)
+.definelabel bot_respawn_flag, VARIABLE_RAM_BASE+0x69 //1 byte, True = bots cannot fall off course, 0 = bots can fall off course
+.definelabel bot_ai_type, VARIABLE_RAM_BASE+0x6A //1 byte, 0 = Normal with some tracking and some randomness, 1 = Seeker pure tracking, 2 = Random, no tracking
+.definelabel bot_use_items,  VARIABLE_RAM_BASE+0x6B //1 byte, True = bots use items (on by default), 0 = they don't use items and are completely helpless
+.definelabel course_start_flag, VARIABLE_RAM_BASE+0x6C //Flag to track that course has booted to run code in the inrace loop only once 0=course is loading, 1=course has loaded
+.definelabel ffa_or_teams, VARIABLE_RAM_BASE+0x6D  //1 byte, free for all = 0, teams = 1
+.definelabel hp_or_points,  VARIABLE_RAM_BASE+0x6F //1` byte, store if scoring is HP (=0) or points(=1)
+.definelabel hit_or_objective, VARIABLE_RAM_BASE+0x70 //1 byte, = 0 if game is scored using hits (score will be displayed as HP/hits), = 1 if game is objective based (score will be displayed as points)
+.definelabel ctf_game_mode, VARIABLE_RAM_BASE+0x71  //1 byte, CTF game mode, 0=1 flag, 1=multiflag
+//.definelabel ctf_score_mode, VARIABLE_RAM_BASE+0x94 
+.definelabel ctf_game_started, VARIABLE_RAM_BASE+0x72 //1 byte, 0=Game has not started, 1=game has started
+.definelabel no_items_when_holding_flag,  VARIABLE_RAM_BASE+0x73 //1 byte, 0=can have item when holding flag, 1=can't have item when holding flag
+.definelabel slow_when_holding_flag, VARIABLE_RAM_BASE+0x74 //1 byte, 0=normal speed when holding flag, 1=lightning shrunk when holding flag
+.definelabel one_player_full_screen, VARIABLE_RAM_BASE+0x75 //1 byte, 0=normal, 1=1 player full screen
+.definelabel text_flicker_flag, VARIABLE_RAM_BASE+0x76 //1 byte, 0 or 1
+.definelabel in_title_screen,  VARIABLE_RAM_BASE+0x77 //1 byte, 1 if you have been in title screen, 0 if not (going to the main menu sets it to zero)
+.definelabel course_height, VARIABLE_RAM_BASE+0x78 //4 bytes, float that stores the course height at course initialization
+.definelabel save_flag,  VARIABLE_RAM_BASE+0x7C //2 bytes, stores the save flag
+.definelabel status_restore_defaults, VARIABLE_RAM_BASE+0x7E //1 byte, controles restoring defaults from the menu, 1 = are you sure?  2 = restore the defaults
+.definelabel status_bombs_respawn, VARIABLE_RAM_BASE+0x7F //1 byte, stores if bombs can respawn or not in Zombombs game mode
+.definelabel zombomb_startup_flag, VARIABLE_RAM_BASE+0x80 //1 byte, 0 if game hasn't started yet, 1 if it has started, resets at beginning of match, used to randomly select player to be a zombie
+.definelabel who_won_zombombs,  VARIABLE_RAM_BASE+0x81 //1 byte, used to track if survivors or bombs won game, 0 if survivors won, 1 if zombombs won
+.definelabel map_toggle_3p, VARIABLE_RAM_BASE+0x82 //1 byte, 0, minimap in 3P mode is on, 1 mimimap in 3 player mode is off
+.definelabel map_button_down_3p, VARIABLE_RAM_BASE+0x83 //1 byte, store if the map toggling button was down or not
+.definelabel map_x_3p, VARIABLE_RAM_BASE+0x84 //2 bytes, store the current x position of the map before it gets pushed off the screen
+.definelabel bot_angle_p1, VARIABLE_RAM_BASE+0x86 //2 bytes, stores angle for bot to turn to
+.definelabel bot_angle_p2, VARIABLE_RAM_BASE+0x88 //2 bytes, stores angle for bot to turn to
+.definelabel bot_angle_p3, VARIABLE_RAM_BASE+0x8A //2 bytes, stores angle for bot to turn to
+.definelabel bot_angle_p4, VARIABLE_RAM_BASE+0x8B //2 bytes, stores angle for bot to turn to]
+.definelabel bot_timer_p1, VARIABLE_RAM_BASE+0x90 //Bot timer, 4 bytes
+.definelabel bot_timer_p2, VARIABLE_RAM_BASE+0x94
+.definelabel bot_timer_p3, VARIABLE_RAM_BASE+0x98
+.definelabel bot_timer_p4, VARIABLE_RAM_BASE+0x9C
+//NOTE EVERYTHING ABOVE HERE IS SAVED TO THE EPPROM, EVERYTHING BELOW IS NOT, SAVE IS FIRST 512 OR 0x200 BYTES
+.definelabel bot_respawn_datastructure, VARIABLE_RAM_BASE+0x200 //3 x 4 bytes each = 12 bytes - Previous positions stored to teleport bots that fall off the map, a 3 element array 
 
+
+// //Disable game's usual saving and loading so I can use DeadHamster's custom code
+.org 0x800B45E0 + RAM_TO_ROM
+	JR RA
+	NOP
+.org 0x800B4670 + RAM_TO_ROM
+	JR RA
+	NOP
+.org 0x800B559C + RAM_TO_ROM
+	JR RA
+	NOP
+.org 0x800B5948 + RAM_TO_ROM
+	JR RA
+	NOP
+.org 0x800B4A10 + RAM_TO_ROM
+	JR RA
+	NOP
 
 /* Hooks */
 
-// //General menu/titlescreen hook
-// .org 0x095858
-// 	J testThisHook
-// 	NOP
-
-//Title screen
-.org 0x957D0
-	J titleScreen
-	NOP
-
-//1p
-.org 0x2214  //RAM address
-	J race1P
-	NOP
-
-//2p
-.org 0x269C  //RAM address
-	J race2P
-	NOP
-
-//mp
-.org 0x28F8  //RAM address
-	J raceMP
-	NOP
 
 
-// //exception handler
-// .org EXCEPTION_HANDLER 
-// 	J 0xE9E80 + ROM_TO_RAM
-// 	NOP
+//Hook on top of InitCenterLine
+.org 0x03DCB4
+	J afterMapDataLoads
+
 
 //Item reroll
 .org 0x7BAD4
@@ -703,7 +259,8 @@
 
 //Raise big donut to be higher when flat courses are on 
 //Set up the hook inside scale height multiplier code
-.org 0x111D4C
+//.org 0x111D4C
+.org 0x111DB0
 	J raiseBigDonut
 	//note there is no nop because we want the delay slot to run
 
@@ -713,264 +270,78 @@
 	NOP
 
 
-// //This code runs from a hook into the exception handler, if the main battle kart code has been DMAed, then the custom code that hooks into the exception handler is jumped to and allowed to run
-.org 0xD1DB0
-//.org 0xE9E80
-// exceptionHandlerBootCheck:
-// 	LUI k0, hi(boot_flag)
-// 	LBU k0, lo(boot_flag) (k0) //Check if boot has finished and GS code has been copied from rom to ram by waiting for controllers to be set up
-// 	// LUI k0, hi(end_label)
-// 	// LHU k0, 0x80196500
-// 	// LI k1, 0xFF01
-// 	BEQ k0, zero, @@branch_boot_finished //If boot has finisehd
-		// NOP
-		J exceptionHandlerLoop + ROM_TO_RAM //Jump to custom code
-		NOP
-// 	@@branch_boot_finished:
-// 	//If boot has not yet finished completely (e.g. if title screen has not been reached yet), overwrite some of the main game code right after boot
+//Set up hook for running before course select menu is loaded
+.org 0x32FC
+	JAL setCourseSelectVSorBattle
+	NOP
 
-// 	//Enable mirror mode
-// 	LUI k0, 0x8019
-// 	LI k1, 0xFF00
-// 	SH k1, 0xED12 (k0)
-// 	//Force crash screen to always display
-// 	LI k0, 0x08001192
-// 	LUI k1, 0x8000
-// 	sw k0, 0x45F0 (k1)
-// 	//Force starting lap to be 1, this forces the balloon with the blue shell to display in Luigi's raceway
-// 	LUI k0, 0x8001
-// 	SH zero, 0xF94A (k0)
 
-// 	J exceptionHandleJumpback //Otherwise jump back to exception handler
-// 	NOP
+//Set up hook for running before course is initialized
+.org 0x331C
+	JAL runAtCourseInitialization
+	NOP
+
+
+
+// // // .org 0x038EDC// hook into beginning of DriveStickControl
+// //.org 0x001628 //read controller hook
+.org 0x038E48
+	// JAL controllerLoop //Jump to custom code
+	JAL botControlWrapper
+	NOP
+
+// .org 0x51F0
+// JAL controllerLoop
+// .org 0x344C
+// JAL controllerLoop
+// .org 0x349C
+// JAL controllerLoop
 
 
 // .org 0x120F4
 
-.org 0xE9E80 
-//Runs in exception handler (like a Gameshark), necessary for some stuff
-exceptionHandlerLoop:
+//Hijack the execute_item function to prevent players holding flags in CTF mode from 
+.org 0x11C890
+	JAL hijackExecuteItem
 
-	// LBU k0, boot_flag
-	// LI k1, 1
-	// BEQ k0, k1, @@branch_wait_for_boot
-	// 	NOP
-	// 	J exceptionHandleJumpback
-	// 	NOP
-	// 	@@branch_wait_for_boot:
-
-
-	//Enable mirror mode
-	LI k0, 0xFF00
-	LUI k1, hi(0x8018ED12)
-	SH k0, lo(0x8018ED12) (k1)
-
-
-	//Copy battle bot controller input generated by battle bot function to the current button activators (because we need to use the exception handler hook)
-	//Player 1
-	LBU k0, bot_status_p1 //Check if bot is on
-	BEQ k0, zero, @@branch_bot_control_p1
-		LUI k0, 0x8019 //Auto selet character for bot
-		LI k1, 1
-		SB k1, 0xEDE8 (k0)
-		LBU k0, 0x800F6990 //check if in game and player is not starting or dead
-		LI k1, 0xC0
-		BNE k0, k1, @@branch_bot_control_p1
-			LBU k0, current_screen_state //Load current screen state
-			LI k1, 5 //Results screen state
-			BEQ k0, k1, @@branch_bot_control_p1 //Skip copying controller input if on results screen
-				LUI k0, 0x8019
-				LW k1, bot_controller_input_p1 //Copy controller input into correct button activator
-				SW k1, 0x6504 (k0) 
-				LI k1, 0xFF010401 //Trick console/emulator into thinking controller is plugged in
-				SW k1, 0x6500 (k0)
-	@@branch_bot_control_p1:
-	//Player 2
-	LBU k0, bot_status_p2 //Check if bot is on
-	BEQ k0, zero, @@branch_bot_control_p2
-		LUI k0, 0x8019 //Auto selet character for bot
-		LI k1, 1
-		SB k1, 0xEDE9 (k0)
-		LBU k0, 0x800F7768 //check if in game and player is not starting or dead
-		LI k1, 0xC0
-		BNE k0, k1, @@branch_bot_control_p2
-			LBU k0, current_screen_state //Load current screen state
-			LI k1, 5 //Results screen state
-			BEQ k0, k1, @@branch_bot_control_p2 //Skip copying controller input if on results screen
-				LUI k0, 0x8019
-				LW k1, bot_controller_input_p2 //Copy controller input into correct button activator
-				SW k1, 0x650C (k0)
-				LI k1, 0xFF010401 //Trick console/emulator into thinking controller is plugged in
-				SW k1, 0x6508 (k0)
-	@@branch_bot_control_p2:
-	//Player 3
-	LBU k0, bot_status_p3 //Check if bot is on
-	BEQ k0, zero, @@branch_bot_control_p3
-		LUI k0, 0x8019 //Auto selet character for bot
-		LI k1, 1
-		SB k1, 0xEDEA (k0)
-		LBU k0, 0x800F8540 //check if in game and player is not starting or dead
-		LI k1, 0xC0
-		BNE k0, k1, @@branch_bot_control_p3
-			LBU k0, current_screen_state //Load current screen state
-			LI k1, 5 //Results screen state
-			BEQ k0, k1, @@branch_bot_control_p3 //Skip copying controller input if on results screen
-				LUI k0, 0x8019
-				LW k1, bot_controller_input_p3 //Copy controller input into correct button activator
-				SW k1, 0x6514 (k0)
-				LI k1, 0xFF010401 //Trick console/emulator into thinking controller is plugged in
-				SW k1, 0x6510 (k0)
-	@@branch_bot_control_p3:
-	//Player 4
-	LBU k0, bot_status_p4 //Check if bot is on
-	BEQ k0, zero, @@branch_bot_control_p4
-		LUI k0, 0x8019 //Auto selet character for bot
-		LI k1, 1
-		SB k1, 0xEDEB (k0)
-		LBU k0, 0x800F9318 //check if in game and player is not starting or dead
-		LI k1, 0xC0
-		BNE k0, k1, @@branch_bot_control_p4
-			LBU k0, current_screen_state //Load current screen state
-			LI k1, 5 //Results screen state
-			BEQ k0, k1, @@branch_bot_control_p4 //Skip copying controller input if on results screen
-				LUI k0, 0x8019
-				LW k1, bot_controller_input_p4 //Copy controller input into correct button activator
-				SW k1, 0x651C (k0)
-				LI k1, 0xFF010401 //Trick console/emulator into thinking controller is plugged in
-				SW k1, 0x6518 (k0)
-	@@branch_bot_control_p4:
-
-
-	//Flatten courses
-	LUI k0, hi(status_options_flatcourses)
-	LBU k1, lo(status_options_flatcourses) (k0)
-	BEQ k1, zero, @@branch_flatten_battle_courses
-		LUI k1, 0x800E
-		LUI k0, 0x3CCC
-		SW k0, 0xC608 (k1)
-	@@branch_flatten_battle_courses:
-
-	//Add same character selection if set to on
-	LB k0, status_options_samechars
-	BEQ k0, zero, @@branch_samechars_on
-		LUI k0, 0x800B
-		LI k1, 0x7FFFF
-		SW zero, 0x3924 (k0)
-		SH k1, 0x3936 (k0)
-		SW zero, 0x39A4 (k0)
-		SH k1, 0x39B6 (k0)
-		SW zero, 0x3A38 (k0)
-		SH k1, 0x3A4E (k0)
-	@@branch_samechars_on:
-
-
-	//If starting a battle course, use default initialization, otherwise use big donut initialization
-	LUI k0, 0x8004 //By default, do not force battle mode initialization for big donut
-	LI k1, 0x01600008
-	SW k1, 0xC1E8 (k0)
-	LBU k1, 0x800DC5A1 //Load current track from cup course index 0x8018EE0B
-	LI k0, 0x13 //Check if Big Donut, if it is, skip the rest of this
-	BEQ k0, k1, @@branch_course_init_skip
-	LI k0, 0x11 //Check if double deck, if it is, skip the rest of this
-	BEQ k0, k1, @@branch_course_init_skip
-	LI k0, 0x10 //check if Skyscraper, if it is, skip the rest of this
-	BEQ k0, k1, @@branch_course_init_skip
-	LI k0, 0xF //check if block Fort, if it is, skip the rest of this
-	BEQ k0, k1, @@branch_course_init_skip
-		LI k1, 0x0800F263 //Force battle mode initialization for Big Donut
-		LUI k0, 0x8004
-		SW k1, 0xC1E8 (k0)
-		LBU k0, 0x8018EDEC //Force battle mode after selecting okay in course selection menu
-		LI k1, 3
-		BNE k0, k1, @@branch_course_init_skip
-		LUI k0, 0x800E
-		SH k1, 0xC53E (k0)
-	@@branch_course_init_skip:
-
-	//Default lose HP/balloons when falling off course, certain game modes might overwrite this
-	LI k0, 0x0C01AE2D
-	LUI k1, 0x8009
-	SW k0, 0x0F78 (k1)
-	//If respawn mode is on,  turn off losing balloons/HP when falling off course
-	LBU k0, status_respawn
-	BEQ k0, zero, @@branch_respawn_mode_on
-		NOP
-		SW zero, 0x0F78 (k1)
-		@@branch_respawn_mode_on:
-
-	//If game mode is traditional, and HP is <= 4, set the number of ballons displayed to be this and set the max balloons so that the game's own code can take care of that
-	LUI k0, 0x8007 //Default zero out left and right baloons
-	SW zero, 0xB82C (k0)
-	SW zero, 0xB850 (k0)
-	LBU k1, status_respawn
-	BNE k1, zero, @@skip_balloon_display_code //If respawning is on, display only one balloon, and skip the rest of  this code
-		LUI k0, 0x8007 //Default max balloon count to three
-		LI k1, 2
-		SH k1, 0xB86E (k0)
-		LBU k0, score_mode //check if stock is on (not timed), and if it is on run the following code below
-		BNE k0, zero, @@skip_balloon_display_code
-			LBU k0, game_mode //Load game mode
-			BNE k0, zero, @@skip_balloon_display_code //If game mode is traditional battle
-				//HP = 1
-				LHU k0, max_hp //Load max HP
-				LI k1, 1
-				BNE k0, k1, @@branch_hp_equals_1 //If HP == 1
-					LUI k0, 0x8007 //Set max ballon count to one
-					SH zero, 0xB86E (k0)
-					@@branch_hp_equals_1:
-				//HP = 2
-				LHU k0, max_hp //Load max HP
-				LI k1, 2
-				BNE k0, k1, @@branch_hp_equals_2 //If HP == 2
-					LI k0, 0x0C01A943 //Load instruction that causes balloons to load "JAL 0x8006A50C" into $a2
-					LUI k1, 0x8007
-					SW k0, 0xB82C (k1) //display left balloon
-					LUI k0, 0x8007 //Set max balloon count to two
-					LI k1, 1
-					SH k1, 0xB86E (k0)
-					@@branch_hp_equals_2:
-				//HP = 3
-				LHU k0, max_hp
-				LI k1, 3
-				BNE k0, k1, @@branch_hp_equals_3 //If HP == 3
-					LI k0, 0x0C01A943 //Load instruction that causes balloons to load "JAL 0x8006A50C" into $a2
-					LUI k1, 0x8007
-					SW k0, 0xB82C (k1) //Display left balloon
-					SW k0, 0xB850 (k1) //Display right balloon
-					@@branch_hp_equals_3:
-		@@skip_balloon_display_code:
-
-	J exceptionHandleJumpback
-	NOP
+//Hijack the makeBorder function so that it can be toggled on or off
+.org 0x002A64
+	JAL hijackMakeBorder
 
 
 
 
-// overwrite boot function
-.org 0x17EC //RAM address 0x80000BEC
-	LUI a0, hi(PAYLOAD_RAM) //RAM address
-	LUI a1, hi(PAYLOAD_ROM)
-	LUI a2, hi(DMA_MAX_LENGTH)
-	JAL DMA_FUNC
-	ADDIU a2, a2, lo(DMA_MAX_LENGTH)
-	J OriginalBootFunction
-	NOP
+// // overwrite boot function
+// .org 0x17EC //RAM address 0x80000BEC
+// 	LUI a0, hi(PAYLOAD_RAM) //RAM address
+// 	LUI a1, hi(PAYLOAD_ROM)
+// 	LUI a2, hi(DMA_MAX_LENGTH)
+// 	JAL DMA_FUNC
+// 	ADDIU a2, a2, lo(DMA_MAX_LENGTH)
+// 	J OriginalBootFunction
+// 	NOP
 
 
 
-
+// //Test making green shells despawn when they hit a wall
+// .org 0x11CF58 //ram location 0x802B3948
+// 	//JAL 0x802AC098 //JAL killobject
+// 	//MOVE a0, s0 //Move object pointer into A0 to pass to killobject
+// 	J 0x802B3AC4
+// 	NOP
 
 /* Code to be DMAed (e.g. the rest of Battle Kart)*/
 
-//.headersize 0x7F816EA0
 .headersize PAYLOAD_RAM - PAYLOAD_ROM
 .org PAYLOAD_RAM
 
 start_label:
 
 /* Text */
+.align 0x10
+
 text_title_1: .asciiz "BATTLE KART 64"
-text_title_2: .asciiz "v1.0 by Triclon"
+text_title_2: .asciiz " v2.2b1 by Triclon"
 text_Z: .asciiz "Z"
 text_L: .asciiz "L"
 text_R: .asciiz "R"
@@ -990,6 +361,7 @@ text_item_autoitems: .asciiz "AUTO ITEMS"
 text_item_infgshells: .asciiz "INF. G. SHELLS"
 text_off: .asciiz "OFF"
 text_on: .asciiz "ON"
+text_player: .asciiz "PLAYER"
 text_player1: .asciiz "PLAYER 1"
 text_player2: .asciiz "PLAYER 2"
 text_player3: .asciiz "PLAYER 3"
@@ -1017,8 +389,9 @@ text_stock: .asciiz "STOCK"
 text_time: .asciiz "TIME      "
 text_respawn: .asciiz "RESPAWN"
 text_hp: .asciiz "HP"
-text_timer: .asciiz "TIMER (MIN)"
-text_countdown: .asciiz "COUNTDOWN"
+text_hp_long: .asciiz "HP              "
+text_timer: .asciiz "TIMER (MIN)     "
+text_countdown: .asciiz "COUNTDOWN       "
 text_angle: .asciiz "ANGLE: "
 text_hit: .asciiz "HIT"
 text_sudden_death: .asciiz "SUDDEN        DEATH"
@@ -1027,24 +400,60 @@ text_semicolon_plus_zero: .asciiz ":0"
 text_null: .asciiz "" //A blank spot that is just a null, used to display no text
 text_team_points: .asciiz "TEAM POINTS"
 text_team_time: .asciiz "TEAM TIME"
-text_max_points: .asciiz "MAX POINTS"
+text_max_points: .asciiz "MAX POINTS      "
 text_team: .asciiz "TEAM"
 text_score: .asciiz "SCORE"
 text_team_1_score: .asciiz "TEAM 1 SCORE"
 text_team_2_score: .asciiz "TEAM 2 SCORE"
+text_bots_cannot_Fall: .asciiz "BOTS CAN'T FALL"
+text_bot_ai_type: .asciiz "BOT AI TYPE"
+text_bot_ai_normal: .asciiz "NORMAL"
+text_bot_ai_seeker: .asciiz "SEEKER"
+text_bot_ai_random: .asciiz "RANDOM"
+text_bot_use_items: .asciiz "BOTS USE ITEMS"
+text_capture_the_flag: .asciiz "CAPTURE THE FLAG"
+text_points: .asciiz "POINTS"
+text_ctf_game: .asciiz "CTF GAME"
+text_1_flag: .asciiz "1 FLAG"
+text_multiflag: .asciiz "MULTIFLAG"
+text_star: .asciiz "*"
+text_hashtag: .asciiz "#"
+text_ffa_or_teams: .asciiz "FFA/TEAMS"
+text_teams: .asciiz "TEAMS"
+text_ffa: .asciiz "FFA"
+text_scr: .asciiz "SCR"
+text_slow_with_flag: .asciiz "FLAG SLOWDOWN"
+text_no_items_with_flag: .asciiz "FLAG NO ITEMS"
+text_1p_full_screen: .asciiz "1P FULL SCREEN"
+text_keep_away: .asciiz "KEEP AWAY"
+text_team_1: .asciiz "TEAM 1"
+text_team_2: .asciiz "TEAM 2"
+text_p1: .asciiz "P1"
+text_p2: .asciiz "P2"
+text_p3: .asciiz "P3"
+text_p4: .asciiz "P4"
+text_restore_defaults: .asciiz "RESET SETTINGS"
+text_restore_defaults_are_you_sure: .asciiz "RESET SETTINGS   (ARE YOU SURE?)"
+text_zombombs: .asciiz "ZOMBOMBS"
+text_bombs_respawn: .asciiz "BOMBS RESPAWN"
+text_char_mario: .asciiz "MARIO"
+text_char_luigi: .asciiz "LUIGI"
+text_char_yoshi: .asciiz "YOSHI"
+text_char_toad: .asciiz "TOAD"
+text_char_dk: .asciiz "DK"
+text_char_wario: .asciiz "WARIO"
+text_char_peach: .asciiz "PEACH"
+text_char_bowser: .asciiz "BOWSER"
+text_bombs_win: .asciiz "BOMBS WIN"
+text_survivors_win: .asciiz "SURVIVORS WIN"
 
 
-.byte 0x00 //Padding bytes in case the text doesn't use a full word at the end
-.byte 0x00
-// .byte 0x00
-
-
-
-
+.align 0x10
 
 OriginalBootFunction: //we overwrite this when DMAing our code
 	JAL setDefaults //Hook into boot to set default values for battle kart variables
 	NOP
+
 
 	//therefore, make sure it gets ran or the game wont boot
 	LUI    T6, 0x8030
@@ -1060,15 +469,19 @@ OriginalBootFunction: //we overwrite this when DMAing our code
 
 //Set game defaults on boot
 setDefaults:
-	ADDI sp, sp, -0x30
+	ADDI sp, sp, -0x40
 	SW ra, 0x20 (sp)
+	sw a0, 0x24 (sp)
+	sw a1, 0x28 (sp)
+	sw a2, 0x2C (sp)
+	sw a3, 0x30 (sp)
 	//Run emulator check and store result in t9
 	JAL detectEmulator
 	NOP
 	MOVE t9, v0
 	//First blank the ram
 	LI a0, VARIABLE_RAM_BASE //Blank ram block start
-	LI a1, VARIABLE_RAM_BASE + 0x1000 //Blank ram block end
+	LI a1, VARIABLE_RAM_BASE + VARIABLE_RAM_SIZE //Blank ram block end
 	JAL blankRam
 	NOP
 	//Set default variables
@@ -1084,6 +497,9 @@ setDefaults:
 	SB a0, status_item_ghost
 	SB a0, status_options_minimap
 	sb a0, status_options_antialiasing
+	sb a0, bot_respawn_flag
+	sb a0, bot_use_items
+	sb a0, ctf_game_started
 	li a1, 3
 	SH a1, max_hp
 	li a1, 0x8CBC //Set default time limit to 10 minutes
@@ -1091,16 +507,22 @@ setDefaults:
 	li a1, 1800 //Set default countdown for hot potato to 30 seconds (times 60 FPS)
 	sh a1, hotpotato_countdown_default
 	LI a1, 10 //Set default max team points to 10
-	SH a1, max_team_points
-	BEQ t9, zero, @@branch_set_fps 
+	SH a1, max_points
+	LI a0, save_key //Store save key in the save flag, if game hasn't saved yet
+	SH a0, save_flag
+	BNE t9, zero, @@branch_set_fps 
 		LI a0, 3
 		SB a0, status_options_tempo
 		@@branch_set_fps:
 	LW ra, 0x20 (sp)
-	JR ra
-	ADDI sp, sp, 0x30
+	lw a0, 0x24 (sp)
+	lw a1, 0x28 (sp)
+	lw a2, 0x2C (sp)
+	lw a3, 0x30 (sp)
 
-//Code to hook into exception handler
+	JR ra
+	ADDI sp, sp, 0x40
+
 
 
 //Force player starting positions in race courses to avoid crashes when loading race courses in battle mode
@@ -1116,358 +538,8 @@ setRaceCourseStartingPositions:
 	BEQ v1, v0, @@branch_starting_positions_end
 	LI v0, 0xF //Block fort
 	BEQ v1, v0, @@branch_starting_positions_end
+	NOP
 
-	//Positions for luigi's raceway
-	LI v0, 0x08
-	BNE $v1, $v0, @@branch_starting_positions_luigi_raceway
-		NOP
-		LUI t1, 0xC2DA
-		LUI t2, 0xC301
-		LUI t3, 0xC315
-		LUI t4, 0xC329
-		LUI a2, 0xC232
-		LUI a3, 0xC334
-	@@branch_starting_positions_luigi_raceway:
-	//Positions for moo moo farm
-	LI v0, 0x07
-	BNE $v1, $v0, @@branch_starting_positions_moo_moo_farm
-		NOP
-		LUI t1, 0x4220
-		LUI t2, 0x41A0
-		LUI t3, 0x0000
-		LUI t4, 0xC1A0
-		LUI a2, 0x41BC
-		LUI a3, 0x427C
-	@@branch_starting_positions_moo_moo_farm:
-	//Positions for koopa troopa beach
-	LI v0, 0x06
-	BNE $v1, $v0, @@branch_starting_positions_koopa_troopa_beach
-		NOP
-		LUI t1, 0xC080
-		LUI t2, 0xC1C0
-		LUI t3, 0xC230
-		LUI t4, 0xC280
-		LUI a2, 0x40C7
-		LUI a3, 0x42DE
-	@@branch_starting_positions_koopa_troopa_beach:
-	//Positions for kalamari desert
-	LI v0, 0x0B
-	BNE $v1, $v0, @@branch_starting_positions_kalamari_desert
-		NOP
-		LUI t1, 0x41F8
-		LUI t2, 0x4130
-		LUI t3, 0xC110
-		LUI t4, 0xC1E8
-		LUI a2, 0x40B0
-		LUI a3, 0x4403
-	@@branch_starting_positions_kalamari_desert:
-	//Positions for toad's turnpike
-	LI v0, 0x0A
-	BNE $v1, $v0, @@branch_starting_positions_toads_turnpike
-		NOP
-		LUI t1, 0x41F0
-		LUI t2, 0x4120
-		LUI t3, 0xC120
-		LUI t4, 0xC1F0
-		LUI a2, 0x40B0
-		LUI a3, 0x4238
-	@@branch_starting_positions_toads_turnpike:
-	//Positions for frappe snowland
-	LI v0, 0x05
-	BNE $v1, $v0, @@branch_starting_positions_frappe_snowland
-		NOP
-		LUI t1, 0x41D0
-		LUI t2, 0x40C0
-		LUI t3, 0xC160
-		LUI t4, 0xC208
-		LUI a2, 0x40B0
-		LUI a3, 0xC370
-	@@branch_starting_positions_frappe_snowland:
-	//Positions for Chocho Mountain
-	LI v0, 0x01
-	BNE $v1, $v0, @@branch_starting_positions_chocho_mountain
-		NOP
-		LUI t1, 0x41C0
-		LUI t2, 0x4080
-		LUI t3, 0xC180
-		LUI t4, 0xC210
-		LUI a2, 0x423C
-		LUI a3, 0xC428
-	@@branch_starting_positions_chocho_mountain:
-	//Positions for Mario Raceway
-	LI v0, 0x00
-	BNE $v1, $v0, @@branch_starting_positions_mario_raceway
-		NOP
-		LUI t1, 0x41F0
-		LUI t2, 0x4120
-		LUI t3, 0xC120
-		LUI t4, 0xC1F0
-		LUI a2, 0x40B0
-		LUI a3, 0xC34A
-	@@branch_starting_positions_mario_raceway:
-	//Positions for Wario Stadium
-	LI v0, 0x0E
-	BNE $v1, $v0, @@branch_starting_positions_wario_stadium
-		NOP
-		LUI t1, 0x422C
-		LUI t2, 0x41B8
-		LUI t3, 0x4040
-		LUI t4, 0xC188
-		LUI a2, 0x40B0
-		LUI a3, 0x41A8
-	@@branch_starting_positions_wario_stadium:
-	//Positions for Sherbert land
-	LI v0, 0x0C
-	BNE $v1, $v0, @@branch_starting_positions_sherbert_land
-		NOP
-		LUI t1, 0x41A0
-		LUI t2, 0x0000
-		LUI t3, 0xC1A0
-		LUI t4, 0xC220
-		LUI a2, 0x40B0
-		LUI a3, 0x41F8
-	@@branch_starting_positions_sherbert_land:
-	//Positions for Royal Raceway
-	LI v0, 0x07
-	BNE $v1, $v0, @@branch_starting_positions_royal_raceway
-		NOP
-		LUI t1, 0xC200
-		LUI t2, 0xC250
-		LUI t3, 0xC290
-		LUI t4, 0xC2B8
-		LUI a2, 0x40B0
-		LUI a3, 0xC396
-	@@branch_starting_positions_royal_raceway:
-	//Positions for Bowser's Castle
-	LI v0, 0x02
-	BNE $v1, $v0, @@branch_starting_positions_bowsers_castle
-		NOP
-		LUI t1, 0x4200
-		LUI t2, 0x4140
-		LUI t3, 0xC100
-		LUI t4, 0xC1E0
-		LUI a2, 0x40B0
-		LUI a3, 0xC31A
-	@@branch_starting_positions_bowsers_castle:
-	//Positions for DK's Jungle Parkway
-	LI v0, 0x12
-	BNE $v1, $v0, @@branch_starting_positions_dks_jungle_parkway
-		NOP
-		LUI t1, 0x4204
-		LUI t2, 0x4150
-		LUI t3, 0xC0E0
-		LUI t4, 0xC1D8
-		LUI a2, 0x40AA
-		LUI a3, 0x4204
-	@@branch_starting_positions_dks_jungle_parkway:
-	//Positions for Yoshi's Valley
-	LI v0, 0x04
-	BNE $v1, $v0, @@branch_starting_positions_yoshis_valley
-		NOP
-		LUI t1, 0x41D8
-		LUI t2, 0x40E0
-		LUI t3, 0xC150
-		LUI t4, 0xC204
-		LUI a2, 0x4339
-		LUI a3, 0x4190
-	@@branch_starting_positions_yoshis_valley:
-	//Positions for Banshee boardwalk
-	LI v0, 0x03
-	BNE $v1, $v0, @@branch_starting_positions_banshee_boardwalk
-		NOP
-		LUI t1, 0x420C
-		LUI t2, 0x4170
-		LUI t3, 0xC0A0
-		LUI t4, 0xC1C8
-		LUI a2, 0x418C
-		LUI a3, 0xC23C
-	@@branch_starting_positions_banshee_boardwalk:
-	//Positions for Rainbow Road
-	LI v0, 0x0D
-	BNE $v1, $v0, @@branch_starting_positions_rainbow_road
-		NOP
-		LUI t1, 0x4210
-		LUI t2, 0x4180
-		LUI t3, 0xC080
-		LUI t4, 0xC1C0
-		LI a2, 0x44BD8000
-		LUI a3, 0x4198
-	@@branch_starting_positions_rainbow_road:
-
-	//If in extra (mirroed) mode, flip the x starting positions from positive to negative
-	LBU t5, 0x800DC54B //Load current CCs
-	LI a0, 0x3
-	BNE t5, a0, @@branch_extra_mode_is_on
-		//Positions for Luigi's Raceway
-		LI v0, 0x08
-		BNE v1, v0, @@branch_mirror_mode_positions_luigis_raceway
-			NOP
-			LUI t1, 0x4329
-			LUI t2, 0x4315
-			LUI t3, 0x4301
-			LUI t4, 0x42DA
-		@@branch_mirror_mode_positions_luigis_raceway:
-		//Positions for Moo Moo Farm
-		LI v0, 0x09
-		BNE v1, v0, @@branch_mirror_mode_positions_moo_moo_farm
-			NOP
-			LUI t1, 0x41A0
-			LUI t2, 0x0000
-			LUI t3, 0xC1A0
-			LUI t4, 0xC220
-		@@branch_mirror_mode_positions_moo_moo_farm:
-		//Positions for Koopa Troopa Beach
-		LI v0, 0x06
-		BNE v1, v0, @@branch_mirror_mode_positions_koopa_troopa_beach
-			NOP
-			LUI t1, 0x4280
-			LUI t2, 0x4230
-			LUI t3, 0x41C0
-			LUI t4, 0x4080
-		@@branch_mirror_mode_positions_koopa_troopa_beach:
-		//Positions for Kalamari Desert
-		LI v0, 0x0B
-		BNE v1, v0, @@branch_mirror_mode_positions_kalamari_desert
-			NOP
-			LUI t1, 0x4118
-			LUI t2, 0x4110
-			LUI t3, 0xC130
-			LUI t4, 0xC1F8
-		@@branch_mirror_mode_positions_kalamari_desert:
-		//Positions for Toad's Turnpike
-		LI v0, 0x0A
-		BNE v1, v0, @@branch_mirror_mode_positions_toads_turnpike
-			NOP
-			LUI t1, 0x41F0
-			LUI t2, 0x4120
-			LUI t3, 0xC120
-			LUI t4, 0xC1F0
-		@@branch_mirror_mode_positions_toads_turnpike:
-		//Positions for Frappe Snowland
-		LI v0, 0x05
-		BNE v1, v0, @@branch_mirror_mode_positions_frappe_snowland
-			NOP
-			LUI t1, 0x4208
-			LUI t2, 0x4160
-			LUI t3, 0xC0C0
-			LUI t4, 0xC1D0
-		@@branch_mirror_mode_positions_frappe_snowland:
-		//Positions for Choco Mountain
-		LI v0, 0x01
-		BNE v1, v0, @@branch_mirror_mode_positions_choco_mountain
-			NOP
-			LUI t1, 0x4210
-			LUI t2, 0x4180
-			LUI t3, 0xC080
-			LUI t4, 0xC1C0
-		@@branch_mirror_mode_positions_choco_mountain:
-		//Positions for Mario Raceway
-		LI v0, 0x00
-		BNE v1, v0, @@branch_mirror_mode_positions_mario_raceway
-			NOP
-			LUI t1, 0x41F0
-			LUI t2, 0x4120
-			LUI t3, 0xC120
-			LUI t4, 0xC1F0
-		@@branch_mirror_mode_positions_mario_raceway:
-		//Positions for Wario Stadium
-		LI v0, 0x0E
-		BNE v1, v0, @@branch_mirror_mode_positions_wario_stadium
-			NOP
-			LUI t1, 0x4188
-			LUI t2, 0xC040
-			LUI t3, 0xC1B8
-			LUI t4, 0xC22C
-		@@branch_mirror_mode_positions_wario_stadium:
-		//Positions for Sherbert Land
-		LI v0, 0x0C
-		BNE v1, v0, @@branch_mirror_mode_positions_sherbert_land
-			NOP
-			LUI t1, 0x4220
-			LUI t2, 0x41A0
-			LUI t3, 0x0000
-			LUI t4, 0xC1A0
-		@@branch_mirror_mode_positions_sherbert_land:
-		//Positions for Royal Raceway		
-		LI v0, 0x07
-		BNE v1, v0, @@branch_mirror_mode_positions_royal_raceway
-			NOP
-			LUI t1, 0x42B8
-			LUI t2, 0x4290
-			LUI t3, 0x4250
-			LUI t4, 0x4200
-		@@branch_mirror_mode_positions_royal_raceway:
-		//Positions for Bowser's Castle
-		LI v0, 0x02
-		BNE v1, v0, @@branch_mirror_mode_positions_bowsers_castle
-			NOP
-			LUI t1, 0x41E0
-			LUI t2, 0x4100
-			LUI t3, 0xC140
-			LUI t4, 0xC200
-		@@branch_mirror_mode_positions_bowsers_castle:
-		//Positions for DKs Jungle Parkway
-		LI v0, 0x12
-		BNE v1, v0, @@branch_mirror_mode_positions_dks_jungle_parkway
-			NOP
-			LUI t1, 0x41D8
-			LUI t2, 0x40E0
-			LUI t3, 0xC150
-			LUI t4, 0xC204
-		@@branch_mirror_mode_positions_dks_jungle_parkway:
-		//Positions for Yoshi Valley
-		LI v0, 0x04
-		BNE v1, v0, @@branch_mirror_mode_positions_yoshi_valley
-			NOP
-			LUI t1, 0x4204
-			LUI t2, 0x4150
-			LUI t3, 0xC0E0
-			LUI t4, 0xC1D8
-		@@branch_mirror_mode_positions_yoshi_valley:
-		//Positions for Banshee Boardwalk
-		LI v0, 0x03
-		BNE v1, v0, @@branch_mirror_mode_positions_banshee_boardwalk
-			NOP
-			LUI t1, 0x41C8
-			LUI t2, 0x40A0
-			LUI t3, 0xC170
-			LUI t4, 0xC20C
-		@@branch_mirror_mode_positions_banshee_boardwalk:
-		//Positions for Rainbow Road
-		LI v0, 0x0D
-		BNE v1, v0, @@branch_mirror_mode_positions_rainbow_road
-			NOP
-			LUI t1, 0x41C0
-			LUI t2, 0x4080
-			LUI t3, 0xC180
-			LUI t4, 0xC210
-		@@branch_mirror_mode_positions_rainbow_road:
-	@@branch_extra_mode_is_on:
-
-	//General code for setting positions
-	LUI v0, 0x800F
-	Lui v1, 0x8010
-	//x
-	SW t1, 0x69A4 (v0) //P1 x
-	SW t2, 0x777C (v0) //P2 x
-	SW t3, 0x8554 (v1) //P3 x
-	SW t4, 0x932C (v1) //P4 x
-	//y
-	SW a2, 0x69A8 (v0) //P1 y
-	SW a2, 0x7780 (v0) //P2 y
-	SW a2, 0x8558 (v1) //P3 y
-	SW a2, 0x9330 (v1) //P4 y
-	//z
-	SW a3, 0x69AC (v0) //P1 z
-	SW a3, 0x7784 (v0) //P2 z
-	SW a3, 0x855C (v1) //P3 z
-	SW a3, 0x9334 (v1) //P4 z
-	//Set rotation angle
-	LI a0, 0x8000
-	SH a0, 0x69BE (v0) //P1 rotation
-	SH a0, 0x7796 (v0) //P2 rotation
-	SH a0, 0x856E (v1) //P3 rotation
-	SH a0, 0x9346 (v1) //P4 rotation
 
 	//Set top speed for 50, 100, and 140 CC since the battle mode top speed is a snail's pace
 	LBU a1, 0x800DC54B //Load current CCs
@@ -1516,7 +588,8 @@ raiseBigDonut:
 			NOP
 			ADDI t3, t3, 0x80 //Set course height to be higher to get it above the water level
 	@@branch_check_if_flat_courses_on:
-	J 0x802A8740
+	//J 0x802A8740
+	JR RA
 	NOP
 
 
@@ -1631,15 +704,46 @@ itemReroll:
 //This function decrements a timer (e.g. time score timer or hot potato battle countdown) based on the game tempo
 //a3 is both the input and output ofr the timer to decrement
 decrementTimer:
-	LW a1, 0x80150114 //Load game tempo to subtract from timer, this is the default
 	LBU a0, status_options_tempo //Load game tempo menu option	
+	LW a1, 0x80150114 //Load game tempo to subtract from timer, this is the default
 	BEQ a0, zero, @@branch_game_tempo_option_on //If game tempo is set on in the menu, use that tempo instead
 		LI a2, 5
 		SUB a1, a2, a0
 		@@branch_game_tempo_option_on:
-	SUB a3, a3, a1 //Subtract game tempo
 	JR ra
-	NOP
+	SUB a3, a3, a1 //Subtract game tempo
+
+//This function returns the tempo
+getTempo:
+	ADDI sp, sp, -0x30
+	SW a0, 0x20 (sp)
+	SW a1, 0x24 (sp)
+	SW a2, 0x28 (sp)
+	LBU a0, status_options_tempo //Load game tempo menu option	
+	LW v0, 0x80150114 //Load game tempo, this is the default
+	BEQ a0, zero, @@branch_game_tempo_option_on //If game tempo is set on in the menu, use that tempo instead
+		LI a2, 5
+		SUB v0, a2, a0
+		@@branch_game_tempo_option_on:
+	LW a0, 0x20 (sp)
+	LW a1, 0x24 (sp)
+	LW a2, 0x28 (sp)
+	JR ra
+	ADDI sp, sp, 0x30
+
+
+//Wrap decrement timer in a function for c
+//a0 == input
+//v0 == output
+decrementTimerWrapper:
+	ADDI sp, sp, -0x30
+	SW ra, 0x0020 (sp)
+	JAL decrementTimer
+	MOVE a3, a0
+	LW ra, 0x0020 (sp)
+	MOVE v0, a3
+	JR ra //Jump back
+	ADDI sp, sp, 0x30
 
 //Given a player, return a random other player who is still alive
 //Inputs
@@ -1658,13 +762,22 @@ getEnemy:
 	// SW t3, 0x0040 (sp)
 	// SW t4, 0x0044 (sp)
 
+	// //Only get a new rival some portion of the time
+	// JAL FUNCTION_RNG //Run RNG and return "enemy" in v0
+	// LI a0, 4 //25% chance of finding a new rival
+	// BNE v0, zero, @@branch_getEnemy_continue
+	// 	LW a1, -0x14 (sp) //Get memory address for rival (note I am adding 0x50 t0 0x3C for the offset)
+	// 	LBU v0, 0x0000 (a1)
+	// 	BEQ zero, zero, @@branch_skip
+	// 	NOP
+	// 	@@branch_getEnemy_continue:
 
 	@@branch_rerun_rng:
 	JAL FUNCTION_RNG //Run RNG and return "enemy" in v0
 	LI a0, 4
-	LI a1, 0x800F6990 //Check if selected player is alive
 	LI a2, 0xDD8
 	MULT v0, a2
+	LI a1, 0x800F6990 //Check if selected player is alive
 	MFLO a2
 	ADDU a1, a1, a2
 	LBU a1, 0x0000 (a1)
@@ -1674,24 +787,21 @@ getEnemy:
 	LW a0, 0x0020 (sp)
 	BEQ v0, a0, @@branch_rerun_rng //Check if RNG returned current player, if it is, reroll
 	NOP
-	LBU a0, score_mode //If game is in team scoring mode, ensure
-	LI a1, 2
-	BEQ a0, a1, @@branch_team_scoring_mode
-	LI a1, 3
-	BEQ a0, a1, @@branch_team_scoring_mode
+	LBU a0, ffa_or_teams //If game is in team scoring mode, ensure
+	BNE a0, zero, @@branch_team_scoring_mode
 	NOP
 	BEQ zero, zero, @@skip_team_scoring_mode
 		@@branch_team_scoring_mode:
 		LW a0, 0x20 (sp) //Grab current player
-		slti a1, a0, 2 //True if on team 1, false if on team 2
 		slti a2, v0, 2 //True if rival is on team 1, flase if on team two
+		slti a1, a0, 2 //True if on team 1, false if on team 2
 		BEQ a1, a2, @@branch_rerun_rng //If current player and chosen rival on the same team, reroll
 		NOP
 	@@skip_team_scoring_mode:
 
 	//LI v0, 0//Force target to be player 1 for the moment
 	
-	//@@branch_skip:
+	@@branch_skip:
 
 	LW a0, 0x0020 (sp)
 	LW a1, 0x0024 (sp)
@@ -1708,15 +818,15 @@ getEnemy:
 
 //Given two players, this function returns the angle between them
 //Inputs
-//a0 = first player (1,2,3,4)
-//a1 = player to compare to (1,2,3,4)
+//a0 = player to compare to (1,2,3,4)
+//a1 = first player (1,2,3,4)
 //returns
 //v0 = angle
 getAngle:
 	ADDI sp, sp, -0x40
 	SW ra, 0x0028 (sp)
-	SW a0, 0x002C (sp)
-	SW a1, 0x0030 (sp)
+	//SW a0, 0x002C (sp)
+	//SW a1, 0x0030 (sp)
 	SW a2, 0x0034 (sp)
 	SW a3, 0x0038 (sp)
 	//ADDI a0, a0, -1 //Subtract 1 from player numbers so that 0 counts as player 1
@@ -1725,16 +835,16 @@ getAngle:
 	MULT a0, a2
 	MFLO a0
 	MULT a1, a2 
-	MFLO a1
 	LI a2, 0x800F69A4 //Set a0 and a1 to be pointers for the positions of the first and second players
-	ADDU a0, a2, a0 //Pointer to first player's x coordinate (z is found automatically)
+	ADDU a0, a2, a0 //Pointer to second player's x coordinate (z is found automatically)
+	MFLO a1
 	JAL FUNCTION_FIND_ANGLE //Call built in arctan2 function
-	ADDU a1, a2, a1 //Pointer to second player's x coordinate (z is found automatically)
+	ADDU a1, a2, a1 //Pointer to first player's x coordinate (z is found automatically)
 	SUB v0, zero, v0 //Mirror angle
-	ADDI v0, v0, 0x8000 //Phase by 180 degrees so that angle points inward instead of outward
+	//ADDI v0, v0, 0x8000 //Phase by 180 degrees so that angle points inward instead of outward
 	LW ra, 0x0028 (sp)
-	LW a0, 0x002C (sp)
-	LW a1, 0x0030 (sp)
+	//LW a0, 0x002C (sp)
+	//LW a1, 0x0030 (sp)
 	LW a2, 0x0034 (sp)
 	LW a3, 0x0038 (sp)
 	JR ra //Jump back
@@ -1745,33 +855,91 @@ getAngle:
 //Function processes running the battle bot for a single player
 //A0 = Current player (0=P1, 1=P2, 2=P3, 3=P4)
 runBot:
-	ADDI sp, sp, -0x40 //store registers
+	ADDI sp, sp, -0x50 //store registers
 	SW a0, 0x0020 (sp) //store current player in stack
 	SW a1, 0x0024 (sp)
 	SW a2, 0x0028 (sp)
 	SW a3, 0x002C (sp)
 	SW ra, 0x0030 (sp)
+	SW t0, 0x0034 (sp)
+	SW t4, 0x0044 (sp)
+	SW zero, 0x0048 (sp) //Flag if player has flipped or not
 
 	
-	//Set pointer for current player battle bot and store state in v0
-	LI v0, bot_status_p1
-	ADD v0, v0, a0
-	SW v0, 0x38 (sp)
+	
 	//Set pointer for current bot rival
 	LI a1, bot_rival_p1 //Get byte to store rival pointer
 	ADD a1, a1, a0
 	SW a1, 0x3C (sp) //Store rival pointer
+	//Set player structure offset and store in t5
+	LI a1, player_state_offset //Load player structure offset
+	MULT a1, a0 //multiply current player number by structure offset
+	//Set pointer for current player battle bot and store state in v0 (inside the mult to save on cycles)
+	LI v0, bot_status_p1
+	ADD v0, v0, a0
+	SW v0, 0x38 (sp)
+	//Continue the mult
+	MFLO a0
+	SW a0, 0x40 (sp) //Store result in stack
+
+
+	//Copy coordinates into data structure for teleporting back to land if bot falls off course
+	//LW a0, 0x0040 (sp)
+	LBU a1, bot_respawn_flag
+	BEQ a1, zero, @@branch_no_fall
+	  	LUI t0, hi(0x800F6A5A) //If falling over nothingness (pit or off the course)
+	  	ADDU t0, t0, a0
+	  	LBU a1, lo(0x800F6A5A) (t0) 
+		ANDI a1, a1, 0x1
+		BEQ a1, zero, @@branch_no_fall
+			 //Copy x,y,z coords from data structure
+			LI a1, bot_respawn_player_offset
+			LW a3, 0x0020 (sp)
+			MULT a1, a3
+			LBU a2, bot_respawn_index
+			LI a0, bot_respawn_datastructure
+			ADDI a2, a2, 0xC
+			MFLO a3
+			DIV a2, a1
+			ADDU a0, a0, a3
+			LW a3, 0x0040 (sp)
+			LI a1, 0x800F69A4 //paste coordinates to teleport character back
+			ADDU a1, a1, a3
+
+
+			LUI t4, hi(angle_p1) //flip kart angle
+			ADDU t4, t4, a3
+			LH a2, lo(angle_p1) (t4)
+			ADDI a2, a2, 0x8000
+			SH a2, lo(angle_p1) (t4)
+
+			LI a2, 1 //Store flag that kart angle was flipped
+			SW a2, 0x0048 (sp)
+
+			MFHI a2
+			ADDU a0, a0, a2
+			LW t1, 0x0000 (a0) //This is where the copying and pasting of coordinates happens
+			LW t2, 0x0004 (a0)
+			LW t3, 0x0008 (a0)
+			SW t1, 0x0000 (a1)
+			SW t2, 0x0004 (a1)
+			SW t3, 0x0008 (a1)
+
+
+			SB zero, lo(0x800F6A5A) (t0) //Set byte to no longer falling
+		@@branch_no_fall: //If no longer falling
 
 
 	//Give bots auto items
 	LBU a0, status_item_infgshells //If inf. green shells are off, randomly assign items
+	LUI a2, hi(0x802BA290)
 	BNE a0, zero, @@branch_skip_bot_auto_items
-		LBU a2, 0x802BA290 //Load byte from RNG into a2
+		LW v0, 0x20 (sp)
+		LI a1, player_item_offset //#Calculate and add offset for current player
+		MULT a1, v0
+		LBU a2, lo(0x802BA290) (a2) //Load byte from RNG into a2
 		SRA a2, a2, 1 //Divide RNG value by 2 to double the probability of getting an item
 		LI a0, player_item_base //Load base for player has an item memory loc.
-		LI a1, player_item_offset //#Calculate and add offset for current player
-		LW v0, 0x20 (sp)
-		MULT a1, v0
 		MFLO a1
 		ADDU a0, a0, a1 //Store total offset for player for item memory location
 		ADDI a1, v0, 0x60 //Value to compare RNG to
@@ -1788,6 +956,45 @@ runBot:
 				SB v0, 0x0000 (a0) //Randomly give player item
 		@@branch_skip_bot_auto_items:
 
+	//Check if player runs into a wall, if so, initiate turning
+	LW t5, 0x40 (sp)
+	LI a0, player_collision_base //Load mem location of player 1 speed
+	ADDU a0, a0, t5 //Add offset to player 1 speed mem location
+	LBU a0, 0x0000 (a0) //Load byte that stores if wall collision is occuring or not
+	ANDI a0, a0, 0x8 //Check byte 0x8 to see if wall collision is occuring or not
+	BEQ a0, zero, @@branch_hitting_a_wall
+	LW t2, 0x38 (sp) //Load timer
+		SB zero, 0x4 (t2) //Set timer to zero
+		SB zero, 0x8 (t2) //Set current bot state to "going straight", this combined with the timer being zero will force the bot to turn
+		JAL FUNCTION_RNG //#Iniate steering, call the RNG for a value between 1 and 2 and store in the player state
+		LI a0, 2
+		ADDI v0, v0, 1 //add 1 to the result from the RNG
+		LW t2, 0x38 (sp)
+		SB v0, 0x8 (t2) //Store player steering state back to ram
+		JAL FUNCTION_RNG //Call RandomInt funciton to grab a new number for the timer
+		LI a0, 0x8
+		// LI a0, 0x12
+		// ADDI v0, v0, 0x9 //add constant to result from RNG			
+		LW t2, 0x38 (sp)
+		ADDI v0, v0, 0x18 //add constant to result from RNG
+		SB v0, 0x4 (t2) //Store player timer back to ram (this is in delay slot)
+		// //flip kart angle
+		// LW a0, 0x0048 (sp) //Load flag to check if kart has flipped yet or not
+		// BNE a0, zero, @@branch_hitting_a_wall
+		// 	LUI a1, hi(angle_p1) 
+		// 	ADDU a1, a1, t5 //Add offset to player 
+		// 	LH a0, lo(angle_p1) (a1)
+		// 	ADDI a0, a0, 0x8000
+		// 	SH a0, lo(angle_p1) (a1)
+		// 	//Reduce speed
+		// 	LUI a1, hi(g_player1SpeedU2)
+		// 	ADDU a1, a1, t5 //Add offset to player structure
+		// 	L.S F2, lo(g_player1SpeedU2) (a1) //Load address into floating point register
+		// 	LI.S F4, 0.85 //Load 0.5 into register
+		// 	MUL.S F2, F2, F4 //Reduce speed by the above factor
+		// 	S.S F2, lo(g_player1SpeedU2) (a1) //Store register into address
+		@@branch_hitting_a_wall:
+
 	//Decrement player's counter by game tempo then if timer < 0, turn or go straight
 	LW t2, 0x38 (sp)
 	JAL decrementTimer
@@ -1796,101 +1003,195 @@ runBot:
 	//If current timer < 0
 	SLT a1, a3, zero
 	BEQ a1, zero, @@branch_timer_run_out
+		NOP
+		//JAL getEnemy //Randomly find a rival
+		JAL getRival //Randonmly find a rival, but also go after flag carriers
+		LW a0, 0x20 (sp)
+		LW a1, 0x3C (sp)
+		//LI a1, bot_rival_p1 //Get byte to store rival
+		//ADD a1, a1, a0
+		SB v0, 0x0000 (a1) //Store rival
+		// //If speed is low (e.g. stuck on a wall), set flag to going straight to force turning
+		// LI a0, player_speed_base //Load mem location of player 1 speed
+		// LI a1, player_state_offset //Load player structure offset
+		// LW a2, 0x0020 (sp) //Load current player
+		// MULT a1, a2 //multiply current player number by structure offset
+		// MFLO a1
+		// ADDU a0, a0, a1 //Add offset to player 1 speed mem location
+		// LH a0, 0x0000 (a0) //Load top half of current player's speed
+		// SLTI a0, a0, 0x43Z0 //If current player speed is < minimum speed
+		// BNE a0, zero, @@branch_stuck_on_wall
 		//and if current moving straight, initiate turning
+		// LBU a0, bot_ai_type
+		// LI a1, 1
+		// BEQ a0, a1, @@branch_turning //If bot AI set to "seeker", ignore turning and immediately continue going "straight"
+		//LI v0, 0 //Set default for timer to zero
+		LW t2, 0x38 (sp) //Need to reload t2
 		LBU a0, 0x8 (t2) //Load current turning state of player into a0
 		BNE a0, zero, @@branch_turning //If player is currently traveling straight
-			NOP //#Iniate steering, call the RNG for a value between 1 and 2 and store in the player state
-			JAL FUNCTION_RNG
-			LI a0, 2
-			ADDI v0, v0, 1 //add 1 to the result from the RNG
-			LW t2, 0x38 (sp)
-			SB v0, 0x8 (t2) //Store player steering state back to ram
+			LBU a0, bot_ai_type
+			LI a1, 1
+			BEQ a0, a1, @@branch_turning //If bot AI set to "seeker", ignore turning and immediately continue going "straight"
+				NOP
+				JAL FUNCTION_RNG //#Iniate steering, call the RNG for a value between 1 and 2 and store in the player state
+				LI a0, 2
+				LW t2, 0x38 (sp)
+				ADDI v0, v0, 1 //add 1 to the result from the RNG
+				SB v0, 0x8 (t2) //Store player steering state back to ram
+				@@branch_seeker:
 			JAL FUNCTION_RNG //Call RandomInt funciton to grab a new number for the timer
-			LI a0, 0x18
-			ADDI v0, v0, 0x10 //add constant to result from RNG
+			LI a0, 0x10
+			ADDI v0, v0, 0xC //add constant to result from RNG
 			// LI a0, 0x12
 			// ADDI v0, v0, 0x9 //add constant to result from RNG			
 			LW t2, 0x38 (sp)
 			BEQ zero, zero, @@branch_timer_run_out
 			SB v0, 0x4 (t2) //Store player timer back to ram (this is in delay slot)
 			@@branch_turning:
+
 		//Else if currently turning, initiate moving straight
 		SB zero, 0x8 (t2)
 		JAL FUNCTION_RNG //Call RNG to grab new time for going straight
 		LI a0, 0x90
-		ADDI v0, v0, 0x70 //add a constant to the result from the RNG
 		//LI a0, 0x68
 		//ADDI v0, v0, 0x40 //add a constant to the result from the RNG
 		//LI a0, 0x60
 		//ADDI v0, v0, 0x60 //add a constant to the result from the RNG
 		LW t2, 0x38 (sp)
+		ADDI v0, v0, 0x70 //add a constant to the result from the RNG
 		SB v0, 0x4 (t2) //store payer timer back to ram
 
-		JAL getEnemy //Randomly find a rival
-		LW a0, 0x20 (sp)
-		LW a1, 0x3C (sp)
-		//LI a1, bot_rival_p1 //Get byte to store rival
-		//ADD a1, a1, a0
-		SB v0, 0x0000 (a1) //Store rival
+
 
 
 		@@branch_timer_run_out:
 
 	//Bot controller input
-	LI a2, bot_controller_input_p1
-	//LI a0, 4 //Offset per player in controller input
-	LW v0, 0x20 (sp)
-	//MULT a0, v0 //Multiply current player by offset per player
-	//MFLO a0
-	SLL v0, v0, 2 //Multiply by for for current player by offset per player
-	ADD a2, a2, v0 //Store total offset for player for controller input
-	//SW a2, 0x38 (sp)
 
-	//Go foward by alwasy pressing A
-	//LI a0, 0x80
-	//SB a0, 0x0 (a2)
 	
 	//Go foward, steer left, or steer right depending on the current player state
 	LBU a0, 0x8 (t2) //Load state of current player into a0
 	//Go straight if state = 0
 	BNE a0, zero, @@branch_go_straight
-		//LI t0, 0x80
+		LI a3, 0x10 //Default turning to go straight at a slight angle to trigger collision detection
 		//SB t0, 0x0 (a2)
 		//SB zero, 0x2 (a2)
+		LBU a0, bot_ai_type //If bot AI type is not random, turn towards rival, else go straight
+		LI t0, 2
+		BEQ a0, t0, @@branch_go_straight
 
 
-		LW a1, 0x20 (sp) //Get current bot
-		//LI a0, bot_rival_p1 //Grab address for current bot rival
-		//ADD a0, a0, a1 
-		LW a0, 0x3C (sp)
-		JAL getAngle //Find angle between current player and rival
-		LBU a0, 0x0000 (a0) //Get rival
+			//Check if CTF mode 
+			LBU a0, game_mode
+			LI a1, 3
+			BNE a0, a1, @@branch_bot_playing_ctf
+				LW a0, 0x20 (sp) //Get current bot 
+				JAL isPlayerHoldingFlag //Run function to determine if bot is holding flag
+				NOP
+				BEQ v0, zero, @@branch_bring_flag_to_base_ctf //If player is not holding the flag, skip the rest of this
+				LW a0, 0x20 (sp) //Get current bot 
+					JAL angleToBase
+					NOP
+					BEQ zero, zero, @@branch_go_straight //Once this is over, skip the rest of the "go straight" code 
+					MOVE a3, v0 //Copy returned angle to a3
+					@@branch_bring_flag_to_base_ctf:
+				JAL isSomeoneHoldingPlayerFlag //If someone is holding player's flag, skip going after flags/bases and go after the person holding the flag
+				NOP
+				BNE v0, zero, @@branch_bot_playing_ctf
+				LW a0, 0x20 (sp) //Get current bot 
+				JAL isTeamMemberHoldingFlag //If team member is holding a flag, skip the rest of this code to go after rivals from the other team
+				NOP
+				BNE v0, zero, @@branch_bot_playing_ctf
+				LW a0, 0x20 (sp) //Get current bot 			
+				//If bot is holding no flag, send bot to go grab rival's flag
+				LW a1, 0x3C (sp) //Load rival
+				JAL angleToFlag
+				LBU a1, 0x0000 (a1)
+				BEQ zero, zero, @@branch_go_straight //Once this is over, skip the rest of the "go straight" code 
+				MOVE a3, v0 //Copy returned angle to a3
+				@@branch_bot_playing_ctf:
 
-		LI t0, 0x800F69BE//Find current player's turn angle
-		LI t1, 0xDD8
-		MULT t1, a1
-		MFLO t1
-		ADDU t0, t0, t1
-		LHU t8, 0x0000 (t0) //Grab current player's turn angle and store in t8
+			//Check if Keep away mode
+			LBU a0, game_mode
+			LI a1, 4
+			BNE a0, a1, @@branch_bot_playing_keep_away //Check if current bot is holding a flag
+				LW a0, 0x20 (sp) //Get current bot 
+				JAL isPlayerHoldingFlag //Run function to determine if bot is holding flag
+				NOP
+				BEQ v0, zero, @@branch_run_away //If player is not holding the flag, skip the rest of this
+				LW a0, 0x20 (sp) //Get current bot
+				JAL isTeamMemberHoldingFlag //If team member is holding a flag, skip the rest of this code to go after rivals from the other team
+				NOP
+				BNE v0, zero, @@branch_bot_playing_keep_away
+				LW a0, 0x20 (sp) //Get current bot 		
+					LW a1, 0x3C (sp)
+					JAL getAngle //Find angle between current player and rival
+					LBU a1, 0x0000 (a1) //Get rival
+					LW t5, 0x40 (sp)
+					LI t0, 0x800F69BE//Find current player's turn angle
+					ADDU t0, t0, t5
+					LHU t8, 0x0000 (t0) //Grab current player's turn angle and store in t8
+					SUB t2, v0, t8 //claculate difference in angle between bot and rival
+					SRA t2, t2, 8 //convert half to a byte
+					ADDI t2, t2, 0x80 //Phase angle by 30%
+					ANDI t2, t2, 0xFF //Take the modulous so range in angle only 0->255 by grabbing only the first byte in the register using andi (see https://stackoverflow.com/questions/32927039/how-to-get-individual-bytes-from-a-register-in-mips-assembly)
+					//LI t0, 0x100 //Take the modulous so range in angle only 0->255
+					//DIVU t2, t0
+					//MFHI t2
+					SLTIU a1, t2, 0x80
+					BNE a1, zero, @@branch_run_away //turn other direction towards rival
+					LI a3, 0x34  //turn one direction towards rival
+						LI a3, -0x34
+					BEQ zero, zero, @@branch_go_straight //Once this is over, skip the rest of the "go straight" code 
+					NOP
+					@@branch_run_away:
+				//If player is not holding the flag, and flag is just on the course, do this
+				LW t0, playerHoldingFlag
+				LI a1, -1
+				BNE t0, a1, @@branch_bot_playing_keep_away
+					LW a0, 0x20 (sp) //Get current bot 
+					JAL angleToFlag
+					LI a1, 0 //Set flag to go after to zero
+					BEQ zero, zero, @@branch_go_straight //Once this is over, skip the rest of the "go straight" code 
+					MOVE a3, v0 //Copy returned angle to a3
+				@@branch_bot_playing_keep_away:
 
 
-		SUB t2, v0, t8 //claculate difference in angle between bot and rival
-		SRA t2, t2, 8 //convert half to a byte
-		LI t0, 0x100 //Take the modulous so range in angle only 0->255
-		DIVU t2, t0
-		MFHI t2
+			LW a0, 0x20 (sp) //Get current bot
+			//LI a0, bot_rival_p1 //Grab address for current bot rival
+			//ADD a0, a0, a1 
+			LW a1, 0x3C (sp)
+			JAL getAngle //Find angle between current player and rival
+			LBU a1, 0x0000 (a1) //Get rival
 
-		SLTIU a1, t2, 0x80
-		// BEQ a1, zero, @@branch_bot_turn_towards_rival_1 //turn one direction towards rival
-		// 	NOP
-		// 	LI a3, 0x34
-		// 	@@branch_bot_turn_towards_rival_1:
-		// SLTIU a1, t2, 0xA0
-		BNE a1, zero, @@branch_bot_turn_towards_rival_2 //turn other direction towards rival
-		LI a3, 0x34  //turn one direction towards rival
-			LI a3, -0x34
-			@@branch_bot_turn_towards_rival_2:
-		
+			LI t0, 0x800F69BE//Find current player's turn angle
+			//LI t1, 0xDD8
+			//MULT t1, a1
+			//MFLO t1
+			//ADDU t0, t0, t1
+			LW t5, 0x40 (sp)
+			ADDU t0, t0, t5
+			LHU t8, 0x0000 (t0) //Grab current player's turn angle and store in t8
+
+
+			SUB t2, v0, t8 //claculate difference in angle between bot and rival
+			SRA t2, t2, 8 //convert half to a byte
+			// LI t0, 0x100 //Take the modulous so range in angle only 0->255
+			// DIVU t2, t0
+			// MFHI t2
+			ANDI t2, t2, 0xFF //Take the modulous so range in angle only 0->255 by grabbing only the first byte in the register using andi (see https://stackoverflow.com/questions/32927039/how-to-get-individual-bytes-from-a-register-in-mips-assembly)
+
+
+			SLTIU a1, t2, 0x80
+			// BEQ a1, zero, @@branch_bot_turn_towards_rival_1 //turn one direction towards rival
+			// 	NOP
+			// 	LI a3, 0x34
+			// 	@@branch_bot_turn_towards_rival_1:
+			// SLTIU a1, t2, 0xA0
+			BNE a1, zero, @@branch_bot_turn_towards_rival_2 //turn other direction towards rival
+			LI a3, 0x34  //turn one direction towards rival
+				LI a3, -0x34
+				@@branch_bot_turn_towards_rival_2:
 
 		@@branch_go_straight:
 
@@ -1899,12 +1200,14 @@ runBot:
 	LBU a1, 0x4 (t2) //Load current timer for current player into a1
 	LI t0, 0x80 //Press gas (normally when moving straight)
 
-	SLTI t3, a1, 0x38
-	SLTI a1, a1, 0x10
-	XOR a1, a1, t3
-	BEQ a1, zero, @@branch_press_z //Have the bot hold Z if the timer is > 0x30
-		NOP
-		ADDI t0, t0, 0x20 //Press z
+	LBU t3, bot_use_items
+	BEQ t3, zero, @@branch_press_z //If bots use items toggle is on
+		SLTI t3, a1, 0x38
+		SLTI a1, a1, 0x10
+		XOR a1, a1, t3
+		BEQ a1, zero, @@branch_press_z //Have the bot hold Z if the timer is > 0x30
+			NOP
+			ADDI t0, t0, 0x20 //Press z
 		@@branch_press_z:
 	// and Z to hold weapon (normally when moving straight)
 	//Go left if state is = 1
@@ -1921,6 +1224,22 @@ runBot:
 		LI t0, 0xC0 //press gas and breaks (A+B) when turning
 		LI a3, 0xB0
 		@@branch_turn_right:
+
+
+	LI a2, bot_controller_input_p1
+	//LI a0, 4 //Offset per player in controller input
+	LW v0, 0x20 (sp)
+	//MULT a0, v0 //Multiply current player by offset per player
+	//MFLO a0
+	SLL v0, v0, 2 //Multiply by four for current player by offset per player
+	ADD a2, a2, v0 //Store total offset for player for controller input
+	//SW a2, 0x38 (sp)
+
+	//Go foward by alwasy pressing A
+	//LI a0, 0x80
+	//SB a0, 0x0 (a2)
+
+
 	SB t0, 0x0 (a2) //Store bot's button presses (A, B, and/or Z)
 	SB a3, 0x2 (a2) //Store bots steering
 	// //Randomly press Z to fire items
@@ -1937,166 +1256,157 @@ runBot:
 	LW a2, 0x0028 (sp)
 	LW a3, 0x002C (sp)
 	LW ra, 0x0030 (sp)
+	LW t0, 0x0034 (sp)
+	LW t4, 0x0044 (sp)
 
 	JR ra
-	ADDI sp, sp, 0x40 //store registers
+	ADDI sp, sp, 0x50 //store registers
+
+
+//This function kills all players
+killAllPlayers:
+	ADDI sp, sp, -0x40 //store registers
+	SW a0, 0x0020 (sp) 
+	SW ra, 0x0030 (sp)
+	JAL killPlayer
+	LI a0, 0
+	JAL killPlayer
+	LI a0, 1
+	JAL killPlayer
+	LI a0, 2
+	JAL killPlayer
+	LI a0, 3
+	LW ra, 0x0030 (sp)
+	LW a0, 0x0020 (sp)
+	JR RA
+	ADDI sp, sp, 0x40 
 
 
 //This function kills a player
 //A0 = player to kill
 killPlayer:
+	ADDI sp, sp, -0x30 //store registers
+	SW a0, 0x0020 (sp) //store current player in stack
+	SW a1, 0x0024 (sp)
+	SW a2, 0x0028 (sp)
+	SW t5, 0x002C (sp)
 	LI a1, balloon_count_p1 //Set balloons to -1 to kill player
 	ADDU a1, a1, a0
 	ADDU a1, a1, a0
-	LHU t5, 0x0000 (a1)
+	LH t5, 0x0000 (a1)
 	LI a2, -1
 	BEQ a2, t5, @@branch_kill_player //If player is not yet dead
 		NOP
 		SH a2, 0x0000 (a1) //kill player
 		LI a2, player_state_offset //Calculate offset between player structures
 		MULT a0, a2
-		MFLO t5
 		LI a1, 0x800F699C
-		ADDU a1, a1, t5
 		LI a2, 0x04 //Turn player into a bomb/invisible
+		MFLO t5
+		ADDU a1, a1, t5
 		SB a2, 0x0000 (a1) //Store initially at 800F699C for P1
 		ADDIU a1, a1, 1
 		LI a2, 0x40 //Explode the player
 		SB a2, 0x0000 (a1) //Store initially at 800F699D for P1	
 		@@branch_kill_player:
+	LW a0, 0x0020 (sp) //store current player in stack
+	LW a1, 0x0024 (sp)
+	LW a2, 0x0028 (sp)
+	LW t5, 0x002C (sp)
 	JR RA
-	NOP
+	ADDI sp, sp, 0x30 
 
-
-
-//This function checks if a player's HP is set to some value (normally zero) and if it is, kills said player
-//A0 = player to decrement HP for, P1 = 0, P2 = 1, P3 =2, P4 = 4
-//A3 = the value to check againt whichi sthe lowest number of hits
-checkIfNotLowestHits:
-	ADDI sp, sp, -0x30
-	SW ra, 0x20 (sp)
-	LI a1, p1_score //Load current player's hit score
-	SLL a2, a0, 1 //Multiply a0 by 2
-	ADDU a1, a1, a2
-	LHU a2, 0x0000 (a1)
-	BEQ a2, a3, @@branch_kill_player //kill player if their hit score is not the lowest
-		NOP
-		JAL killPlayer
-		NOP
-		@@branch_kill_player:
-	LW ra, 0x20 (sp)
-	JR ra
-	ADDI sp, sp, 0x30
-
-
-//This function handles what happens when the timer reaches zero in time scoring mode
-timerReachesZero:
-	//Display "SUDDEN DEATH" on screen
-	LI a2, text_sudden_death //text pointer
-	LI a0, 0x3C //x position
-	JAL FUNCTION_DISPLAY_TEXT
-	LI a1, 0x60 //y position
-	LBU a0, score_mode
-	LI a1, 1
-	BEQ a0, a1, @@branch_not_teams //If score mode is not teams, run code for handling individual players
-	LI a1, 3
-	BEQ a0, a1, @@branch_is_teams //If score mode is not teams, run code for handling individual players
-	@@branch_not_teams: //Code to run if in regular (non team) time scoring mode
-		//Loop to find player(s) lowest number of hits and kill them if they have a higher number of hits
-		LBU v0, player_count //Max iterations of loop
-		LI v1, 0 //Initialize loop at 0 for player 1
-		LI t1, p1_score //pointer for player score
-		LI a3, 0x7FFF //Load an implausably large score to start off for comparisons and store the lowest found score here
-		@@branch_do_while: //do
-			LHU t2, 0x0000 (t1) //Load current player's score
-			SLT t4, a3, t2 //If current player's hit score is less than all previous scores
-			BNE t4, zero, @@branch_hits_less_than_prev_player
-			ADDI v1, v1, 1 //v1++ to increment current player
-				ADD a3, t2, zero //Set lowest hit score to current player's score
-				@@branch_hits_less_than_prev_player:
-			BNE v1, v0, @@branch_do_while //while current player < player_count 
-			ADDI t1, t1, 2 //t1 += 2 to increment score pointer
-		//Kill all playes who do not have the lowest score
-		JAL checkIfNotLowestHits //P1
-		LI a0, 0
-		JAL checkIfNotLowestHits //P2
-		LI a0, 1
-		JAL checkIfNotLowestHits //P3
-		LI a0, 2
-		JAL checkIfNotLowestHits //P4
-		LI a0, 3
-		BEQ zero, zero, @@branch_finished
-	@@branch_is_teams: //Code to run if in team time scoring mode
-		LHU t0, team_1_score
-		LHU	t1, team_2_score
-		BEQ t0, t1, @@branch_finished //If team 1 and 2 scores are equal, it will be sudden death so skip the rest of this code
-			NOP
-			JAL killPlayer //Always kill player 2
-			LI a0, 1
-			JAL killPlayer //Always kill player 4
-			LI a0, 3
-			SLT v0, t0, t1 //If team 1's score < team 2's score
-			BEQ v0, zero, @@branch_team_2_won //Team 2 won
-				NOP
-				JAL killPlayer //Kill player 1 (player 3 will still be alive to score the win)
-				LI a0, 0
-				@@branch_team_2_won:
-			BNE v0, zero, @@branch_team_1_won //Team 1 won
-				NOP
-				JAL killPlayer //Kill player 3 (player 1 will still be alive to score the win)
-				LI a0, 2
-				@@branch_team_1_won:
-	@@branch_finished:
-	//Jump back
-	LW ra, 0x20 (sp)
-	JR ra
+//This function turns a player into a bomb without necessarily killing them (used in Zombombs)
+//A0 = player to turn into a bomb
+makePlayerBomb:
+	LI a2, player_state_offset //Calculate offset between player structures
+	MULT a0, a2
+	ADDI sp, sp, -0x30 //store registers
+	SW a0, 0x0020 (sp) //store current player in stack
+	SW ra, 0x0024 (sp)
+	LUI a1, hi(0x800F699C)
+	//LI a2, 0x50
+	MFLO a0
+	ADDU a1, a1, a0
+	LBU a3, lo(0x800F6991) (a1) //Bomb status, bit 0x40
+	LBU a0, lo(0x800F6A4E) (a1) //Star status, bit 0x02
+	ANDI a3, a3, 0x40 //Is player a bomb?
+	ANDI a0, a0, 0x02 //Is player using a star?
+	OR a3, a3, a0
+	BNE a3, zero, @@branch_turn_player_into_bomb //If player is not yet a bomb or using a star, turn them into a bomb
+		LI a2, 0x4
+		SB a2, lo(0x800F699C) (a1)
+		JAL bombSpeedup //Up the top the speed of a player turned into a bomb
+		LW a0, 0x20 (sp)
+		@@branch_turn_player_into_bomb:
+	LW ra, 0x0024 (sp)
+	JR RA
 	ADDI sp, sp, 0x30
 
 
 //This function displays the timer when in time scoring
-processTimeScoring:
+displayTimer:
 	//Check if score mode is time, if not just jump back
+
 	LBU a1, score_mode
-	LI a3, 1
-	BEQ a1, a3, @@branch_run_time_scoring //If game mode is time, don't just jump back
-	LI a3, 3
-	BEQ a1, a3, @@branch_run_time_scoring //If game mode is team time, don't just jump back
+	LBU a0, game_mode
+	LI a2, 5
+	BEQ a0, a2, @@branch_run_time_scoring
+	NOP
+	BNE a1, zero, @@branch_run_time_scoring //If time scoring is on
 		NOP
 		JR ra //Jump back if score mode is stock or team points
 		NOP
 		@@branch_run_time_scoring:
+
 	//Store Registers
-	ADDI sp, sp, -0x30
-	SW ra, 0x20 (sp)
+	ADDI sp, sp, -0x40
 	//Load timer and store it in the stack
 	LW a3, timer
+	SW ra, 0x20 (sp)
+	//Set y position for timer
+	LBU a0, one_player_full_screen
 	SW a3, 0x24 (sp)
+	BEQ a0, zero, @@branch_set_y_position_for_timer
+	LI a1, 0x60 //Default y position
+		LI a1, 0xD0 //y position for timer if 
+		@@branch_set_y_position_for_timer:
+	SW a1, 0x30 (sp)
+
+
 	//When the timer runs out, run function to kill all players but the one with the lowest number of hits
 	SLTI a0, a3, 1 //If timer <= 0
 	BEQ a0, zero, @@branch_timer_less_than_zero
-		NOP
-		J timerReachesZero
-		NOP
+		//Display "SUDDEN DEATH" on screen
+		LI a2, text_sudden_death //text pointer
+		LI a0, 0x3C //x position
+		JAL FUNCTION_DISPLAY_TEXT
+		LW a1, 0x30 (sp) //yposition
+		//BREAK Jump back
+		LW ra, 0x20 (sp)
+		JR ra
+		ADDI sp, sp, 0x40
 		@@branch_timer_less_than_zero:
 	//Run the timer code
 	JAL decrementTimer //Function to decrement timer
 	NOP
-	SW a3, timer //Store decremented timer
 	LI a1, 3600 //Divide timer by 3600 to get minutes
 	DIV a3, a1
+	SW a3, timer //Store decremented timer
+	LI a1, 60 //Divide the remainder by 60 to convert it to seconds
 	MFLO a3 //Grab timer minutes
 	SW a3, 0x24 (sp) //store minutes in the stack
 	MFHI a3 //Get the modulus (e.g. remainder) of when the timer was divided by minutes above for later use in calculating seconds
-	LI a1, 60 //Divide the remainder by 60 to convert it to seconds
 	DIV a3, a1
+	LI a0, 0x50 //x position
+	LI a2, text_time //text pointer
+	LW a1, 0x30 (sp) //yposition
 	MFLO a3
 	SW a3, 0x28 (sp) //Store seconds to the stack
 	//Display the text "TIMER" and minutes
-	LW a3, 0x24 (sp) //Load timer minutes from the stack
-	LI a0, 0x50 //x position
-	LI a2, text_time //text pointer
 	JAL FUNCTION_DISPLAY_TEXT_AND_INT
-	LI a1, 0x60 //y position
+	LW a3, 0x24 (sp) //Load timer minutes from the stack
+
 
 	// //Display semicolon and extra zero in seconds if needed
 	LW a3, 0x24 (sp) //Load timer minutes from stack
@@ -2105,15 +1415,15 @@ processTimeScoring:
 	LI a0, 0xB0 //Default x position
 		ADDI a0, a0, 8 //Moved x position over slightly
 		@@branch_timer_gt_10_min:
-	LI a2, text_semicolon //Text pointer for semicolon
 	LW a3, 0x28 (sp) //Load seconds from stack
+	LI a2, text_semicolon //Text pointer for semicolon
 	SLTI t1, a3, 10
 	BEQ t1, zero, @@branch_timer_lt_10_sec //If seconds < 10
 		NOP
 		LI a2, text_semicolon_plus_zero //Set text pointer to semicolon plus a zero
 		@@branch_timer_lt_10_sec:
 	JAL FUNCTION_DISPLAY_TEXT 
-	LI a1, 0x60 //y position
+	LW a1, 0x30 (sp) //y position
 	//Display timer seconds
 	LW a3, 0x28 (sp) //Load seconds from stack
 	SLTI t1, a3, 10
@@ -2129,12 +1439,12 @@ processTimeScoring:
 		@@branch_timer_min_gt_10:
 	ADDIU a2, a2, lo(text_null)
 	JAL FUNCTION_DISPLAY_TEXT_AND_INT
-	LI a1, 0x60 //y position
+	LW a1, 0x30 (sp) //y position
 	//Play final song music if timer is running out
-	LW a3, timer //Load timer
 	LBU a1, final_lap_music_flag //Load flag for if "final song" has played or not
 	BNE a1, zero, @@branch_final_lap_song //if the final flag song has not been played yet
-	SLTI t1, a3, 0xF0 //#and if seconds < 5
+		LW a3, timer //Load timer	
+		SLTI t1, a3, 0xF0 //#and if seconds < 5
 		BEQ t1, zero, @@branch_final_lap_song
 			LI a0, 1
 			SB a0, final_lap_music_flag //Set flag to the final lap song has playe
@@ -2144,7 +1454,7 @@ processTimeScoring:
 	//Jump back
 	LW ra, 0x20 (sp)
 	JR ra
-	ADDI sp, sp, 0x30
+	ADDI sp, sp, 0x40
 
 
 //Display the final results (hits or HP) on the results screen after each battle
@@ -2152,32 +1462,112 @@ displayResults:
 	//Store registers
 	ADDI sp, sp, -0x30
 	SW ra, 0x20 (sp)
-	//Initialize font
-	JaL FUNCTION_LOAD_FONT
-	NOP
-	//Load text pointer "HP" or "HIT" and store in stack
-	LBU v0, score_mode
-	LI a2, text_hp //Text pointer for "HP" (default)
-	BEQ v0, zero, @@branch_score_mode_is_timer //If score mode is timer
-		NOP
-		LI a2, text_hit ///Text pointer for "HIT"
-		@@branch_score_mode_is_timer:
-	BNE v0, zero, @@branch_check_to_display_hp //If traditional battle and max hp <= 3, do not display anything
-		LBU a0, game_mode
-		LHU a1, max_hp
-		SLTI a1, a1, 4 //If max HP > 3
-		//AND a0, a0, zero //If game mode is traditional
-		XOR a0, a1, a0
-		BEQ a0, zero, @@branch_check_to_display_hp
-			NOP
-			BEQ zero, zero, @@branch_skip_disp_results //Just skip displaying the results if that is the case
-			NOP
-		@@branch_check_to_display_hp:
-	SW a2, 0x24 (sp)
 	//Load number of players and store in stack
 	LBU a3, player_count
 	SW a3, 0x28 (sp)
+	//Initialize font
+	JAL FUNCTION_LOAD_FONT
+	NOP
+
+	//Display results for zombombs
+	LBU a0, game_mode
+	LI a1, 5 //value for zombombs game mode
+	BNE a0, a1, @@branch_display_results_for_zombombs
+		LBU v0, who_won_zombombs
+		BEQ v0, zero, @@branch_display_bombs_win //Display text when bombs win
+			LI a2, text_bombs_win
+			LI a0, 0x68 //x
+			JAL FUNCTION_DISPLAY_TEXT
+			LI a1, 0x60//y
+			BEQ zero, zero, @@branch_skip_disp_results
+			NOP
+			@@branch_display_bombs_win:
+		LI a2, text_survivors_win //Display text when suvivors win
+		LI a0, 0x5C //x
+		JAL FUNCTION_DISPLAY_TEXT
+		LI a1, 0x60//y
+		BEQ zero, zero, @@branch_skip_disp_results
+		NOP
+		@@branch_display_results_for_zombombs:
+
+
+	//Display team scores (if in teams mode)
+	LBU t6, ffa_or_teams
+	LBU t7, hp_or_points
+	BEQ t6, zero, @@branch_is_teams
+		LUI a1, 0x8000
+		LBU a0, 0x0335 (a1) //In 3P mode, copy P1 results to P2
+		SB a0, 0x0336 (a1)
+		LBU a0, 0x0338 (a1) //In 4P mode, copy P1 results to P2
+		SB a0, 0x0339 (a1)
+		LBU a0, 0x033A (a1) //In 4P mode, copy P3 results to P4
+		SB a0, 0x033B (a1)
+		LW a3, 0x28 (sp)
+		LI a0, 3
+		BNE a3, a0, @@branch_show_team_results_3p //Display results for 3P mode
+			LI a2, text_score //Display score for team 1
+			LHU a3, team_1_score
+			LI a0, 0x48
+			JAL FUNCTION_DISPLAY_TEXT_AND_INT
+			LI a1, 0x5C
+			LI a2, text_score //Display score for team 2
+			LH a3, team_2_score 
+			LI a0, 0xBC
+			JAL FUNCTION_DISPLAY_TEXT_AND_INT
+			LI a1, 0x5C
+			@@branch_show_team_results_3p:
+		LI a0, 4
+		BNE a3, a0, @@branch_show_team_results_4p ////Display results for 4P mode
+			LI a2, text_score //Display score for team 1
+			LHU a3, team_1_score
+			LI a0, 0x2C
+			JAL FUNCTION_DISPLAY_TEXT_AND_INT
+			LI a1, 0x5C
+			LI a2, text_score //Display score for team 2
+			LH a3, team_2_score 
+			LI a0, 0xB6
+			JAL FUNCTION_DISPLAY_TEXT_AND_INT
+			LI a1, 0x5C
+			@@branch_show_team_results_4p:
+		LBU t8, hit_or_objective
+		BEQ t8, zero, @@branch_is_team_points //If score is objective, just display the team score and jump back here
+			NOP 	//Jump back
+			BEQ zero, zero, @@branch_skip_disp_results
+			NOP
+			@@branch_is_team_points:
+		@@branch_is_teams:
+	//Load text pointer "HP" or "HIT" and store in stack
+	LBU v0, score_mode
+	BNE t6, zero, @@branch_check_to_display_hp //If not teams....
+		LBU a0, game_mode
+		BNE a0, zero, @@branch_check_to_display_hp //If game is traditional battle game mode
+			NOP
+			BNE v0, zero, @@branch_check_to_display_hp //If traditional battle and max hp <= 3, do not display anything
+				LHU a1, max_hp
+				SLTI a1, a1, 4 //If max HP > 3
+				//AND a0, a0, zero //If game mode is traditional
+				XOR a0, a1, a0
+				BEQ a0, zero, @@branch_check_to_display_hp
+					NOP
+					BEQ zero, zero, @@branch_skip_disp_results //Just skip displaying the results if that is the case
+					NOP
+		@@branch_check_to_display_hp:
+	LI a2, text_hp //Text pointer for "HP" (default)
+	BEQ v0, zero, @@branch_score_mode_is_timer //If score mode is timer
+	LBU t6, ffa_or_teams
+		LI a2, text_hit ///Text pointer for "HIT"
+		@@branch_score_mode_is_timer:
+	BEQ t6, zero, @@branch_display_hits_for_teams //If team scoring, default to "HITS" since there is no individual HP
+	LBU t8, hit_or_objective
+		LI a2, text_hit ///Text pointer for "HIT"
+		@@branch_display_hits_for_teams: 
+	BEQ t8, zero, @@branch_scoring_is_points //If scoring is objective (e.g. an objective based game mode)
+		NOP
+		LI a2, text_scr ///Text pointer for "PTS"
+		@@branch_scoring_is_points:
+	SW a2, 0x24 (sp)
 	//Display results for 2P mode
+	LW a3, 0x28 (sp)
 	LI a0, 2
 	BNE a3, a0, @@branch_show_results_2p
 		LI a0, 0x40 //x position
@@ -2192,6 +1582,7 @@ displayResults:
 		LW a2, 0x24 (sp) //Load text pointer
 		@@branch_show_results_2p:
 	//Display results for 3P mode
+	LW a3, 0x28 (sp)
 	LI a0, 3
 	BNE a3, a0, @@branch_show_results_3p
 		LI a0, 0x22 //x position
@@ -2211,6 +1602,7 @@ displayResults:
 		LW a2, 0x24 (sp) //Load text pointer
 		@@branch_show_results_3p:
 	//Display results for 4P mode
+	LW a3, 0x28 (sp)
 	LI a0, 4
 	BNE a3, a0, @@branch_show_results_4p
 		LI a0, 0x8 //x position
@@ -2235,51 +1627,22 @@ displayResults:
 		LW a2, 0x24 (sp) //Load text pointer
 		@@branch_show_results_4p:
 	@@branch_skip_disp_results:
-	//If a team scoring mode is selected, copy wins from 1P to 2P and 3P to 4P
-	LBU v0, score_mode
-	LI a0, 2
-	BEQ v0, a0, @@branch_team_mode //If team points score mode
-	LI a0, 3
-	BEQ v0, a0, @@branch_team_mode //or If team time score mode
-	NOP
-	BEQ zero, zero, @@branch_not_team_mode //Else if not a team scoring mode, skip
-		@@branch_team_mode:
-		LUI a1, 0x8000
-		LBU a0, 0x0335 (a1) //In 3P mode, copy P1 results to P2
-		SB a0, 0x0336 (a1)
-		LBU a0, 0x0338 (a1) //In 4P mode, copy P1 results to P2
-		SB a0, 0x0339 (a1)
-		LBU a0, 0x033A (a1) //In 4P mode, copy P3 results to P4
-		SB a0, 0x033B (a1)
-		LW a3, 0x28 (sp)
-		LI a0, 3
-		BNE a3, a0, @@branch_show_team_results_3p //Display results for 3P mode
-			LI a2, text_score //Display score for team 1
-			LHU a3, team_1_score
-			LI a0, 0x48
-			JAL FUNCTION_DISPLAY_TEXT_AND_INT
-			LI a1, 0x5C
-			LI a2, text_score //Display score for team 2
-			LHU a3, team_2_score 
-			LI a0, 0xBC
-			JAL FUNCTION_DISPLAY_TEXT_AND_INT
-			LI a1, 0x5C
-			@@branch_show_team_results_3p:
-		LI a0, 4
-		BNE a3, a0, @@branch_show_team_results_4p ////Display results for 4P mode
-			LI a2, text_score //Display score for team 1
-			LHU a3, team_1_score
-			LI a0, 0x2C
-			JAL FUNCTION_DISPLAY_TEXT_AND_INT
-			LI a1, 0x5C
-			LI a2, text_score //Display score for team 2
-			LHU a3, team_2_score 
-			LI a0, 0xB6
-			JAL FUNCTION_DISPLAY_TEXT_AND_INT
-			LI a1, 0x5C
-			@@branch_show_team_results_4p:
-		
+
 	@@branch_not_team_mode:
+
+	//Disable background music (fix for 3&4 P background music
+	LBU a0, status_options_3P4Pmusic
+	BEQ a0, zero, @@branch_3p4p_music_on	
+		LUI a0, 0x803B
+		SB zero, 0x03C3 (a0) //Disable BG music for all courses
+		SW zero, 0x03C4 (a0)
+		SH zero, 0x03C8 (a0)
+		SB zero, 0x03CA (a0)
+		SB zero, 0x03CF (a0)
+		SH zero, 0x03D0 (a0)
+		SB zero, 0x03D2 (a0)
+		@@branch_3p4p_music_on:
+
 	//Jump back
 	LW ra, 0x20 (sp)
 	JR ra
@@ -2287,119 +1650,269 @@ displayResults:
 	//
 
 
-//This function displays HP or "HITS" for some battle modes
-displayHP:
+
+
+//This function increments the score, either individual or teams, for use with certain game modes
+//a0 = player or team to incrementm, 0=P1, 1=P2, 2=P3, 3=P4
+incrementScore:
+	LBU a1, ffa_or_teams
+	BNE a1, zero, @@branch_increment_individual_scores //Increment individual scores
+		NOP
+		LI v0, p1_score //Load P1 score memory address as base
+		@@branch_increment_individual_scores: //Increment team scores
+	BEQ a1, zero, @@branch_increment_team_scores
+		NOP
+		LI v0, team_1_score
+		SRA a0, a0, 1 //Divide a0 by two so P1 and P2 are team 1 and P3 and P4 are team 2
+		@@branch_increment_team_scores:
+	SLL a0, a0, 1  //Double player or team number to get offset for score
+	ADDU v0, v0, a0 //Add offset to base
+	LHU v1, 0x0000 (v0) //Load player or team's score
+	ADDI v1, v1, 1 //Increment score + 1
+	JR RA //Jump back
+	SH v1, 0x0000 (v0) //Store player or team's score back to ram
+
+//This function checks if a player is hit, mostly for dropping the flag in CTF mode
+//See old Death Race code for details
+//a0 = player or team to incrementm, 0=P1, 1=P2, 2=P3, 3=P4
+//returns v0 = 0 player not hit, 1 player is hit
+check_if_hit:
+	LI a1, player_state_offset
+	MULT a0, a1
+	LI v0, 0 //v0 stores if player is hit (or not), here we initialize it to zero
+	LUI a1, hi(0x800F6A4C) //Check various tumbles
+	MFLO a0 //a0 stores the offset to the current player
+	ADD a1, a1, a0
+	LBU a2, lo(0x800F6A4C) (a1)
+	ANDI a3, a2, 0x7
+	BEQ a3, zero, @@branch_check_tumble_bits
+	//LUI a1, hi(0x800F6A4E) //check spinouts and directional tumbles (delay branch)
+	LHU a2, lo(0x800F6A4E) (a1)
+		LI v0, 1
+		@@branch_check_tumble_bits:
+	//ADD a1, a1, a0
+	//LHU a2, lo(0x800F6A4E) (a1)
+	ANDI a3, a2, 0x04C0
+	BEQ a3, zero, @@branch_check_spinouts_and_directional_tumble_bits
+	//LUI a1, hi(0x800F6A5B) //check if out of bounds, in water, or picked up by Lakitu for any reason (delay branch)
+	LBU a2, lo(0x800F6A5B) (a1)
+		LI v0, 1
+		@@branch_check_spinouts_and_directional_tumble_bits:
+	//ADD a1, a1, a0
+	BEQ a2, zero, @@branch_check_out_of_bounds
+		NOP
+		LI v0, 1
+		@@branch_check_out_of_bounds:
+	JR ra //Jump back
+	NOP
+
+
+// //Check if hit by bomb
+// //a0 = player, 0=P1, 1=P2, 2=P3, 3=P4
+// //returns v0 = 0 player not hit bomb, 1 player is hit by bomb
+// checkHitBomb:
+// 	LI a1, player_state_offset
+// 	MULT a0, a1
+// 	//LI v0, 0 //v0 stores if player is hit (or not), here we initialize it to zero
+// 	LUI a1, hi(0x800F699C)
+// 	MFLO a0 //a0 stores the offset to the current player
+// 	ADD a1, a1, a0
+// 	LHU a1, lo(0x800F699C) (a1)
+// 	// BNE a1, zero, @@branch_check_bomb_hit
+// 	// 	NOP
+// 	// 	LI v0, 1
+// 	// 	@@branch_check_bomb_hit:
+// 	JR ra
+// 	//ANDI v0, a1, 0x01 //Check if bomb hit
+// 	ANDI v0, a1, 0x0040 //Check if bomb hit
+
+//This function displays SCORE, HP or "HITS" for some battle modes
+displayScore:
 	ADDI sp, sp, -0x30//Store registers
-	SW ra, 0x20 (sp)
 	LBU a3, player_count
+	SW ra, 0x20 (sp)
+	LBU v0, ffa_or_teams
 	SW a3, 0x24 (sp) //Store player count in stack for easy retrieval
-	LBU v0, score_mode
-	// AND a0, v0, zero
-	// AND a1, v0, a2
-	// OR a0, a1, a0
-	LI a2, 2
-	BEQ v0, a2, @@branch_team_scoring //If scoring mode is stock or time (not team)
-	LI a2, 3
-	BEQ v0, a2, @@branch_team_scoring //If scoring mode is stock or time (not team)
-			LI a2, text_hp //Text pointer for "HP" (default)
-			BEQ v0, zero, @@branch_score_mode_is_timer //If score mode is timer
+	BNE v0, zero, @@branch_team_scoring
+
+			LBU v1, hit_or_objective
+			BNE v1, zero, @@branch_score_mode_is_hits
+				LBU v0, score_mode
+				LI a2, text_hp //Text pointer for "HP" (default)
+				BEQ v0, zero, @@branch_score_mode_is_timer //If score mode is timer
+					NOP
+					LI a2, text_hit ///Text pointer for "HIT"
+					@@branch_score_mode_is_timer:
+				@@branch_score_mode_is_hits:
+			BEQ v1, zero, @@branch_score_mode_is_points
 				NOP
-				LI a2, text_hit ///Text pointer for "HIT"
-				@@branch_score_mode_is_timer:
+				LI a2, text_scr
+				@@branch_score_mode_is_points:
+			LBU a0, one_player_full_screen
 			SW a2, 0x28 (sp) //Store text pointer in stack for later retrieval
-			//Display HP/HIT for P1
-			LI a0, 0x0 //x position
-			LHU a3, p1_score //Int to display
-			JAL FUNCTION_DISPLAY_TEXT_AND_INT
-			LI a1, 0x0 //y position
-			//Display HP/HIT for P2
-			LI a0, 0x0 //x position (default)
-			LI a1, 0x72 //y position (default)
-			LI a2, 2
-			LW a3, 0x24 (sp) //Load player count
-			BEQ a3, a2, @@branch_disp_p2_number_of_players_not_2 //If number of players is not 2, move position to upper right
-				NOP
-				LI a0, 0xE2 //x position
-				LI a1, 0x0 //y position
-				@@branch_disp_p2_number_of_players_not_2:
-			LHU a3, p2_score //Int to display
-			JAL FUNCTION_DISPLAY_TEXT_AND_INT
-			LW a2, 0x28 (sp) //text pointer
-			//Display HP/HIT for P3
-			LW a3, 0x24 (sp) //Load player count
-			LI a2, 2
-			BEQ a3, a2, @@branch_disp_p3_score //If number of players is not 2, display player 3
+			BNE a0, zero, @@branch_ffa_scoring_1p_full_screen //If not in 1P full screen mode, dispaly the scores in each player's screemn
+				//Display HP/HIT for P1
 				LI a0, 0x0 //x position
-				LI a1, 0x72 //y position
-				LHU a3, p3_score //int to display
+				LHU a3, p1_score //Int to display
+				JAL FUNCTION_DISPLAY_TEXT_AND_INT
+				LI a1, 0x0 //y position
+				//Display HP/HIT for P2
+				LI a0, 0x0 //x position (default)
+				LI a1, 0x72 //y position (default)
+				LW a3, 0x24 (sp) //Load player count
+				LI a2, 2
+				BEQ a3, a2, @@branch_disp_p2_number_of_players_not_2 //If number of players is not 2, move position to upper right
+					NOP
+					LI a0, 0xE2 //x position
+					LI a1, 0x0 //y position
+					@@branch_disp_p2_number_of_players_not_2:
+				LHU a3, p2_score //Int to display
 				JAL FUNCTION_DISPLAY_TEXT_AND_INT
 				LW a2, 0x28 (sp) //text pointer
-				@@branch_disp_p3_score:
-			//Display HP/HIT for P4
-			LW a3, 0x24 (sp) //Load player count
-			LI a2, 4
-			BNE a3, a2, @@branch_disp_p4_score //If number of players is 4, display P4's score
-				LI a0, 0xE2 //x position
-				LI a1, 0x72 //y position
-				LHU a3, p4_score //int to display
+				//Display HP/HIT for P3
+				LW a3, 0x24 (sp) //Load player count
+				LI a2, 2
+				BEQ a3, a2, @@branch_disp_p3_score //If number of players is not 2, display player 3
+					LI a0, 0x0 //x position
+					LI a1, 0x72 //y position
+					LHU a3, p3_score //int to display
+					JAL FUNCTION_DISPLAY_TEXT_AND_INT
+					LW a2, 0x28 (sp) //text pointer
+					@@branch_disp_p3_score:
+				//Display HP/HIT for P4
+				LW a3, 0x24 (sp) //Load player count
+				LI a2, 4
+				BNE a3, a2, @@branch_disp_p4_score //If number of players is 4, display P4's score
+					LI a0, 0xE2 //x position
+					LI a1, 0x72 //y position
+					LHU a3, p4_score //int to display
+					JAL FUNCTION_DISPLAY_TEXT_AND_INT
+					LW a2, 0x28 (sp) //text pointer
+					@@branch_disp_p4_score:
+				BEQ zero, zero, @@branch_done_displaying_score
+				NOP
+			@@branch_ffa_scoring_1p_full_screen: //If in 1P full screen mode, display scores in corner of screen
+				//Display P1 score
+				LI a0, 0x00 //x position
+				LI a2, text_p1
+				JAL FUNCTION_DISPLAY_TEXT
+				LI a1, 0x00 //y position
+				LI a0, 0x18 //x position
+				LI a1, 0x00 //y position
+				LHU a3, p1_score //Int to display
 				JAL FUNCTION_DISPLAY_TEXT_AND_INT
 				LW a2, 0x28 (sp) //text pointer
-				@@branch_disp_p4_score:
-			BEQ zero, zero, @@branch_done_displaying_score
+				// //Display P2 score
+				LI a0, 0x00 //x position
+				LI a2, text_p2
+				JAL FUNCTION_DISPLAY_TEXT
+				LI a1, 0x0C //y position
+				LI a0, 0x18 //x position
+				LI a1, 0x0C //y position
+				LHU a3, p2_score //Int to display
+				JAL FUNCTION_DISPLAY_TEXT_AND_INT
+				LW a2, 0x28 (sp) //text pointer
+				// Display P3
+				LW a3, 0x24 (sp) //Load player count
+				LI a2, 2
+				BEQ a3, a2, @@branch_disp_p3_score_in_1p_fullscreen //If number of players is not 2, display player 3
+					LI a0, 0x00 //x position
+					LI a2, text_p3
+					JAL FUNCTION_DISPLAY_TEXT
+					LI a1, 0x18 //y position
+					LI a0, 0x18 //x position
+					LI a1, 0x18 //y position
+					LHU a3, p3_score //Int to display
+					JAL FUNCTION_DISPLAY_TEXT_AND_INT
+					LW a2, 0x28 (sp) //text pointer
+					@@branch_disp_p3_score_in_1p_fullscreen:
+				//Display P4
+				LW a3, 0x24 (sp) //Load player count
+				LI a2, 4
+				BNE a3, a2, @@branch_disp_p4_score_in_1p_fullscreen //If number of players is 4, display P4's score
+					LI a0, 0x00 //x position
+					LI a2, text_p4
+					JAL FUNCTION_DISPLAY_TEXT
+					LI a1, 0x24 //y position
+					LI a0, 0x18 //x position
+					LI a1, 0x24 //y position
+					LHU a3, p4_score //Int to display
+					JAL FUNCTION_DISPLAY_TEXT_AND_INT
+					LW a2, 0x28 (sp) //text pointer
+					@@branch_disp_p4_score_in_1p_fullscreen:
+				BEQ zero, zero, @@branch_done_displaying_score
+				NOP
 		//Else if branch is team scoring
 		@@branch_team_scoring:
-			LUI a3, hi(p1_score)
-			LHU a0, lo(p3_score) (a3) //Calculate team 1 score
-			LHU a1, lo(p4_score) (a3)
-			ADDU v0, a1, a0 
-			LHU a0, lo(p1_score) (a3) //Calculate team 2 score
-			LHU a1, lo(P2_score) (a3)
-			ADDU v1, a1, a0 
-			SH v0, lo(team_1_score) (a3) //Store team scores
-			SH v1, lo(team_2_score) (a3)
+			LBU a0, hit_or_objective
+			BNE a0, zero, @@branch_calculate_team_scores //If game is hit based, calculate the team scores
+				LUI a3, hi(p1_score)
+				LHU a0, lo(p3_score) (a3) //Calculate team 1 score
+				LHU a1, lo(p4_score) (a3)
+				ADDU v0, a1, a0 
+				LHU a0, lo(p1_score) (a3) //Calculate team 2 score
+				LHU a1, lo(P2_score) (a3)
+				SH v0, lo(team_1_score) (a3) //Store team scores
+				ADDU v1, a1, a0 
+				SH v1, lo(team_2_score) (a3)
+			@@branch_calculate_team_scores:
 
-			LI a0, 0x77 //x position
-			LI a2, text_score //text pointer
-			JAL FUNCTION_DISPLAY_TEXT
-			LI a1, -0xC //y position
+			LBU a0, one_player_full_screen
+			BNE a0, zero, @@branch_team_scoring_1p_full_screen //If not in 1P full screen mode, dispaly the scores in each player's screemn
+				LI a0, 0x77 //x position
+				LI a2, text_score //text pointer
+				JAL FUNCTION_DISPLAY_TEXT
+				LI a1, -0xC //y position
 
-			LI a0, 0x7B //x position
-			LI a2, text_null //text pointer
-			LHU a3, team_1_score
-			SLTI v0, a3, 10 //If score is < 10, move it over a bit
-			BEQ v0, zero, @@branch_team_1_score_positioning_a
+				LI a0, 0x7B //x position
+				LI a2, text_null //text pointer
+				LH a3, team_1_score
+				SLTI v0, a3, 10 //If score is < 10, move it over a bit
+				BEQ v0, zero, @@branch_team_1_score_positioning_a
+					NOP
+					ADDI a0, a0, 0x4
+					@@branch_team_1_score_positioning_a:
+				SLTI v0, a3, 100 //If score is < 10, move it over a bit
+				BNE v0, zero, @@branch_team_1_score_positioning_b
+					NOP
+					ADDI a0, a0, -0x4
+					@@branch_team_1_score_positioning_b:
+				JAL FUNCTION_DISPLAY_TEXT_AND_INT
+				LI a1, -0x2 //y position
+
+				LI a0, 0x77 //x position
+				LI a2, text_score //text pointer
+				JAL FUNCTION_DISPLAY_TEXT
+				LI a1, 0xC2 //y position
+
+				LI a0, 0x7B //x position
+				LI a2, text_null //text pointer
+				LH a3, team_2_score
+				SLTI v0, a3, 10 //If score is < 10, move it over a bit
+				BEQ v0, zero, @@branch_team_2_score_positioning
+					NOP
+					ADDI a0, a0, 0x4
+					@@branch_team_2_score_positioning:
+				SLTI v0, a3, 100 //If score is < 10, move it over a bit
+				BNE v0, zero, @@branch_team_2_score_positioning_b
+					NOP
+					ADDI a0, a0, -0x4
+					@@branch_team_2_score_positioning_b:
+				JAL FUNCTION_DISPLAY_TEXT_AND_INT
+				LI a1, 0xCC //y position	
+				BEQ zero, zero, @@branch_done_displaying_score
 				NOP
-				ADDI a0, a0, 0x4
-				@@branch_team_1_score_positioning_a:
-			SLTI v0, a3, 100 //If score is < 10, move it over a bit
-			BNE v0, zero, @@branch_team_1_score_positioning_b
-				NOP
-				ADDI a0, a0, -0x4
-				@@branch_team_1_score_positioning_b:
-			JAL FUNCTION_DISPLAY_TEXT_AND_INT
-			LI a1, -0x2 //y position
-
-			LI a0, 0x77 //x position
-			LI a2, text_score //text pointer
-			JAL FUNCTION_DISPLAY_TEXT
-			LI a1, 0xC4 //y position
-
-			LI a0, 0x7B //x position
-			LI a2, text_null //text pointer
-			LHU a3, team_2_score
-			SLTI v0, a3, 10 //If score is < 10, move it over a bit
-			BEQ v0, zero, @@branch_team_2_score_positioning
-				NOP
-				ADDI a0, a0, 0x4
-				@@branch_team_2_score_positioning:
-			SLTI v0, a3, 100 //If score is < 10, move it over a bit
-			BNE v0, zero, @@branch_team_2_score_positioning_b
-				NOP
-				ADDI a0, a0, -0x4
-				@@branch_team_2_score_positioning_b:
-			JAL FUNCTION_DISPLAY_TEXT_AND_INT
-			LI a1, 0xCE //y position			
-
+			@@branch_team_scoring_1p_full_screen:
+				LI a0, 0x0 //x position		
+				LI a2, text_team_1_score
+				LH a3, team_1_score
+				JAL FUNCTION_DISPLAY_TEXT_AND_INT
+				LI a1, 0x0 //y position
+				LI a0, 0xA0 //x position		
+				LI a2, text_team_2_score
+				LH a3, team_2_score
+				JAL FUNCTION_DISPLAY_TEXT_AND_INT
+				LI a1, 0x0 //y position
 	@@branch_done_displaying_score:
 	//Jump back
 	LW ra, 0x20 (sp)
@@ -2413,20 +1926,23 @@ checkIfZeroHP:
 	ADDI sp, sp, -0x30 
 	SW ra, 0x1C (sp)
 	SW a0, 0x20 (sp)
-	SW a1, 0x24 (sp)
 	SW a2, 0x28 (sp)
 	//SW a3, 0x2C (sp)
-	//Load current player's HP
-	LI a1, p1_score
-	SLL a2, a0, 1 //Multiply a0 by 2
-	ADDU a1, a1, a2
-	LHU a2, 0x0000 (a1)
-	//Kill player if their HP = 0
-	BNE a2, zero, @@branch_kill_player_if_hp_zero
-		NOP
-		JAL killPlayer
-		NOP
-		@@branch_kill_player_if_hp_zero:
+	LBU a2, hp_or_points //Check if stock is on (not timed), and if it is on, check if player has HP=0
+	SW a1, 0x24 (sp)	
+	BNE a2, zero, @@branch_check_if_zero_hp
+		//Load current player's HP
+		LI a1, p1_score
+		SLL a2, a0, 1 //Multiply a0 by 2
+		ADDU a1, a1, a2
+		LHU a2, 0x0000 (a1)
+		//Kill player if their HP = 0
+		BNE a2, zero, @@branch_kill_player_if_hp_zero
+			NOP
+			JAL killPlayer
+			NOP
+			@@branch_kill_player_if_hp_zero:
+		@@branch_check_if_zero_hp:
 	//Load registers and jump back
 	LW ra, 0x1C (sp)
 	LW a0, 0x20 (sp)
@@ -2436,138 +1952,341 @@ checkIfZeroHP:
 	JR ra
 	ADDI sp, sp, 0x30
 
-//This function checks if a team has reached the number of points to win and handles the win/lose conditions
-checkIfTeamWon:
-	ADDI sp, sp, -0x30
-	SW ra, 0x1C (sp)
-	SW a0, 0x20 (sp)
-	SW a1, 0x24 (sp)
-	SW a2, 0x28 (sp)
-	//SW a3, 0x2C (sp)
-	LBU a0, score_mode
-	LI a1, 2
-	BNE a0, a1, @@branch_skip //Only run if score mode is team points
-		LHU t0, max_team_points//Load maximum score
-		LHU t1, team_1_score //Load team 1's score
-		SLT t2, t1, t0
-		BNE t2, zero, @@branch_team_1_won  //If team 1's score is >= the max score, team 1 wins so kill everyone except player 1
-			NOP
-			JAL killPlayer //Kill player 2
-			LI a0, 1
-			JAL killPlayer //Kill player 3
-			LI a0, 2
-			JAL killPlayer //Kill player 4
-			LI a0, 3
-			@@branch_team_1_won:
-		LHU t1, team_2_score //Load team 2's score
-		SLT t2, t1, t0	
-		BNE t2, zero, @@branch_team_2_won  //If team 2's score is >= the max score, team 2 wins so kill everyone except player 3
-			NOP
-			JAL killPlayer //Kill player 1`
-			LI a0, 0
-			JAL killPlayer //Kill player 2
-			LI a0, 1
-			JAL killPlayer //Kill player 4
-			LI a0, 3
-			@@branch_team_2_won:
-		@@branch_skip:
 
-	LW ra, 0x1C (sp)
-	LW a0, 0x20 (sp)
-	LW a1, 0x24 (sp)
-	LW a2, 0x28 (sp)
-	//LW a3, 0x2C (sp)
-	JR ra
-	ADDI sp, sp, 0x30
-
+//This function processes respawning
+//$A0 = player to respawn H, P1 = 0, P2 = 1, P3 =2, P4 = 4
+processRespawn:
+	LI a1, player_state_offset //Get player state mem address for forcing lakitu to respawn player
+	MULT a0, a1
+	LUI a1, 0x800F
+	LI a3, 1 //Set bits for respawning
+	MFLO a2
+	ADD a1, a1, a2
+	JR RA
+	SB a3, 0x6A5B (a1)
 
 //This function processes hits and decrements 1 HP
 //$A0 = player to decrement HP for, P1 = 0, P2 = 1, P3 =2, P4 = 4
 processHit:
 	//Store registers
-	ADDI sp, sp, -0x30 
+	ADDI sp, sp, -0x34 
 	SW a0, 0x20 (sp)
 	SW a1, 0x24 (sp)
 	SW a2, 0x28 (sp)
-	SW a3, 0x2C (sp)
+	//SW a3, 0x2C (sp)
 	//If respawn is on, respawn player who was just hit
 	LBU v0, status_respawn
+	SW ra, 0x30 (sp)
 	BEQ v0, zero, @@branch_respawn_on //#If respawn is set to on
-		LI a1, player_state_offset //Get player state mem address for forcing lakitu to respawn player
-		MULT a0, a1
-		MFLO a2
-		LUI a1, 0x800F
-		ADD a1, a1, a2
-		LI a3, 1 //Set bits for respawning
-		SB a3, 0x6A5B (a1)
+		NOP
+		JAL processRespawn
+		NOP
 		@@branch_respawn_on:
 	//Subtract or add 1 HP from player number stored in a0
 	LI a1, p1_score
 	SLL a0, a0, 1 //Multiply a0 by 2
+	LBU v0, hp_or_points
 	ADDU a1, a1, a0
-	LHU a2, 0x0000 (a1)
-	LBU v0, score_mode
 	BNE v0, zero, @@branch_score_is_stock //If scoring is stock
-		NOP
+	LHU a2, 0x0000 (a1)
 		ADDI a2, a2, -1 //Subtract 1 HP
 		@@branch_score_is_stock:
-	BEQ v0, zero, @@branch_score_is_timer //If scoring is timer
+	BEQ v0, zero, @@branch_score_is_timer //If scoring is points or timer
 		NOP
 		ADDI a2, a2, 1 //Add 1 hit
 		@@branch_score_is_timer:
 	SH a2, 0x0000 (a1) //Store HP or hits back to ram
 	//Load registers and jump back
+	//LW a3, 0x2C (sp)
+	LW ra, 0x30 (sp)
 	LW a0, 0x20 (sp)
 	LW a1, 0x24 (sp)
 	LW a2, 0x28 (sp)
-	LW a3, 0x2C (sp)
+	JR ra
+	ADDI sp, sp, 0x34
+
+
+
+//This function checks win conditions for time and point matches and kills the losers
+winConditions:
+	ADDI sp, sp, -0x30
+	SW ra, 0x20 (sp)
+	LBU t6, score_mode //Load if points/stock or time into t6
+	LBU t7, ffa_or_teams //Load if ffa or teams into t7
+	BNE t6, zero, @@branch_not_timed //If game is not timed
+		LHU v1, max_points//Load maximum score
+		BNE t7, zero, @@branch_not_timed_ffa //If game is a FFA
+			LBU t8, hp_or_points //L:oad if hp or points into t8
+			BEQ t8, zero, @@branch_not_timed_ffa_is_points //If game is points (if it is HP, the win conditions don't matter)
+				LUI a3, hi(p1_score)
+				LHU v0, lo(p1_score) (a3)
+				BNE v1, v0, @@branch_ffa_is_points_p1 //If P1 has reached max points
+					NOP
+					JAL killPlayer //Kill player 2
+					LI a0, 1
+					JAL killPlayer //Kill player 3
+					LI a0, 2
+					JAL killPlayer //Kill player 4
+					LI a0, 3
+					@@branch_ffa_is_points_p1:
+				LHU v0, lo(p1_score)+0X2 (a3)
+				BNE v1, v0, @@branch_ffa_is_points_p2 //If P2 has reached max points
+					NOP
+					JAL killPlayer //Kill player 1
+					LI a0, 0
+					JAL killPlayer //Kill player 3
+					LI a0, 2
+					JAL killPlayer //Kill player 4
+					LI a0, 3
+					@@branch_ffa_is_points_p2:
+				LHU v0, lo(p1_score)+0X4 (a3)
+				BNE v1, v0, @@branch_ffa_is_points_p3 //If P3 has reached max points
+					NOP
+					JAL killPlayer //Kill player 1
+					LI a0, 0
+					JAL killPlayer //Kill player 2
+					LI a0, 1
+					JAL killPlayer //Kill player 4
+					LI a0, 3
+					@@branch_ffa_is_points_p3:
+				LHU v0, lo(p1_score)+0x6 (a3)
+				BNE v1, v0, @@branch_ffa_is_points_p4 //If P4 has reached max points
+					NOP
+					JAL killPlayer //Kill player 1
+					LI a0, 0
+					JAL killPlayer //Kill player 2
+					LI a0, 1
+					JAL killPlayer //Kill player 3
+					LI a0, 2
+					@@branch_ffa_is_points_p4:
+				@@branch_not_timed_ffa_is_points:
+			@@branch_not_timed_ffa:
+		BEQ t7, zero, @@branch_not_timed_teams //If game is a teams
+			LUI a3, hi(team_1_score)
+			LH v0, lo(team_1_score) (a3)
+			LH t0, lo(team_2_score) (a3)
+			BNE v0, v1, @@branch_not_timed_team_1_wins //If team 1 reaches the max score
+					NOP
+					JAL killPlayer //Kill player 2
+					LI a0, 1
+					JAL killPlayer //Kill player 3
+					LI a0, 2
+					JAL killPlayer //Kill player 4
+					LI a0, 3
+				@@branch_not_timed_team_1_wins:
+			BNE t0, v1, @@branch_not_timed_team_2_wins //If team 2 reaches the max score
+					NOP
+					JAL killPlayer //Kill player 1
+					LI a0, 0
+					JAL killPlayer //Kill player 2
+					LI a0, 1
+					JAL killPlayer //Kill player 4
+					LI a0, 3
+				@@branch_not_timed_team_2_wins:
+			@@branch_not_timed_teams:
+		@@branch_not_timed:
+	BEQ t6, zero, @@branch_is_timed //If game is timed
+		LW a0, timer
+		SLTI a0, a0, 1
+		BEQ a0, zero, @@branch_is_timed //If timer is < zero
+			NOP
+			BNE t7, zero, @@branch_is_timed_ffa //If game is a FFA
+				LBU t9, hit_or_objective //Load if game is hit based or objective based	
+				LUI a3, hi(p1_score)
+				BNE t9, zero, @@branch_is_timed_ffa_hits //If score mode is hits
+					LHU v0, lo(p1_score) (a3)  //First find the lowest number of hits out of all the player and team scores
+					LHU v1, lo(p2_score) (a3)
+					SLTU a2, v1, v0
+					BEQ a2, zero, @@branch_timed_ffa_hits_p2_lesser
+						NOP
+						MOVE v0, v1
+						@@branch_timed_ffa_hits_p2_lesser:
+					LBU t0, player_count
+					SLTI t1, t0, 3
+					BNE t1, zero, @@branch_timed_ffa_hits_p4_lesser //Skip if < 3 players
+						LHU v1, lo(p3_score) (a3)
+						SLTU a2, v1, v0
+						BEQ a2, zero, @@branch_timed_ffa_hits_p3_lesser
+							NOP
+							MOVE v0, v1
+							@@branch_timed_ffa_hits_p3_lesser:
+						SLTI t1, t0, 4
+						BNE t1, zero, @@branch_timed_ffa_hits_p4_lesser //skip if < 4 players
+							LHU v1, lo(p4_score) (a3)
+							SLTU a2, v1, v0
+							BEQ a2, zero, @@branch_timed_ffa_hits_p4_lesser
+								NOP
+								MOVE v0, v1
+								@@branch_timed_ffa_hits_p4_lesser:
+					LHU v1, lo(p1_score) (a3)//Now kill all players with a score above the lowest number of hits
+					BEQ v0, v1, @@branch_timed_ffa_hits_p1_dead
+					LHU v1, lo(p2_score) (a3)
+						JAL killPlayer
+						LI a0, 0
+						@@branch_timed_ffa_hits_p1_dead:
+					BEQ v0, v1, @@branch_timed_ffa_hits_p2_dead
+					LHU v1, lo(p3_score) (a3)
+						JAL killPlayer
+						LI a0, 1
+						@@branch_timed_ffa_hits_p2_dead:
+					BEQ v0, v1, @@branch_timed_ffa_hits_p3_dead
+					LHU v1, lo(p4_score) (a3)
+						JAL killPlayer
+						LI a0, 2
+						@@branch_timed_ffa_hits_p3_dead:
+					BEQ v0, v1, @@branch_timed_ffa_hits_p4_dead
+						NOP
+						JAL killPlayer
+						LI a0, 3
+						@@branch_timed_ffa_hits_p4_dead:
+					@@branch_is_timed_ffa_hits:
+				BEQ t9, zero, @@branch_is_timed_ffa_objective //If score mode is objective (points) based
+					LHU v0, lo(p1_score) (a3)  //First find the maximum score out of all the player and team scores
+					LHU v1, lo(p2_score) (a3)
+					SLTU a2, v0, v1
+					BEQ a2, zero, @@branch_timed_ffa_objective_p2_greater
+						NOP
+						MOVE v0, v1
+						@@branch_timed_ffa_objective_p2_greater:
+					LHU v1, lo(p3_score) (a3)
+					SLTU a2, v0, v1
+					BEQ a2, zero, @@branch_timed_ffa_objective_p3_greater
+						NOP
+						MOVE v0, v1
+						@@branch_timed_ffa_objective_p3_greater:
+					LHU v1, lo(p4_score) (a3)
+					SLTU a2, v0, v1
+					BEQ a2, zero, @@branch_timed_ffa_objective_p4_greater
+						NOP
+						MOVE v0, v1
+						@@branch_timed_ffa_objective_p4_greater:
+					LHU v1, lo(p1_score) (a3)//Now kill all players with a score below the max score
+					SLTU a2, v1, v0
+					BEQ a2, zero, @@branch_timed_ffa_objective_p1_dead
+						NOP
+						JAL killPlayer
+						LI a0, 0
+						@@branch_timed_ffa_objective_p1_dead:
+					LHU v1, lo(p2_score) (a3)
+					SLTU a2, v1, v0
+					BEQ a2, zero, @@branch_timed_ffa_objective_p2_dead
+						NOP
+						JAL killPlayer
+						LI a0, 1
+						@@branch_timed_ffa_objective_p2_dead:
+					LHU v1, lo(p3_score) (a3)
+					SLTU a2, v1, v0
+					BEQ a2, zero, @@branch_timed_ffa_objective_p3_dead
+						NOP
+						JAL killPlayer
+						LI a0, 2
+						@@branch_timed_ffa_objective_p3_dead:
+					LHU v1, lo(p4_score) (a3)
+					SLTU a2, v1, v0
+					BEQ a2, zero, @@branch_timed_ffa_objective_p4_dead
+						NOP
+						JAL killPlayer
+						LI a0, 3
+						@@branch_timed_ffa_objective_p4_dead:
+					@@branch_is_timed_ffa_objective:
+				@@branch_is_timed_ffa:
+			BEQ t7, zero, @@branch_is_timed_teams //If game is teams
+				LUI a3, hi(team_1_score)
+				//BNE t9, zero, @@branch_is_timed_teams_hits //If score mode is hits
+				LH v0, lo(team_1_score) (a3)
+				LH v1, lo(team_2_score) (a3)
+				SLT a0, v1, v0
+				BEQ a0, zero, @@branch_timed_teams_hits_team1_greater //Team 1 scored higher
+					NOP
+					JAL killPlayer
+					LI a0, 1
+					JAL killPlayer
+					LI a0, 2
+					JAL killPlayer
+					LI a0, 3
+					@@branch_timed_teams_hits_team1_greater:
+				SLT a0, v0, v1
+				BEQ a0, zero, @@branch_timed_teams_hits_team2_greater //Team 2 score is higher
+					NOP
+					JAL killPlayer
+					LI a0, 0
+					JAL killPlayer
+					LI a0, 1
+					JAL killPlayer
+					LI a0, 3
+					@@branch_timed_teams_hits_team2_greater:
+				@@branch_is_timed_teams:
+		@@branch_is_timed:
+
+
+	LW ra, 0x20 (sp)
 	JR ra
 	ADDI sp, sp, 0x30
-
 
 
 //This function handles hit detection for all battle modes
 //Returns player who was hit as the byte who_was_hit_last
 hitDetection:
 	//Check each player's balloon count, if player has two balloons, set them back to three and make that player the hot potato
-	LI a3, 1 //Set counter to 1
+	LI a3, 0 //Set counter to 1
 	LI a1, 1 //Load 2 balloons into a1 for comparison
 	LI a0, 0x8018D8C0 //Load player balloon memory location
+	LI t0, 2 //Set balloons back to 3
+	LI t1, 4 //set loop maximum
 	@@branch_hit_detection_do_while_loop: //Do
 		LHU a2, 0x0000 (a0)
-		BNE a2, a1, @@branch_hit_found //If ballons == 2, run the following code
-			LI a2, 2 //Set balloons back to 3
-			SH a2, 0x0000 (a0)
-			SB a3, who_was_hit_last //Set who was hit/player to be the hot potato 
-			@@branch_hit_found:
-		ADDIU a0, a0, 2 //Add offset for next player's balloon count mem location
-		LI a2, 4
-		BNE a3, a2, @@branch_hit_detection_do_while_loop //WHILE $A3 <= 0x4
 		ADDIU a3, a3, 1 //a3 = a3 + 1
+		BNE a2, a1, @@branch_hit_found //If ballons == 2, run the following code
+			LUI a2, hi(who_was_hit_last)
+			SH t0, 0x0000 (a0)
+			BEQ zero, zero, @@branch_break_loop //Break the loop so the hit can be processed before the next player who was hit gets processed, this works around some rare bugs/crashes
+			SB a3, lo(who_was_hit_last) (a2) //Store who was hit/player (e.g. this will turn them into the hot potato)	
+			@@branch_hit_found:
+		BNE a3, t1, @@branch_hit_detection_do_while_loop //WHILE $A3 <= 0x4
+		ADDIU a0, a0, 2 //Add offset for next player's balloon count mem location
+	@@branch_break_loop:
 	JR ra
 	NOP
 
-//This function resets the timer when in time scoring
-resetTimer:
-	LW v1, max_timer //Copy max timer value to timer value
-	SW v1, timer
-	SB zero, final_lap_music_flag //Reset final lap music flag
-	SB zero, final_sudden_death_music_flag //Reset sudden death music flag
-	JR ra
-	NOP
 
-//This funciton resets HP back to max (or score to zero if game is timed)
-resetHP:
-	LBU v0, score_mode
-	LI a1, 0 //If scoring is timer, reset hits to zero
-	BNE v0, zero, @@branch_reset_hp_to_max //If scoring is stock, reset HP back to max'
-		NOP
-		LHU a1, max_hp
-		@@branch_reset_hp_to_max:
-	SH a1, p1_score
-	SH a1, p2_score
-	SH a1, p3_score
-	SH a1, p4_score
+
+//This function simply resets all player and team scores or HP, it also sets course_height
+resetGame:
+	LBU a1, status_p1
+	LI a2, 0xE0
+	BNE a1, a2, @@branch_reset_everything //If game is starting or restarting, force score, HP, and timer to all reset
+		//Reset player score or HP
+		LBU v0, hp_or_points
+		BNE v0, zero, @@branch_use_hp
+		LI a1, 0 //Default reset to 0 if scoring is points
+			LHU a1, max_hp //If scoring is stock, reset HP back to max'
+			@@branch_use_hp:
+		SH a1, p1_score //Reset individual player scores to zero or max ahp
+		SH a1, p2_score
+		SH a1, p3_score
+		SH a1, p4_score
+		//Reset team score
+		SH zero, team_1_score //Team scores always reset to zero
+		SH zero, team_2_score
+		//Reset timer
+		LW v1, max_timer //Copy max timer value to timer value
+		SW v1, timer
+		SB zero, final_lap_music_flag //Reset final lap music flag
+		SB zero, final_sudden_death_music_flag //Reset sudden death music flag
+		//Reset who was hit last
+		SB zero, who_was_hit_last
+		//Set course height
+		LW a1, 0x800F69A8 //Mem address of player 1 height
+		SW a1, course_height //variable to store this as the course height
+		//Force bot input to be zero
+		LUI a0, hi(bot_controller_input_p1)
+		SW zero, lo(bot_controller_input_p1) (a0)
+		SW zero, lo(bot_controller_input_p2) (a0)
+		SW zero, lo(bot_controller_input_p3) (a0)
+		SW zero, lo(bot_controller_input_p4) (a0)
+		//Reset zombomb startup flag
+		SB zero, zombomb_startup_flag
+		@@branch_reset_everything:
 	JR ra
 	NOP
 
@@ -2576,6 +2295,7 @@ displayCountdown:
 	//Store registers
 	ADDI sp, sp, -0x30
 	SW RA, 0x20 (sp)
+
 	//Display Countdown
 	LUI t0, hi(hotpotato_countdown)
 	JAL decrementTimer //Function to decrement counter
@@ -2586,6 +2306,33 @@ displayCountdown:
 	DIV a3, a1
 	MFLO a3 //a3 is the integer to display
 	LI a2, text_null //null text pointer
+	LBU v1, one_player_full_screen
+	BEQ v1, zero, @@branch_countdown_1p_full_screen //If in 1 player full screen mode
+		LI t0, 1
+		BNE t0, v0, @@branch_1p_full_screen_countdown //If it's not player 1 who is the hot potato, just don't display anything
+		LI t0, 2
+			LI a0, 0x7C //Set x
+			LI a1, 0xB4 //set y
+			@@branch_1p_full_screen_countdown:
+		BNE t0, v0, @@branch_2p_full_screen_countdown //If it's not player 1 who is the hot potato, just don't display anything
+		LI t0, 3
+			LI a0, 0x40 //Set x
+			LI a1, 0x0C //set y
+			@@branch_2p_full_screen_countdown:
+		BNE t0, v0, @@branch_3p_full_screen_countdown //If it's not player 1 who is the hot potato, just don't display anything
+		LI t0, 4
+			LI a0, 0x40 //Set x
+			LI a1, 0x18 //set y
+			@@branch_3p_full_screen_countdown:
+		BNE t0, v0, @@branch_4p_full_screen_countdown //If it's not player 1 who is the hot potato, just don't display anything
+			NOP
+			LI a0, 0x40 //Set x
+			LI a1, 0x24 //set y
+			@@branch_4p_full_screen_countdown:
+		BEQ zero, zero, @@branch_skip_to_dispaly_countdown
+		NOP
+
+		@@branch_countdown_1p_full_screen:
 	LBU v1, player_count
 	LI t1, 2
 	BNE v1, t1, @@branch_number_players_is_2 //If number of players is 2
@@ -2623,8 +2370,10 @@ displayCountdown:
 			LI a1, 0xC0 //set y
 			@@branch_p4_is_hot_potato_b:
 		@@branch_number_players_is_not_2:
+	@@branch_skip_to_dispaly_countdown:
 	JAL FUNCTION_DISPLAY_TEXT_AND_INT //Run function to display 
 	NOP
+	@@branch_skip_countdown_display:
 	//Jump back
 	LW ra, 0x20 (sp)
 	JR ra
@@ -2636,22 +2385,291 @@ processHitShrink:
 	//Store registers
 	ADDI sp, sp, -0x30
 	SW a0, 0x20 (sp)
-	SW a1, 0x24 (sp)
 	SW a2, 0x28 (sp)
-	SW a3, 0x2C (sp)
 	//Lightning shrink from player number stored in a0
-	LI a1, 0x800F699E
 	LI a2, player_state_offset
 	MULT a0, a2
+	LI a0, 0x800F699E	
 	MFLO a2
-	ADD a2, a2, a1
-	LI a3, 0x40
-	SB a3, 0x0000 (a2)
+	ADD a2, a2, a0
+	LI a0, 0x40
+	SB a0, 0x0000 (a2)
 	//Load registers
 	LW a0, 0x20 (sp)
-	LW a1, 0x24 (sp)
 	LW a2, 0x28 (sp)
-	LW a3, 0x2C (sp)
+	JR ra
+	ADDI sp, sp, 0x30
+
+
+//This function returns if the number of players are bombs or not
+//returns v0=false if not all players are bombs, =true if all players are bombs
+all_players_bombs:
+	//Count number of players that are bombs
+	LI a0, 0 //Bomb counter
+	LI t0, 0 //loop counter
+	LI a1, 0x50 //Match to bomb
+	LBU a2, player_count //number of players
+	LI a3, 0x800F6991 //Base address for if a player is a bomb
+	@@branch_bomb_counter_loop:
+		LBU t1, 0x0000 (a3)
+		BNE t1, a1, @@branch_count_a_bomb //If player is a bomb....
+		ADDIU a3, a3, player_state_offset //Increment address to status if player is a bomb (in delay slot)
+			ADDIU a0, a0, 1 //Increment bomb counter
+			@@branch_count_a_bomb:
+		BNE t0, a2, @@branch_bomb_counter_loop
+		ADDIU t0, t0, 1 //Increment loop counter
+	JR RA
+	AND v0, a0, a2 //v0 = (a0 and a2)
+
+//This function handles everything  for the game mode Zombombs
+runGameModeZombombs:
+	//store registers
+	ADDI sp, sp, -0x30
+	SW ra, 0x20 (sp)
+
+	JAL hitDetection
+	NOP
+
+	//Bombs win if all players are bombs
+	JAL all_players_bombs
+	NOP
+	BEQ v0, zero, @@branch_bombs_win //If the number of bombs in play equals the number of players...
+		LI a0, 1
+		SB a0, who_won_zombombs
+		JAL killAllPlayers
+		NOP
+		@@branch_bombs_win:
+
+	//Display timer if in time scoring
+	LBU a1, game_paused //Only run counter and display HP and countdown when not paused (game tempo is zero or less)
+	LBU a2, in_game
+	XOR a1, a2, a1 //Check if game is not paused or in the results screen
+	BEQ a1, zero, @@branch_display_stuff
+		NOP
+		JAL FUNCTION_LOAD_FONT //load debug font
+		NOP
+		JAL displayTimer //Display timer(if in a time match)
+		NOP
+		//End game if timer reaches zero, victory for the survivors
+		LW a0, timer
+		SLTI a0, a0, 1
+		BEQ a0, zero, @@branch_survivors_win //If timer is < zero
+			NOP
+			SB zero, who_won_zombombs
+			JAL bombSlowdown //Slow down all players who were bombs back to their original speed
+			NOP
+			JAL killAllPlayers //Kill everyone to end the game
+			NOP
+			@@branch_survivors_win:
+		//Kill player randomly at start of a zombombs match
+		LBU a0, zombomb_startup_flag
+		SLTI a1, a0, 2
+		BEQ a1, zero, @@make_player_at_start_a_bomb
+			NOP
+			LI a2, 2
+			ADDIU a0, a0, 1
+			SB a0, zombomb_startup_flag
+			BNE a0, a2, @@make_player_at_start_a_bomb
+				LUI a1, hi(player_count)
+				JAL FUNCTION_RNG //Run RNG and random player in v0 to kill
+				LBU a0, lo(player_count) (a1)
+				JAL makePlayerBomb
+				MOVE a0, v0
+				@@make_player_at_start_a_bomb:
+		@@branch_display_stuff:
+
+	//Jump back
+	LW ra, 0x20 (sp)
+	JR ra
+	ADDI sp, sp, 0x30
+
+
+//This function handles everything for keep away mode
+runGameModeKeepAway:
+	//store registers
+	ADDI sp, sp, -0x30
+	SW ra, 0x20 (sp)
+
+	//Run hit detection to find who as hit last and process 
+	JAL hitDetection
+	NOP
+
+	//If respawn is on, respawn players that are hit
+	LBU v0, status_respawn
+	BEQ v0, zero, @@branch_respawn_on //#If respawn is set to on
+		LBU a0, who_was_hit_last //Load whoever might have been hit
+		BEQ a0, zero, @@branch_respawn_on //If a player was hit, respawn them
+			NOP
+			SB zero, who_was_hit_last
+			JAL processRespawn
+			ADDI a0, a0, -1
+		@@branch_respawn_on:
+
+	//Display timer if in time scoring
+	LBU a1, game_paused //Only run counter and display HP and countdown when not paused (game tempo is zero or less)
+	LBU a2, in_game
+	XOR a1, a2, a1 //Check if game is not paused or in the results screen
+	BEQ a1, zero, @@branch_display_stuff
+		LBU a0, status_options_minimap
+		BEQ a0, zero, @@branch_minimap_is_off //Check if minimap off option has been toggled
+			LBU a0, 0x80165800
+			BEQ a0, zero, @@branch_minimap_is_off //Check if player 1 intentinoally toggled minimap off or not (stored in the above byte)		
+				NOP
+				JAL keep_away_minimap_display_flag //Run minmimap display flag function
+				NOP
+				@@branch_minimap_is_off:
+		NOP
+		JAL trackKeepAwayScoring //Function tracks the keep away scoring
+		NOP
+		JAL FUNCTION_LOAD_FONT
+		NOP
+		JAL displayScore
+		NOP
+		JAL displayTimer //Display timer(if in a time match)
+		NOP
+		JAL winConditions
+		NOP
+		//Function that runs to check if a player holding the flag is hit and to drop the flag if they are hit
+		JAL dropFlagAfterHit
+		NOP
+		LBU a3, flagDropped  //Here we only check if the first flag has dropped since only the first flag matters for keep away
+		BEQ a3, zero, @@branch_flag_is_dropped1 //If has been dropped
+			LUI t1, hi(flagTimer)
+			JAL decrementTimer //Decrement timer
+			LW a3, lo(flagTimer) (t1) //(delay slot)
+			SW a3, lo(flagTimer) (t1)
+			@@branch_flag_is_dropped1:
+
+		@@branch_display_stuff:
+
+
+
+
+
+
+	//Test loading custom objects
+	LBU a1, course_start_flag
+	BNE a1, zero, @@run_at_start_of_course
+		NOP
+		JAL initKeepAway
+		NOP
+		//Set course start flag so that the above code only runs once
+		LI a0, 1
+		SB a0, course_start_flag
+		@@run_at_start_of_course:
+
+	//Jump back
+	LW ra, 0x20 (sp)
+	JR ra
+	ADDI sp, sp, 0x30
+
+
+
+
+//This function handles everything for CTF battle mode
+runGameModeCTF:
+	//store registers
+	ADDI sp, sp, -0x30
+	SW ra, 0x20 (sp)
+
+
+	//Test pausing at start
+	JAL selectStartingPositions
+	NOP
+	//Run hit detection to find who as hit last and process 
+	JAL hitDetection
+	NOP
+	//If respawn is on, respawn players that are hit
+	LBU v0, status_respawn
+	BEQ v0, zero, @@branch_respawn_on //#If respawn is set to on
+		LBU a0, who_was_hit_last //Load whoever might have been hit
+		BEQ a0, zero, @@branch_respawn_on //If a player was hit, respawn them
+			NOP
+			SB zero, who_was_hit_last
+			JAL processRespawn
+			ADDI a0, a0, -1
+		@@branch_respawn_on:
+
+
+	//Display timer if in time scoring
+	LBU a1, game_paused //Only run counter and display HP and countdown when not paused (game tempo is zero or less)
+	LBU a2, in_game
+	XOR a1, a2, a1 //Check if game is not paused or in the results screen
+	BEQ a1, zero, @@branch_display_stuff
+		LBU a0, ctf_game_started
+		BEQ a0, zero, @@branch_display_stuff //Check if game has started 
+			LBU a0, status_options_minimap
+			BEQ a0, zero, @@branch_minimap_is_off //Check if minimap off option has been toggled
+				LBU a0, 0x80165800
+				BEQ a0, zero, @@branch_minimap_is_off //Check if player 1 intentinoally toggled minimap off or not (stored in the above byte)
+					NOP
+					JAL ctf_minimap_display_flags_and_bases //Run mimimap base and flag sprite function//Run mimimap base and flag sprite function
+					NOP
+				@@branch_minimap_is_off:
+			JAL FUNCTION_LOAD_FONT
+			NOP
+			JAL displayScore
+			NOP
+			JAL displayTimer //Display timer(if in a time match)
+			NOP
+			JAL winConditions
+			NOP
+
+
+			//Function that runs to check if a player holding the flag is hit and to drop the flag if they are hit
+			JAL dropFlagAfterHit
+			NOP
+			//Decrement flag timer if it is > 0
+				//SLL a0, a0, 2 //Multiply flag numnber by
+			LBU a3, flagDropped
+			BEQ a3, zero, @@branch_flag_is_dropped1 //If has been dropped
+				LUI t1, hi(flagTimer)
+				JAL decrementTimer //Decrement timer
+				LW a3, lo(flagTimer) (t1) //(delay slot)
+				SW a3, lo(flagTimer) (t1)
+				@@branch_flag_is_dropped1:
+			LBU a3, flagDropped + 0x1
+			BEQ a3, zero, @@branch_flag_is_dropped2 //If has been dropped
+				LUI t1, hi(flagTimer)
+				JAL decrementTimer //Decrement timer
+				LW a3, lo(flagTimer)+0x4 (t1) //(delay slot)
+				SW a3, lo(flagTimer)+0x4 (t1)
+				@@branch_flag_is_dropped2:
+			LBU a3, flagDropped + 0x2
+			BEQ a3, zero, @@branch_flag_is_dropped3 //If has been dropped
+				LUI t1, hi(flagTimer)
+				JAL decrementTimer //Decrement timer
+				LW a3, lo(flagTimer)+0x8 (t1) //(delay slot)
+				SW a3, lo(flagTimer)+0x8 (t1)
+				@@branch_flag_is_dropped3:
+			LBU a3, flagDropped + 0x3
+			BEQ a3, zero, @@branch_flag_is_dropped4 //If has been dropped
+				LUI t1, hi(flagTimer)
+				JAL decrementTimer //Decrement timer
+				LW a3, lo(flagTimer)+0xC (t1) //(delay slot)
+				SW a3, lo(flagTimer)+0xC (t1)
+				@@branch_flag_is_dropped4:
+
+
+		@@branch_display_stuff:
+
+
+	//Test loading custom objects
+	LBU a1, course_start_flag
+	BNE a1, zero, @@run_at_start_of_course
+		NOP
+		JAL initCTF
+		NOP
+
+
+		//Set course start flag so that the above code only runs once
+		LI a0, 1
+		SB a0, course_start_flag
+		@@run_at_start_of_course:
+
+
+	//Jump back
+	LW ra, 0x20 (sp)
 	JR ra
 	ADDI sp, sp, 0x30
 
@@ -2664,16 +2682,6 @@ runGameModeSquish:
 	//Lengthen lightning shrink time
 	LI a1, 0x398 
 	SH a1, 0x8008E302 //Store lightning shrink time
-	//If game is starting or restarting, reset HP
-	LBU a1, status_p1
-	LI a2, 0xE0
-	BNE a1, a2, @@branch_rest_hp
-		NOP
-		JAL resetHP
-		NOP
-		JAL resetTimer
-		NOP
-		@@branch_rest_hp:
 	//Hit detection, HP, and killing player handling
 	JAL hitDetection
 	NOP
@@ -2720,11 +2728,8 @@ runGameModeSquish:
 	@@branch_to_hit_processing:
 		JAL processHit //Subtract 1 HP from player
 		NOP
-		LBU a2, score_mode //Check if stock is on (not timed), and if it is on, check if player has HP=0
-		BNE a2, zero, @@branch_over_hit_processing
-			NOP
-			JAL checkIfZeroHP //kill player if their HP = 0
-			NOP
+		JAL checkIfZeroHP //kill player if their HP = 0
+		NOP
 	@@branch_over_hit_processing:
 	SB zero, who_was_hit_last //Reset who was hit to zero
 	//DISPLAY HP and run the time scoring (if it is selected as an option)
@@ -2735,11 +2740,11 @@ runGameModeSquish:
 		NOP
 		JAL FUNCTION_LOAD_FONT
 		NOP
-		JAL displayHP
+		JAL displayScore
 		NOP
-		JAL processTimeScoring
+		JAL displayTimer
 		NOP
-		JAL checkIfTeamWon //If in team points scoring mode, check if a team has won
+		JAL winConditions
 		NOP
 		@@branch_display_hp_and_process_time:
 	//Jump back
@@ -2748,12 +2753,14 @@ runGameModeSquish:
 	ADDI sp, sp, 0x30
 
 
+
+
 //This function handles everything for hot potato battle mode
 runGameModeHotPotato:
 	//Store registers
 	ADDI sp, sp, -0x30
 	SW ra, 0x20 (sp)
-	//Shorten lightnign shrink time, otherwise use the default above
+	//Shorten lightning shrink time, otherwise use the default above
 	LI a1, 0x40 
 	SH a1, 0x8008E302 //Store lightning shrink time
 	//Check each player's balloon count, if player has two balloons, set them back to three and make that player the hot potato 
@@ -2787,12 +2794,8 @@ runGameModeHotPotato:
 		MFLO a3
 		JAL processHit //Subtract 1 HP from player that is the hot potato
 		NOP
-		LBU a2, score_mode //Check if stock is on (not timed), and if it is on, check if player has HP=0
-		BNE a2, zero, @@branch_kill_the_hot_potato
-			NOP
-			JAL checkIfZeroHP
-			NOP
-			@@branch_kill_the_hot_potato:
+		JAL checkIfZeroHP
+		NOP
 		LI a1, 0x800F6A4C //Make player who is hot potato lightning strink for a split second to indicate the hit
 		ADDU a1, a1, a3
 		LI a2, 0x40
@@ -2802,17 +2805,6 @@ runGameModeHotPotato:
 		LH a1, lo(hotpotato_countdown_default) (a0) //Reset timer to default value
 		SH a1, lo(hotpotato_countdown) (a0)
 		@@branch_hurt_the_hot_potato:
-	//If game is starting or restarting, force timer to starting value and ensure nobody is the hot potato
-	LBU a1, status_p1
-	LI a2, 0xE0
-	BNE a1, a2, @@branch_reset_hp_and_timer
-		NOP
-		JAL resetHP
-		NOP
-		JAL resetTimer
-		NOP
-		SB zero, who_was_hit_last //#Set who is the hot potato back to nothing
-		@@branch_reset_hp_and_timer:
 	//#If nobody is the hot potato, reset hot potato counter to default value
 	LBU a1, who_was_hit_last
 	BNE a1, zero, @@branch_reset_counter
@@ -2828,7 +2820,7 @@ runGameModeHotPotato:
 		NOP
 		JAL FUNCTION_LOAD_FONT //load font
 		NOP
-		JAL displayHP //display HP
+		JAL displayScore //display HP
 		NOP
 		LBU v0, who_was_hit_last //display countdown
 		BEQ v0, zero, @@branch_display_countdown
@@ -2836,9 +2828,9 @@ runGameModeHotPotato:
 			JAL displayCountdown
 			NOP
 			@@branch_display_countdown:
-		JAL processTimeScoring //Dispaly timer
+		JAL displayTimer //Dispaly timer
 		NOP
-		JAL checkIfTeamWon //If in team points scoring mode, check if a team has won
+		JAL winConditions
 		NOP
 		@@branch_display_hp_and_run_time_scoring:
 
@@ -2852,8 +2844,7 @@ runGameModeHotPotato:
 runGameModeTraditionalBattle:
 	ADDI sp, sp, -0x30 //store registers
 	SW ra, 0x20 (sp)
-	//Check if stock is off (not timed), and if it is on, then do a check on if HP < 3
-	LBU a2, score_mode
+	LBU a2, hp_or_points
 	BNE a2, zero, @@branch_stock_on //If HP <= 3, in stock (not timed), and respawn is off, just return and use the game's built in ballons and skip all the custom HP code
 		LBU v1, status_respawn 
 		BNE v1, zero, @@branch_stock_on //If respawning is on, do not branch back
@@ -2865,16 +2856,6 @@ runGameModeTraditionalBattle:
 				JR ra
 				ADDI sp, sp, 0x30
 		@@branch_stock_on:
-	//If game is starting for restarting, reset HP
-	LBU a1, status_p1
-	LI a2, 0xE0
-	BNE a1, a2, @@branch_rest_hp
-		NOP
-		JAL resetHP
-		NOP
-		JAL resetTimer
-		NOP
-		@@branch_rest_hp:
 	//Hit detection, HP, and killing player handling
 	JAL hitDetection
 	NOP
@@ -2883,12 +2864,8 @@ runGameModeTraditionalBattle:
 		ADDI a0, a0, -1 //Subtract 1 from $a0 to feed into the following functions
 		JAL processHit
 		NOP
-		LBU a2, score_mode //Check if stock is on (not timed), and if it is on, check if player has HP=0
-		BNE a2, zero, @@branch_check_if_zero_hp
-			NOP
-			JAL checkIfZeroHP //Kill player if their HP = 0
-			NOP
-			@@branch_check_if_zero_hp:
+		JAL checkIfZeroHP //Kill player if their HP = 0
+		NOP
 		SB zero, who_was_hit_last //Reset who was hit to zero
 		@@branch_player_was_hit:
 	//DISPLAY HP and run the time scoring (if it is selected as an option)
@@ -2899,11 +2876,11 @@ runGameModeTraditionalBattle:
 		NOP
 		JAL FUNCTION_LOAD_FONT //Load font
 		NOP
-		JAL displayHP //Display HP
+		JAL displayScore //Display HP
 		NOP
-		JAL processTimeScoring //Display timer(if in a time match)
+		JAL displayTimer //Display timer(if in a time match)
 		NOP
-		JAL checkIfTeamWon //If in team points scoring mode, check if a team has won
+		JAL winConditions //If in team points scoring mode, check if a team has won
 		NOP
 		@@branch_run_counter_and_display_hp:
 	//Jump back
@@ -2915,92 +2892,106 @@ runGameModeTraditionalBattle:
 //Loop that runs in race
 inRace:
 	addi sp, sp, -0x30 //store registers
-	sw a0, 0x0010 (sp)
-	sw a1, 0x0014 (sp)
-	sw a3, 0x0018 (sp)
 	sw ra, 0x001C (sp)
 
-	JAL FUNCTION_LOAD_FONT
-	NOP
 
-
-
-	//Run battle bots (
-	LI a0, 0x800F6990 //Only run if two or more players are alive
-	LI a1, 0xDD8
-	LI a2, 0xC0
-	LI v0, 0
-	LI v1, 3
-	@@branch_count_players_alive:  //loop through v1 and count down from 4 to zero
-		LBU t0, 0x0000 (a0)
-		BNE t0, a2, @@branch_this_player_is_alive
-		ADD a0, a0, a1
-			ADDI v0, v0, 1
-			@@branch_this_player_is_alive:
-		BNE v1, zero, @@branch_count_players_alive
-		ADDI v1, v1, -1
-	SLTI a0, v0, 2
-	BNE a0, zero, @@branch_skip_battle_bots //Only run battle bots if two or more players are alive
-		LUI a2, hi(bot_status_p1)
-		LBU a1, lo(bot_status_p1) (a2) //P1
-		BEQ a1, zero, @@branch_run_bot1
-			LI a0, 0
-			JAL runBot
+	//Fix for 3 player mode minimap togging on and off since the fix for the crash caused hte minimap to be untogglable
+	LBU a0, 0x800DC53B
+	LI a1, 3
+	BNE a0, a1, @@branch_3_player_mimimap //If in 3P mode
+		LHU a0, BUTTON_ACTIVATOR_1_P1
+		ANDI a0, a0, 0x0001
+		BEQ a0, zero, @@branch_3_player_mimimap_button_down //If P1 pressed the c-right button
+			LI a1, 1
+			SB a1, map_button_down_3p //Store byte that button was down
+			B @@branch_3_player_mimimap //skip the rest of this code if the button is down
 			NOP
-			@@branch_run_bot1:
-		LBU a1, lo(bot_status_p2) (a2) //P2
-		BEQ a1, zero, @@branch_run_bot2
-			LI a0, 1
-			JAL runBot
-			NOP
-			@@branch_run_bot2:
-		LBU a1, lo(bot_status_p3) (a2) //P3
-		BEQ a1, zero, @@branch_run_bot3
-			LI a0, 2
-			JAL runBot
-			NOP
-			@@branch_run_bot3:
-		LBU a1, lo(bot_status_p4) (a2) //P4
-		BEQ a1, zero, @@branch_run_bot4
-			LI a0, 3
-			JAL runBot
-			NOP
-			@@branch_run_bot4:
-		@@branch_skip_battle_bots:
+			@@branch_3_player_mimimap_button_down:
+		LBU a1, map_button_down_3p
+		BEQ a1, zero, @@branch_3_player_mimimap //If button was held down but no longer is...
+			LBU a0, map_toggle_3p
+			BNE a0, zero, @@branch_3p_map_toggle_off 
+				LH a1, 0x8018D2C0
+				LI a2, 0x200
+				SH a1, map_x_3p //Save current map position before moving it
+				SH a2, 0x8018D2C0 //Move map off the screen
+				LI a3, 1
+				SB a3, map_toggle_3p //Set map toggle 3p byte to on
+				@@branch_3p_map_toggle_off:
+			BEQ a0, zero, @@branch_3p_map_toggle_on
+				LH a1, map_x_3p
+				SH a1, 0x8018D2C0
+				SB zero, map_toggle_3p
+				@@branch_3p_map_toggle_on:
+			SB zero, map_button_down_3p //Set button held down byte to zero
+		@@branch_3_player_mimimap:
+	// JAL displayPlayerOnePosition
+	// NOP
+
+
+	//Tempo control
+	LBU v0, status_options_tempo //(0 = Default, 1 = 15 FPS, 2 = 20 FPS, 3=30 FPS)
+	LUI v1, 0x8000
+	BNE v0, zero, @@branch_tempo_off //If tempo is set to default
+		LI a0, 0x3C0F8015 //1P tempo default code
+		SW a0, 0x15C4 (v1)
+		LI a0, 0x8DEF0114
+		SW a0, 0x15C8 (v1)
+		LI a0, 0x3C098015 //2P default tempo code
+		SW a0, 0x1A38 (v1)
+		LI a0, 0x8D290114
+		SW a0, 0x1A3C (v1)
+		LI a0, 0x3C0A8015 //3/4P default dempo code
+		SW a0, 0x1C90 (v1)
+		LI a0, 0x8D4A0114
+		SW a0, 0x1C94 (v1)
+	@@branch_tempo_off:
+	BEQ v0, zero, @@branch_tempo_on //If tempo is not set to default
+		//Set assembly
+		LI a0, 0x240F //1P tempo
+		SH a0, 0x15C4 (v1)
+		SH a0, 0x15C8 (v1)
+		LI a0, 0x2409 //2P tempo
+		SH a0, 0x1A38 (v1)
+		SH a0, 0x1A3C (v1)
+		LI a0, 0x240A //3P/4P tempo
+		SH a0, 0x1C90 (v1)
+		SH a0, 0x1C94 (v1)
+		//Set tempo number
+		LI a2, 5
+		SUB a0, a2, v0
+		SH a0, 0x15C6 (v1) //1P tempo
+		SH a0, 0x15CA (v1)
+		SH a0, 0x1A3A (v1) //2P tempo
+		SH a0, 0x1A3E (v1)
+		SH a0, 0x1C92 (v1) //3P/4P tempo
+		SH a0, 0x1C96 (v1)
+		// //If tempo set to 60 FPS, run a few extra things so that it runs correctly in emulator at 2x speed, source: http://forum.pj64-emu.com/showthread.php?t=8848)
+		// LI k1, 1
+		// BNE k0, k1, @@branch_tempo_on
+		// 	LUI k0, 0x8000
+		// 	SB zero, 0x0FE3 (k0)
+		// 	SB k1, 0x14CF (k0)
+		// 	LI k1, 0x24010001
+		// 	SW k1, 0x1890 (k0)
+		// 	SW k1, 0x1894 (k0)
+		// 	LUI k0, 0x800B
+		// 	LI k1, 0x24010006
+		// 	SW k1, 0xC5D4 (k0)
+	@@branch_tempo_on:	
+
+	// JAL displayGameTempo
+	// NOP
 
 
 
-
-	//Ludicrious speed (top speed is set to 0x45000000)
-	LBU a0, status_options_ludicrousspeed
-	BEQ a0, zero, @@branch_ludicrousspeed_on
-		LI a2, 0x4500 //Set top speed
-		SH a2, 0x800F6BA4 //Update top speeds for all 4 players
-		SH a2, 0x800F797C //Update top speeds for all 4 players
-		SH a2, 0x800F8754 //Update top speeds for all 4 players
-		SH a2, 0x800F952C //Update top speeds for all 4 players
-	@@branch_ludicrousspeed_on:
-
-	//Turn on music in 3P/4P mode if set to on
-	LBU a0, status_options_3P4Pmusic
-	BEQ a0, zero, @@branch_3p4p_music_on
-		LI a1, 0x240E0002
-		SW a1, 0x8028EC9C
-		LI a1, 0x24090002
-		SW a1, 0x8028F9C4
-		LBU a2, 0x800DC513 //Check if game has finished (0x800DC513==5)
-		LI a3, 5
-		BNE a2, a3, @@branch_3p4p_music_game_finished
-			LUI a0, 0x803B
-			SB zero, 0x03C3 (a0) //Disable BG music for all courses
-			SW zero, 0x03C4 (a0)
-			SH zero, 0x03C8 (a0)
-			SB zero, 0x03CA (a0)
-			SB zero, 0x03CF (a0)
-			SH zero, 0x03D0 (a0)
-			SB zero, 0x03D2 (a0)
-		@@branch_3p4p_music_game_finished:
-	@@branch_3p4p_music_on:
+	//If 1 player full screen is on, run the external c function
+	LBU a0, one_player_full_screen
+	BEQ a0, zero, @@branch_one_player_full_screen
+		NOP
+		JAL onePlayerFullScreen
+		NOP
+		@@branch_one_player_full_screen:
 
 	//Disable antialising if it is set on
 	LBU a0, status_options_antialiasing
@@ -3024,14 +3015,161 @@ inRace:
 	@@branch_widescren_on:
 
 
+	//Ludicrious speed (top speed is set to 0x45000000)
+	LBU a0, status_options_ludicrousspeed
+	BEQ a0, zero, @@branch_ludicrousspeed_on
+		LI a2, 0x4500 //Set top speed
+		SH a2, 0x800F6BA4 //Update top speeds for all 4 players
+		SH a2, 0x800F797C //Update top speeds for all 4 players
+		SH a2, 0x800F8754 //Update top speeds for all 4 players
+		SH a2, 0x800F952C //Update top speeds for all 4 players
+	@@branch_ludicrousspeed_on:
+
+
+	JAL runBots //Test running battle bots in c
+	NOP
+
+	// //Run battle bots (
+	// LI a0, 0x800F6990 //Only run if two or more players are alive
+	// LI a1, 0xDD8
+	// LI a2, 0xC0
+	// LI v0, 0
+	// LI v1, 3
+	// @@branch_count_players_alive:  //loop through v1 and count down from 4 to zero
+	// 	LBU t0, 0x0000 (a0)
+	// 	BNE t0, a2, @@branch_this_player_is_alive
+	// 	ADD a0, a0, a1
+	// 		ADDI v0, v0, 1
+	// 		@@branch_this_player_is_alive:
+	// 	BNE v1, zero, @@branch_count_players_alive
+	// 	ADDI v1, v1, -1
+	// SLTI a0, v0, 2
+	// BNE a0, zero, @@branch_skip_battle_bots //Only run battle bots if two or more players are alive
+	// 	//Run bot respawning timer and index to use when bots fall off cliffs
+	// 	LUI a0, hi(bot_respawn_timer)
+	// 	JAL decrementTimer //Load respawn timer from ram and decrement it
+	// 	LH a3, lo(bot_respawn_timer) (a0)
+	// 	LBU t0, bot_respawn_flag
+	// 	BEQ t0, zero, @@branch_bot_respawn_copy_coords
+	// 	MOVE t0, zero
+	// 		LBU t4, bot_respawn_index
+	// 		SLT t0, a3, zero //If the bot respawn flag is on and timer is less than zero then copy the coordiantes
+	// 		BEQ t0, zero, @@branch_restart_respawn_timer //If respawn timer is <= 0
+	// 			ADDI t4, t4, 0xC
+	// 			LI a1, 0x30
+	// 			BNE t4, a1, @@branch_loop_bot_respawn_index
+	// 				NOP
+	// 				LI t4, 0 //Loop index
+	// 				@@branch_loop_bot_respawn_index:
+	// 			SB t4, bot_respawn_index
+	// 			LI a3, 16 //Reset the bot respawn timer
+	// 			@@branch_restart_respawn_timer:
+	// 		SH a3, bot_respawn_timer //Store respawn timer back to RAM
+
+	// 		@@branch_bot_respawn_copy_coords:
+
+
+
+		// LUI a2, hi(bot_status_p1)
+		// LBU a1, lo(bot_status_p1) (a2) //P1
+		// BEQ a1, zero, @@branch_run_bot1
+		// 	LI a0, 0
+		// 	JAL runBot
+		// 	NOP
+		// 	BEQ t0, zero, @@branch_copy_coords_p1
+		// 		LBU t1, 0x800F6A5A  //If falling over nothingness (pit or off the course)
+		// 		ANDI t1, t1, 0x1
+		// 		BNE t1, zero, @@branch_copy_coords_p1
+		// 			LI v0, 0x800F69A4 //Copy x,y,z coords from ram
+		// 			LW t1, 0x0000 (v0)//Use the 64 bitness of the Nintendo 64 for once
+		// 			LW t2, 0x0004 (v0)
+		// 			LW t3, 0x0008 (v0)
+		// 			LI v0, bot_respawn_datastructure //Paste x,y,z coords into structure
+		// 			ADDU v0, v0, t4 
+		// 			SW t1, 0x0000 (v0)
+		// 			SW t2, 0x0004 (v0)
+		// 			SW t3, 0x0008 (v0)
+		// 		@@branch_copy_coords_p1:
+		// 	@@branch_run_bot1:
+		// LBU a1, lo(bot_status_p2) (a2) //P2
+		// BEQ a1, zero, @@branch_run_bot2
+		// 	LI a0, 1
+		// 	JAL runBot
+		// 	NOP
+		// 	BEQ t0, zero, @@branch_copy_coords_p2
+		// 		LBU t1, 0x800F6A5A + player_state_offset   //If falling over nothingness (pit or off the course)
+		// 		ANDI t1, t1, 0x1
+		// 		BNE t1, zero, @@branch_copy_coords_p2
+		// 			LI v0, 0x800F69A4 + player_state_offset //Copy x,y,z coords from ram
+		// 			LW t1, 0x0000 (v0)
+		// 			LW t2, 0x0004 (v0)
+		// 			LW t3, 0x0008 (v0)
+		// 			LI v0, bot_respawn_datastructure + bot_respawn_player_offset //Paste x,y,z coords into structure
+		// 			ADDU v0, v0, t4 
+		// 			SW t1, 0x0000 (v0)
+		// 			SW t2, 0x0004 (v0)
+		// 			SW t3, 0x0008 (v0)
+		// 		@@branch_copy_coords_p2:
+		// 	@@branch_run_bot2:
+		// LBU a1, lo(bot_status_p3) (a2) //P3
+		// BEQ a1, zero, @@branch_run_bot3
+		// 	LI a0, 2
+		// 	JAL runBot
+		// 	NOP
+		// 	BEQ t0, zero, @@branch_copy_coords_p3
+		// 		LBU t1, 0x800F6A5A + 2*player_state_offset   //If falling over nothingness (pit or off the course)
+		// 		ANDI t1, t1, 0x1
+		// 		BNE t1, zero, @@branch_copy_coords_p3
+		// 			LI v0, 0x800F69A4 + 2*player_state_offset //Copy x,y,z coords from ram
+		// 			LW t1, 0x0000 (v0)
+		// 			LW t2, 0x0004 (v0)
+		// 			LW t3, 0x0008 (v0)
+		// 			LI v0, bot_respawn_datastructure + 2*bot_respawn_player_offset //Paste x,y,z coords into structure
+		// 			ADDU v0, v0, t4 
+		// 			SW t1, 0x0000 (v0)
+		// 			SW t2, 0x0004 (v0)
+		// 			SW t3, 0x0008 (v0)
+		// 		@@branch_copy_coords_p3:
+		// 	@@branch_run_bot3:
+		// LBU a1, lo(bot_status_p4) (a2) //P4
+		// BEQ a1, zero, @@branch_run_bot4
+		// 	LI a0, 3
+		// 	JAL runBot
+		// 	NOP
+		// 	BEQ t0, zero, @@branch_copy_coords_p4
+		// 		LBU t1, 0x800F6A5A + 3*player_state_offset   //If falling over nothingness (pit or off the course)
+		// 		ANDI t1, t1, 0x1
+		// 		BNE t1, zero, @@branch_copy_coords_p4
+		// 			LI v0, 0x800F69A4 + 3*player_state_offset //Copy x,y,z coords from ram
+		// 			LW t1, 0x0000 (v0)
+		// 			LW t2, 0x0004 (v0)
+		// 			LW t3, 0x0008 (v0)
+		// 			LI v0, bot_respawn_datastructure + 3*bot_respawn_player_offset //Paste x,y,z coords into structure
+		// 			ADDU v0, v0, t4 
+		// 			SW t1, 0x0000 (v0)
+		// 			SW t2, 0x0004 (v0)
+		// 			SW t3, 0x0008 (v0)
+		// 		@@branch_copy_coords_p4:
+		// 	@@branch_run_bot4:
+		// @@branch_skip_battle_bots:
+
+
+
+
+
+
+
+
+
+
 	//auto items
 	lb a1, status_item_autoitems
 	beq a1, zero, @@branch_auto_items_on
 		lbu a0, status_item_infgshells //If infinite greenshells are off, randomly assign tiems
 		bne a0, zero, @@branch_auto_items_on
 			lbu a2, random_number_generator //Load byte from RNG into $a2
+			li a0, player_item_base //load base for player has an item memory location			
 			sra a2, a2, 1 //Divide RNG value by two to double the probability of getting an item
-			li a0, player_item_base //load base for player has an item memory location
 			li a1, 0x50
 		@@branch_do_autoitems_loop:
 			bne a1, a2, @@branch_autoitems_rng_is_something //if RNG value == something
@@ -3070,41 +3208,38 @@ inRace:
 	// If courses are set to flat, make all item boxes the same height off the ground
 	LBU a0, status_options_flatcourses
 	BEQ a0, zero, @@branch_flat_courses_set_on //If set to on
+
+
+		LUI a0, hi(course_height)
+		L.s f2, lo(course_height) (a0) //Set height of item boxes to be the course_height plus some small amount
+		LI.s f4, 4.0
+		ADD.s f2, f4, f2
 		LI a0, 0x8015F9B8 //load beginning of item array
 		LI a1, 0x80162508 //load end of item array
-		LBU a2, 0x800DC5A1 //Check if course is big donut or skyscraper and set item box height accordingly, Grab current course from 0x800DC5A0
-		LI a3, 0x13
-		BNE a2, a3, @@branch_item_box_height_big_donut
-		LUI t0, 0x4120 //Force default item box height for double deck and box fort
-			LUI t0, 0x430D //Item box height for big donut
-		@@branch_item_box_height_big_donut:
-		LI a3, 0x10
-		BNE a2, a3, @@branch_item_box_height_skyscraper
-			NOP
-			LUI t0, 0x41A0 //Item box height for skyscraper
-		@@branch_item_box_height_skyscraper:
-	@@branch_item_box_height_DO: //DO while thorugh entire item array
-		LHU a2, 0x0000 (a0)
-		li a3, 0xC
-		bne a2, a3, @@branch_object_is_item_box //If object is an item box
-			LHU a2, 0x0006 (a0) //Load item box state to check if it is inialized
-			LI a3, 0x2 //If item box is initialized
-			BNE a2, a3, @@branch_item_box_initalized
-				NOP
-				SW t0, 0x001C (a0)
-			@@branch_item_box_initalized:
-		@@branch_object_is_item_box:
-		SLT a3, a0, a1
-		BNE a3, zero, @@branch_item_box_height_DO  //WHILE still in the item array
-		ADDIU a0, a0, 0x70
+		mfc1 t0, f2
+		LI t1, 0xC //Item box identifier
+		LI t2, 0x2 //Flag for if item box is initialized
+		//LW t0, course_height //Load item box height from course_height
+		@@branch_item_box_height_DO: //DO while thorugh entire item array
+			LHU a2, 0x0000 (a0)
+			bne a2, t1, @@branch_object_is_item_box //If object is an item box
+				LHU a2, 0x0006 (a0) //Load item box state to check if it is inialized
+				BNE a2, t2, @@branch_item_box_initalized //If item box is initialized
+					NOP
+					SW t0, 0x001C (a0)
+				@@branch_item_box_initalized:
+			@@branch_object_is_item_box:
+			SLT a3, a0, a1
+			BNE a3, zero, @@branch_item_box_height_DO  //WHILE still in the item array
+			ADDIU a0, a0, 0x70
 	@@branch_flat_courses_set_on:
 
 
 	//If any player has a blue shell, replace it with triple red shells, for those rare instances someone picks one up from a course item box
 	LUI a0, 0x8016
+	LBU a3, 0x5F5D (a0) //P1 1&2P modes
 	LI a1, 7 //Blue shell value
 	LI a2, 6 //Triple red shell value
-	LBU a3, 0x5F5D (a0) //P1 1&2P modes
 	BNE a3, a1, @@branch_blue_shell_replace_p1_1p2p_mode //P1 1&2P modes
 	LBU a3, 0x603D (a0)
 		SB a2, 0x5F5D (a0)
@@ -3140,33 +3275,61 @@ inRace:
 	LI a1, 1
 	SB a1, 0x80165898
 
+	//Always run reset game to reset timers, scores, and other things when the game begins
+	JAL resetGame
+	NOP
 
 	//run different battle modes
 	lbu a0, game_mode //Load game mode (0=traditional, 1=hot potato, and so on and so forth...)
 	//Traditional battle mode
 	LI a1, 0
 	BNE a0, a1, @@branch_game_mode_traditional_battle
-		NOP
+	LI a1, 1
 		JAL runGameModeTraditionalBattle
 		NOP
 		BEQ zero, zero, @@branch_finished_running_game_mode
+		NOP
 		@@branch_game_mode_traditional_battle:
 	//Hot potato mode
-	LI a1, 1
 	BNE a0, a1, @@branch_game_mode_hot_potato
-		NOP
+	LI a1, 2
 		JAL runGameModeHotPotato
 		NOP
 		BEQ zero, zero, @@branch_finished_running_game_mode
+		NOP
 		@@branch_game_mode_hot_potato:
 	//Squish mode
-	LI a1, 2
 	BNE a0, a1, @@branch_game_mode_squish
-		NOP
+	LI a1, 3
 		JAL runGameModeSquish
 		NOP
 		BEQ zero, zero, @@branch_finished_running_game_mode
+		NOP
 		@@branch_game_mode_squish:
+	//CTF mode
+	BNE a0, a1, @@branch_game_mode_ctf
+	LI a1, 4
+		JAL runGameModeCTF
+		NOP
+		BEQ zero, zero, @@branch_finished_running_game_mode
+		NOP
+		@@branch_game_mode_ctf:
+	//Keep away mode
+	BNE a0, a1, @@branch_game_mode_keep_away
+	LI a1, 5
+		JAL runGameModeKeepAway
+		NOP
+		BEQ zero, zero, @@branch_finished_running_game_mode
+		NOP
+		@@branch_game_mode_keep_away:
+	//Zombombs mode
+	BNE a0, a1, @@branch_game_mode_zombombs
+		NOP
+		JAL runGameModeZombombs
+		NOP
+		BEQ zero, zero, @@branch_finished_running_game_mode
+		NOP
+		@@branch_game_mode_zombombs:
 	@@branch_finished_running_game_mode:
 	// //Test mode
 	// LW a1, 0x28 (sp)
@@ -3187,20 +3350,6 @@ inRace:
 		NOP
 		@@branch_display_results:
 
-	// //Set lightning shrink time if game mode is hot potato (or not)
-	// LI a1, 0x1CC //Default lightning shrink time
-	// LW a0, 0x28 (sp)
-	// LI a2, 1
-	// BNE a0, a2, @@branch_set_lightning_time_for_hot_potato //If hot potato mode
-	// 	NOP
-	// 	LI a1, 0x40 //Shorten lightnign shrink time, otherwise use the default above
-	// 	@@branch_set_lightning_time_for_hot_potato:
-	// LI a2, 2
-	// BNE a0, a2, @@branch_set_lightning_time_for_squish //If in squish mode
-	// 	NOP
-	// 	LI a1, 0x398 //Lengthen lightning shrink time, otherwise use the default above
-	// 	@@branch_set_lightning_time_for_squish:
-	// SH a1, 0x8008E302 //Store lightning shrink time
 
 	//If Max HP = 0, make everyone a ghost, why would anyone want zero HP anyway?
 	LHU a0, max_hp
@@ -3213,66 +3362,22 @@ inRace:
 
 		@@branch_max_hp_is_zero:
 
-	lw a0, 0x0010 (sp) //load registers
-	lw a1, 0x0014 (sp)
-	lw a3, 0x0018 (sp)
+
+	JAL customCourseRunEveryFrame
+	NOP
+
+
 	lw ra, 0x001C (sp)
-	lw t0, 0x0020 (sp)
 	jr ra
 	addi sp, sp, 0x30
 
-
-race1P:
-	ADDI sp, sp, -0x20
-	JAL inRace
-	SW ra, 0x001C (sp) //push ra to the stack
-	LW ra, 0x001C (sp) //pop ra from the stack
-	ADDI sp, sp, 0x20
-	LUI a0, 0x800E
-	LHU a0, 0xC520 (a0)
-	LUI a1, 0x800E
-	J 0x8000161C
-	NOP
-
-
-
-
-
-
-race2P:
-	ADDI sp, sp, -0x20
-	JAL inRace
-	SW ra, 0x001C (sp) //push ra to the stack
-	LW ra, 0x001C (sp) //pop ra from the stack
-	ADDI sp, sp, 0x20
-	LUI t3, 0x800E
-	LW t3, 0xC5E8 (t3)
-	J 0x80001AA4
-	NOP
-
-
-
-
-
-
-
-raceMP:
-	ADDI sp, sp, -0x20
-	JAL inRace
-	SW ra, 0x001C (sp) //push ra to the stack
-	LW ra, 0x001C (sp) //pop ra from the stack
-	ADDI sp, sp, 0x20
-	LUI v0, 0x800E
-	LW v0, 0xC5E8 (v0)
-	J 0x80001D00
-	NOP
 
 //Function display menu option with ON/OFF
 //a1 = y position
 //a2 = text pointer
 //a3 = Status byte
 menuDispOnOff:
-	LI a0, 0x3C //x position
+	LI a0, 0x8 //x position
 	ADDI sp, sp, 0xFFE0 //Store registers in stack so I can save them while running disp text function
 	SW a0, 0x0010 (sp)
 	SW a1, 0x0014 (sp)
@@ -3288,7 +3393,8 @@ menuDispOnOff:
 		ADDI a2, a2, 4 //Move to text pointer for on
 	@@BRANCH_MOVE_POINTER_TO_ON:
 	JAL FUNCTION_DISPLAY_TEXT
-	addi a0, a0, 0x88 //X position (same as input + 0x88)
+	//addi a0, a0, 0x80 //X position (same as input + 0x88)
+	LI a0, 0x90 //x position
 	LW ra, 0x001C (sp)
 	JR ra
 	ADDI sp, sp, 0x20
@@ -3302,9 +3408,9 @@ menuDispHP:
 	sw ra, 0x20 (sp)
 
 	lhu a3, max_hp //load max hp
-	li a2, text_hp//text pointer for "HP"
+	li a2, text_hp_long//text pointer for "HP"
 	jal FUNCTION_DISPLAY_TEXT_AND_INT
-	li a0, 0x76 //x
+	li a0, 0x8 //x
 
 	lw ra, 0x20 (sp)
 	jr ra
@@ -3323,7 +3429,7 @@ menuDispTime:
 	mflo a3 //a3 is the integer to display
 	li a2, text_timer //text pointer
 	jal FUNCTION_DISPLAY_TEXT_AND_INT
-	li a0, 0x40
+	li a0, 0x8
 
 	lw ra, 0x20 (sp)
 	jr ra
@@ -3331,14 +3437,14 @@ menuDispTime:
 
 //Function display max team points in menu
 //A1 = y position
-menuDispTeamPoints:
+menuDispMaxPoints:
 	addi sp, sp, -0x24
 	sw ra, 0x20 (sp)
 
-	LHU a3, max_team_points
+	LHU a3, max_points
 	li a2, text_max_points //text pointer
 	jal FUNCTION_DISPLAY_TEXT_AND_INT
-	li a0, 0x40
+	li a0, 0x8
 
 	lw ra, 0x20 (sp)
 	jr ra
@@ -3346,43 +3452,190 @@ menuDispTeamPoints:
 
 
 //Function displays the scoring menu item
+// a0 = 0 use "STOCK" and "SCORE" for FFA and teams repsectively for the first option
+//    = 1 force "POINTS" for the first option
 //a1 = y position
 menuDispScoring:
-	addi sp, sp, -0x24
+	addi sp, sp, -0x30
 	sw ra, 0x20 (sp)
 	sw a1, 0x24 (sp)
+	SW a0, 0x28	(sp)
 
 	//Display "SCORING"
 	li a2, text_scoring
-	li a0, 0x3C //x
+	li a0, 0x8 //x
 	jal FUNCTION_DISPLAY_TEXT
 	lw a1, 0x24 (sp) //y
 	//Display which scoring mode is selected
 	lbu a0, score_mode
-	//Set to stock
+	//Set to stock/points
 	bne a0, zero, @@branch_disp_stock
 	LI t0, 1
-		li a2, text_stock
+		li a2, text_stock //Default text to stock
+		LBU t1, ffa_or_teams
+		BEQ t1, zero, @@branch_teams
+			NOP
+			LI a2, text_points
+		 	@@branch_teams:
+		LW a1, 0x28 (sp)
+		BEQ a1, zero, @@branch_force_points
+			NOP
+			LI a2, text_points
+			@@branch_force_points:
 		@@branch_disp_stock:
 	//Set to time
 	BNE a0, t0, @@branch_disp_time
 	LI t0, 2
 		li a2, text_time
 		@@branch_disp_time:
-	//Set to team points
-	BNE a0, t0, @@branch_disp_team_points
-	LI t0, 3
-		li a2, text_team_points
-		@@branch_disp_team_points:
-	//set to team time
-	BNE a0, t0, @@branch_disp_team_time
-		NOP
-		li a2, text_team_time
-		@@branch_disp_team_time:
 	//Show the selection option
 	lw a1, 0x24 (sp) //y
 	JAL FUNCTION_DISPLAY_TEXT
-	ori a0, zero, 0x88 //x
+	ori a0, zero, 0x90 //x
+
+	lw ra, 0x20 (sp)
+	jr ra
+	addi sp, sp, 0x30
+
+
+
+
+//Function displays the scoring menu item but without "score" instead of "stock"
+//a1 = y position
+menuDispCTFMode:
+	addi sp, sp, -0x24
+	sw ra, 0x20 (sp)
+	sw a1, 0x24 (sp)
+
+	//Display "CTF GAME"
+	li a2, text_ctf_game
+	li a0, 0x8 //x
+	jal FUNCTION_DISPLAY_TEXT
+	lw a1, 0x24 (sp) //y
+	//Display which scoring mode is selected
+	lbu a0, ctf_game_mode
+	//Set 1 flag 
+	bne a0, zero, @@branch_1_flag_ffa
+	LI t0, 1
+		li a2, text_1_flag
+		@@branch_1_flag_ffa:
+	//Set multiflag
+	BNE a0, t0, @@branch_multiflag_ffa
+		NOP
+		li a2, text_multiflag
+		@@branch_multiflag_ffa:
+
+	//Show the selection option
+	lw a1, 0x24 (sp) //y
+	JAL FUNCTION_DISPLAY_TEXT
+	ori a0, zero, 0x90 //x
+
+	lw ra, 0x20 (sp)
+	jr ra
+	addi sp, sp, 0x24
+
+
+//Function displays bot character
+//a1 = y position
+//t0 = bot (0, 1, 2, 3)
+menuDispBotCharacter:
+	addi sp, sp, -0x30
+	sw ra, 0x20 (sp)
+	SW t0, 0x24 (sp)
+	SW a1, 0x28 (sp)
+
+	//Display player number
+	LI a2, text_player //text "player"
+	ADDI a3, t0, 1 //Player number
+	JAL FUNCTION_DISPLAY_TEXT_AND_INT
+	LI a0, 0x8 //x position
+
+	LW t0, 0x24 (sp)
+	LW a1, 0x28 (sp)
+	LUI a0, hi(bot_status_p1) //Load bot status for a given player
+	ADD a0, a0, t0
+	LBU a0, lo(bot_status_p1) (a0)
+	LI t0, 0
+	BNE a0, t0, @@branch_bot_character_off //Bot off
+	LI t0, 1
+		LI a2, text_off
+		@@branch_bot_character_off:
+	BNE a0, t0, @@branch_bot_character_mario //Bot is Mario
+	LI t0, 2
+		LI a2, text_char_mario
+		@@branch_bot_character_mario:
+	BNE a0, t0, @@branch_bot_character_luigi //Bot is Luigi
+	LI t0, 3
+		LI a2, text_char_luigi
+		@@branch_bot_character_luigi:
+	BNE a0, t0, @@branch_bot_character_peach //Bot is Peach
+	LI t0, 4
+		LI a2, text_char_peach
+		@@branch_bot_character_peach:
+	BNE a0, t0, @@branch_bot_character_toad //Bot is Toad
+	LI t0, 5
+		LI a2, text_char_toad
+		@@branch_bot_character_toad:
+	BNE a0, t0, @@branch_bot_character_yoshi //Bot is Yoshi
+	LI t0, 6
+		LI a2, text_char_yoshi
+		@@branch_bot_character_yoshi:
+	BNE a0, t0, @@branch_bot_character_dk //Bot is Donkey Kong
+	LI t0, 7
+		LI a2, text_char_dk
+		@@branch_bot_character_dk:
+	BNE a0, t0, @@branch_bot_character_wario //Bot is Wario
+	LI t0, 8
+		LI a2, text_char_wario
+		@@branch_bot_character_wario:
+	BNE a0, t0, @@branch_bot_character_bowser //Bot is Bowser
+		NOP
+		LI a2, text_char_bowser
+		@@branch_bot_character_bowser:
+
+	JAL FUNCTION_DISPLAY_TEXT
+	ori a0, zero, 0x90 //x
+
+
+	lw ra, 0x20 (sp)
+	jr ra
+	addi sp, sp, 0x30
+
+
+//Function displays the bot AI type menu item
+//a1 = y position
+menuDispBotType:
+	addi sp, sp, -0x24
+	sw ra, 0x20 (sp)
+	sw a1, 0x24 (sp)
+
+	//Display "BOT AI TYPE"
+	LI a2, text_bot_ai_type
+	LI a0, 0x8 //x
+	JAL FUNCTION_DISPLAY_TEXT
+	LW a1, 0x24 (sp) //y
+	//Display which bot AI type is selected
+	LBU a0, bot_ai_type
+	//Set to normal
+	BNE a0, zero, @@branch_disp_ai_normal
+	LI t0, 1
+		LI a2, text_bot_ai_normal
+		@@branch_disp_ai_normal:
+	//Set to seeker
+	BNE a0, t0, @@branch_disp_ai_seeker
+	LI t0, 2
+		LI a2, text_bot_ai_seeker
+		@@branch_disp_ai_seeker:
+	//Set to random
+	BNE a0, t0, @@branch_disp_ai_random
+		NOP
+		LI a2, text_bot_ai_random
+		@@branch_disp_ai_random:
+	//Show the  option
+	lw a1, 0x24 (sp) //y
+	JAL FUNCTION_DISPLAY_TEXT
+	ori a0, zero, 0x90 //x
+
 
 	lw ra, 0x20 (sp)
 	jr ra
@@ -3397,14 +3650,131 @@ menuDispCountdown:
 	lhu a3, hotpotato_countdown_default //load default countdown
 	li a2, 60 //Divide timer by 60 so output display is in seconds
 	div a3, a2
-	mflo a3 //a33 is the integer ti display
 	li a2, text_countdown //text pointer
+	mflo a3 //a33 is the integer ti display
 	jal FUNCTION_DISPLAY_TEXT_AND_INT
-	li a0, 0x5D //x
+	li a0, 0x8 //x
 
 	lw ra, 0x20 (sp)
 	jr ra
 	addi sp, sp, 0x24
+
+//Function displays FFA vs. teams menu item
+//a1 = y position
+menuDispFFAOrTeams:
+	ADDI sp, sp, 0xFFDC
+	SW ra, 0x0020 (sp)
+	SW a1, 0x0024 (sp)
+
+	//Display "FFA/TEAMS"
+	LI a2, text_ffa_or_teams
+	LI a0, 0x8 //x
+	JAL FUNCTION_DISPLAY_TEXT
+	LW a1, 0x24 (sp) //y
+	//Display selected option
+	LBU a0, ffa_or_teams
+	BNE a0, zero, @@branch_ffa
+	LI a1, 1
+		LI a2, text_ffa
+		@@branch_ffa:
+	BNE a0, a1, @@branch_teams
+		NOP
+		LI a2, text_teams
+		@@branch_teams:
+	lw a1, 0x24 (sp) //y
+	JAL FUNCTION_DISPLAY_TEXT
+	ori a0, zero, 0x90 //x
+
+	LW ra, 0x0020 (sp)
+	JR ra
+	ADDI sp, sp, 0x0024
+
+
+//Function displays options for test battle mode on the "GAME" page of menu
+menuDisplayModeKeepAway:
+	ADDI sp, sp, 0xFFDC
+	SW ra, 0x0020 (sp)
+
+	//Display FFA or teams menu option
+	JAL menuDispFFAOrTeams
+	LI a1, 0x4C //y
+
+	//Display scoring menu option
+	LI a0, 1 //force txt to be "points"
+	JAL menuDispScoring
+	LI a1, 0x58 //y
+
+	//If scoring is set to Stock, display HP or POINTS depending on if in FFA or teams
+	lbu v0, score_mode
+	bne v0, zero, @@branch_selection_stock
+		NOP
+		jal menuDispMaxPoints
+		li a1, 0x64 //y
+		@@branch_selection_stock:
+	//If scoring is set to TIME
+	LI v1, 1
+	BNE v1, v0, @@branch_selection_time
+	LI v1, 2		
+		jal menuDispTime
+		li a1, 0x64 //y
+		@@branch_selection_time:
+
+	//Display no items when holding flag menu option
+	li a2, text_no_items_with_flag //text pointer
+	lbu a3, no_items_when_holding_flag //status byte
+	jal menuDispOnOff
+	li a1, 0x70 //y
+
+	//Display slow when holding flag menu option
+	li a2, text_slow_with_flag //text pointer
+	lbu a3, slow_when_holding_flag //status byte
+	jal menuDispOnOff
+	li a1, 0x7C //y
+
+
+	//Display respawn menu option
+	li a2, text_respawn //text pointer
+	lbu a3, status_respawn //status byte
+	jal menuDispOnOff
+	li a1, 0x88 //y
+
+
+	//Set max distance you can scroll down in y on menu
+	LI a1, 7
+	SB a1, MENU_Y_MAX
+
+	//Set variable for this mode to be object (not hits)
+	LI a0, 1
+	SB a0, hit_or_objective
+
+	LW ra, 0x0020 (sp)
+	JR ra
+	ADDI sp, sp, 0x0024
+
+
+//Function displays options for Zombombs battle mode on the "GAME" page of menu
+menuDisplayModeZombombs:
+	ADDI sp, sp, 0xFFDC
+	SW ra, 0x0020 (sp)
+
+	jal menuDispTime
+	li a1, 0x4C //y
+
+
+	//Display bombs reapwn menu option
+	li a2, text_bombs_respawn //text pointer
+	lbu a3, status_bombs_respawn //status byte
+	jal menuDispOnOff
+	li a1, 0x58 //y
+
+	//Set max distance you can scroll down in y on menu
+	LI a1, 3
+	SB a1, MENU_Y_MAX
+
+	LW ra, 0x0020 (sp)
+	JR ra
+	ADDI sp, sp, 0x0024
+
 
 //Function displays options for test battle mode on the "GAME" page of menu
 menuDispModeTest:
@@ -3419,52 +3789,131 @@ menuDispModeTest:
 
 
 
-
-//Function displays options for squish battle mode on the "GAME" page of menu
-menuDispModeSquish:
+//Function displays options for CTF mode on the "GAME" page of menu
+menuDispModeCTF:
 	ADDI sp, sp, 0xFFDC
 	SW ra, 0x0020 (sp)
 
-	//Display scoring menu option
-	JAL menuDispScoring
+
+	//Display FFA or teams menu option
+	JAL menuDispFFAOrTeams
 	LI a1, 0x4C //y
 
-	//If scoring is set to Stock
+	//Display scoring menu option
+	LI a0, 1 //force txt to be "points"
+	JAL menuDispScoring
+	LI a1, 0x58 //y
+
+
+
+	//If scoring is set to Stock, display HP or POINTS depending on if in FFA or teams
 	lbu v0, score_mode
-	bne v0, zero, @@branch_selection_hp
-	LI v1, 1
-		jal menuDispHP
-		li a1, 0x58 //y
-		@@branch_selection_hp:
+	bne v0, zero, @@branch_selection_stock
+		NOP
+		jal menuDispMaxPoints
+		li a1, 0x64 //y
+		@@branch_selection_stock:
 	//If scoring is set to TIME
+	LI v1, 1
 	BNE v1, v0, @@branch_selection_time
 	LI v1, 2		
 		jal menuDispTime
-		li a1, 0x58 //y
+		li a1, 0x64 //y
 		@@branch_selection_time:
-	//If scoring is set to TEAM POINTS
-	BNE v1, v0, @@branch_selection_team_points
-	LI v1, 3
-		jal menuDispTeamPoints
-		li a1, 0x58 //y
-		@@branch_selection_team_points:
-	//If scoring is set to TEAM TIME
-	BNE v1, v0, @@branch_selection_team_time
-		li a1, 0x58 //y
-		jal menuDispTime
-		nop
-		@@branch_selection_team_time:
+
+	//Display CTF game mode
+	JAL menuDispCTFMode
+	LI a1, 0x70 //y
+
+
+	//Display no items when holding flag menu option
+	li a2, text_no_items_with_flag //text pointer
+	lbu a3, no_items_when_holding_flag //status byte
+	jal menuDispOnOff
+	li a1, 0x7C //y
+
+	//Display slow when holding flag menu option
+	li a2, text_slow_with_flag //text pointer
+	lbu a3, slow_when_holding_flag //status byte
+	jal menuDispOnOff
+	li a1, 0x88 //y
 
 
 	//Display respawn menu option
 	li a2, text_respawn //text pointer
 	lbu a3, status_respawn //status byte
 	jal menuDispOnOff
-	li a1, 0x64 //y
+	li a1, 0x94 //y
+
+
 
 	//Set max distance you can scroll down in y on menu
-	LI a1, 4
+	LI a1, 8
 	SB a1, MENU_Y_MAX
+
+	//Set variable for this mode to be object (not hits)
+	LI a0, 1
+	SB a0, hit_or_objective
+
+	LW ra, 0x0020 (sp)
+	JR ra
+	ADDI sp, sp, 0x0024
+
+
+
+//Function displays options for squish battle mode on the "GAME" page of menu
+menuDispModeSquish:
+	ADDI sp, sp, 0xFFDC
+	SW ra, 0x0020 (sp)
+
+
+	//Display FFA or teams menu option
+	JAL menuDispFFAOrTeams
+	LI a1, 0x4C
+
+	//Display scoring menu option
+	LI a0, 0
+	JAL menuDispScoring
+	LI a1, 0x58 //y
+
+
+	//If scoring is set to Stock, display HP or POINTS depending on if in FFA or teams
+	lbu v0, score_mode
+	bne v0, zero, @@branch_selection_stock
+		LBU v1, ffa_or_teams
+		BNE v1, zero, @@branch_selection_stock_hp
+			NOP
+			jal menuDispHP
+			li a1, 0x64 //y
+			@@branch_selection_stock_hp:
+		LBU v1, ffa_or_teams
+		BEQ v1, zero, @@branch_selection_stock_points
+			NOP
+			jal menuDispMaxPoints
+			li a1, 0x64 //y
+			@@branch_selection_stock_points:
+		@@branch_selection_stock:
+	//If scoring is set to TIME
+	LI v1, 1
+	BNE v1, v0, @@branch_selection_time
+	LI v1, 2		
+		jal menuDispTime
+		li a1, 0x64 //y
+		@@branch_selection_time:
+
+
+	//Display respawn menu option
+	li a2, text_respawn //text pointer
+	lbu a3, status_respawn //status byte
+	jal menuDispOnOff
+	li a1, 0x70 //y
+
+	//Set max distance you can scroll down in y on menu
+	LI a1, 5
+	SB a1, MENU_Y_MAX
+
+	//Set variable for this mode to be hit based (not objective based)
+	SB zero, hit_or_objective
 
 	LW ra, 0x0020 (sp)
 	JR ra
@@ -3477,51 +3926,58 @@ menuDispModeHotpotato:
 	ADDI sp, sp, 0xFFDC
 	SW ra, 0x0020 (sp)
 
-	//Display scoring menu option
-	JAL menuDispScoring
-	LI a1, 0x4C //y
 
-	//If scoring is set to Stock
+	//Display FFA or teams menu option
+	JAL menuDispFFAOrTeams
+	LI a1, 0x4C
+
+	//Display scoring menu option
+	LI a0, 0
+	JAL menuDispScoring
+	LI a1, 0x58 //y
+
+	//If scoring is set to Stock, display HP or POINTS depending on if in FFA or teams
 	lbu v0, score_mode
-	bne v0, zero, @@branch_selection_hp
-	LI v1, 1
-		jal menuDispHP
-		li a1, 0x58 //y
-		@@branch_selection_hp:
+	bne v0, zero, @@branch_selection_stock
+		LBU v1, ffa_or_teams
+		BNE v1, zero, @@branch_selection_stock_hp
+			NOP
+			jal menuDispHP
+			li a1, 0x64 //y
+			@@branch_selection_stock_hp:
+		LBU v1, ffa_or_teams
+		BEQ v1, zero, @@branch_selection_stock_points
+			NOP
+			jal menuDispMaxPoints
+			li a1, 0x64 //y
+			@@branch_selection_stock_points:
+		@@branch_selection_stock:
 	//If scoring is set to TIME
+	LI v1, 1
 	BNE v1, v0, @@branch_selection_time
 	LI v1, 2		
 		jal menuDispTime
-		li a1, 0x58 //y
+		li a1, 0x64 //y
 		@@branch_selection_time:
-	//If scoring is set to TEAM POINTS
-	BNE v1, v0, @@branch_selection_team_points
-	LI v1, 3
-		jal menuDispTeamPoints
-		li a1, 0x58 //y
-		@@branch_selection_team_points:
-	//If scoring is set to TEAM TIME
-	BNE v1, v0, @@branch_selection_team_time
-		li a1, 0x58 //y
-		jal menuDispTime
-		nop
-		@@branch_selection_team_time:
 
 
 
 	//Display countdown menu option
 	jal menuDispCountdown
-	li a1, 0x64 //y
+	li a1, 0x70 //y
 
 	//Display respawn menu option
 	li a2, text_respawn //text pointer
 	lbu a3, status_respawn //status byte
 	jal menuDispOnOff
-	li a1, 0x70 //y
+	li a1, 0x7C //y
 
 	//Set max distance you can scroll down in y on menu
-	LI a1, 5
+	LI a1, 6
 	SB a1, MENU_Y_MAX
+
+	//Set variable for this mode to be hit based (not objective based)
+	SB zero, hit_or_objective
 
 	LW ra, 0x0020 (sp)
 	JR ra
@@ -3533,45 +3989,53 @@ menuDispModeTraditional:
 	ADDI sp, sp, 0xFFDC
 	SW ra, 0x0020 (sp)
 
-	//Display scoring menu option
-	JAL menuDispScoring
-	LI a1, 0x4C //y
+	//Display FFA or teams menu option
+	JAL menuDispFFAOrTeams
+	LI a1, 0x4C
 
-	//If scoring is set to Stock
+
+	//Display scoring menu option
+	LI a0, 0
+	JAL menuDispScoring
+	LI a1, 0x58 //y
+
+	//If scoring is set to Stock, display HP or POINTS depending on if in FFA or teams
 	lbu v0, score_mode
-	bne v0, zero, @@branch_selection_hp
-	LI v1, 1
-		jal menuDispHP
-		li a1, 0x58 //y
-		@@branch_selection_hp:
+	bne v0, zero, @@branch_selection_stock
+		LBU v1, ffa_or_teams
+		BNE v1, zero, @@branch_selection_stock_hp
+			NOP
+			jal menuDispHP
+			li a1, 0x64 //y
+			@@branch_selection_stock_hp:
+		LBU v1, ffa_or_teams
+		BEQ v1, zero, @@branch_selection_stock_points
+			NOP
+			jal menuDispMaxPoints
+			li a1, 0x64 //y
+			@@branch_selection_stock_points:
+		@@branch_selection_stock:
 	//If scoring is set to TIME
+	LI v1, 1
 	BNE v1, v0, @@branch_selection_time
 	LI v1, 2		
 		jal menuDispTime
-		li a1, 0x58 //y
+		li a1, 0x64 //y
 		@@branch_selection_time:
-	//If scoring is set to TEAM POINTS
-	BNE v1, v0, @@branch_selection_team_points
-	LI v1, 3
-		jal menuDispTeamPoints
-		li a1, 0x58 //y
-		@@branch_selection_team_points:
-	//If scoring is set to TEAM TIME
-	BNE v1, v0, @@branch_selection_team_time
-		li a1, 0x58 //y
-		jal menuDispTime
-		nop
-		@@branch_selection_team_time:
+
 
 	//Display respawn menu option
 	li a2, text_respawn //text pointer
 	lbu a3, status_respawn //status byte
 	jal menuDispOnOff
-	li a1, 0x64 //y
+	li a1, 0x70 //y
 
 	//Set max distance you can scroll down in y on menu
-	LI a1, 4
+	LI a1, 5
 	SB a1, MENU_Y_MAX
+
+	//Set variable for this mode to be hit based (not objective based)
+	SB zero, hit_or_objective
 
 	LW ra, 0x0020 (sp)
 	JR ra
@@ -3587,7 +4051,7 @@ menuDispPageGame:
 
 	//Display "MODE"
 	LI a2, text_game_mode //text pointer
-	LI a0, 0x3C //x
+	LI a0, 0x8 //x
 	JAL FUNCTION_DISPLAY_TEXT
 	LI a1, 0x40 //y
 	//Display exactly what mode is selected 
@@ -3596,27 +4060,37 @@ menuDispPageGame:
 	BNE t0, zero, @@BRANCH_MODE_SELECT_TRADITIONAL
 		NOP
 		LI a2, text_game_traditional
-	@@BRANCH_MODE_SELECT_TRADITIONAL:
+		@@BRANCH_MODE_SELECT_TRADITIONAL:
 	//Display "HOT POTATO"
 	LI t1, 1
 	BNE t0, t1, @@BRANCH_MODE_SELECT_HOTPOTATO
 		NOP
 		LI a2, text_game_hotpotato
-	@@BRANCH_MODE_SELECT_HOTPOTATO:
+		@@BRANCH_MODE_SELECT_HOTPOTATO:
 	//Display "SQUISH"
 	LI t1, 2
 	BNE t0, t1, @@BRANCH_MODE_SELECT_SQUISH
 		NOP
 		LI a2, text_game_squish
-	@@BRANCH_MODE_SELECT_SQUISH:
-	//Display "TEST MODE"
+		@@BRANCH_MODE_SELECT_SQUISH:
+	//Display "CAPTURE THE FLAG"
 	LI t1, 3
-	BNE t0, t1, @@BRANCH_MODE_SELECT_TEST
+	BNE t0, t1, @@BRANCH_MODE_SELECT_CTF
 		NOP
-		LI a2, text_game_testmode
-	@@BRANCH_MODE_SELECT_TEST:
+		LI a2, text_capture_the_flag
+		@@BRANCH_MODE_SELECT_CTF:
+	LI t1, 4
+	BNE t0, t1, @@BRANCH_MODE_SELECT_KEEP_AWAY
+		NOP
+		LI a2, text_keep_away
+		@@BRANCH_MODE_SELECT_KEEP_AWAY:
+	LI t1, 5
+	BNE t0, t1, @@BRANCH_MODE_SELECT_ZOMBOMBS
+		NOP
+		LI a2, text_zombombs
+		@@BRANCH_MODE_SELECT_ZOMBOMBS:
 	//Actually show the selected option
-	LI a0, 0x70 //x
+	LI a0, 0x90 //x
 	JAL FUNCTION_DISPLAY_TEXT
 	LI a1, 0x40 //y
 
@@ -3643,14 +4117,36 @@ menuDispPageGame:
 		JAL menuDispModeSquish
 		NOP
 	@@BRANCH_MODE_DISPLAY_SQUISH:
-	//Display "TEST MODE"
+
+	//Display CTF
 	LBU a0, game_mode	
 	LI a1, 3
-	BNE a0, a1, @@BRANCH_MODE_DISPLAY_TEST
+	BNE a0, a1, @@BRANCH_MODE_DISPLAY_CTF
 		NOP
-		JAL menuDispModeTest
+		JAL menuDispModeCTF
 		NOP
-	@@BRANCH_MODE_DISPLAY_TEST:
+	@@BRANCH_MODE_DISPLAY_CTF:
+
+
+
+
+	//Display "KEEP AWAY"
+	LBU a0, game_mode	
+	LI a1, 4
+	BNE a0, a1, @@BRANCH_MODE_DISPLAY_KEEP_AWAY
+		NOP
+		JAL menuDisplayModeKeepAway
+		NOP
+	@@BRANCH_MODE_DISPLAY_KEEP_AWAY:
+
+	//Display "ZOMBOMBS"
+	LBU a0, game_mode	
+	LI a1, 5
+	BNE a0, a1, @@BRANCH_MODE_DISPLAY_ZOMBOMBS
+		NOP
+		JAL menuDisplayModeZombombs
+		NOP
+	@@BRANCH_MODE_DISPLAY_ZOMBOMBS:
 
 
 
@@ -3743,28 +4239,47 @@ menuDispPageBots:
 	ADDI sp, sp, 0xFFDC
 	SW ra, 0x0020 (sp)
 
-	LI a2, text_player1 //Display "PLAYER 1"
-	LBU a3, bot_status_p1
-	JAL menuDispOnOff
+	//Display "PLAYER 1"
+	LI t0, 0
+	JAL menuDispBotCharacter
 	LI a1, 0x40 //y
 
-	LI a2, text_player2 //Display "PLAYER 2"
-	LBU a3, bot_status_p2
-	JAL menuDispOnOff
+	//Display "PLAYER 2"
+	LI t0, 1
+	JAL menuDispBotCharacter
 	LI a1, 0x4C //y
 
-	LI a2, text_player3 //Display "PLAYER 3"
-	LBU a3, bot_status_p3
-	JAL menuDispOnOff
+	//Display "PLAYER 3"
+	LI t0, 2
+	JAL menuDispBotCharacter
 	LI a1, 0x58 //y
 
-	LI a2, text_player4 //Display "PLAYER 4"
-	LBU a3, bot_status_p4
-	JAL menuDispOnOff
+	//Display "PLAYER 4"
+	LI t0, 3
+	JAL menuDispBotCharacter
 	LI a1, 0x64 //y
 
+	JAL menuDispBotType //Dispaly bot AI type
+	LI a1, 0x70 //y
+
+	LI a2, text_bots_cannot_Fall //Display "BOTS CANNOT FALL"
+	LBU a3, bot_respawn_flag
+	JAL menuDispOnOff
+	LI a1, 0x7C //y
+
+	LI a2, text_bot_use_items //Display "BOTS CANNOT FALL"
+	LBU a3, bot_use_items
+	JAL menuDispOnOff
+	LI a1, 0x88 //y
+
+
+	LI a2, text_1p_full_screen //Display "BOTS CANNOT FALL"
+	LBU a3, one_player_full_screen
+	JAL menuDispOnOff
+	LI a1, 0x94 //y
+
 	//Set max distance you can scroll down in y on menu
-	LI a1, 4
+	LI a1, 8
 	SB a1, MENU_Y_MAX
 
 	LW ra, 0x0020 (sp)
@@ -3788,6 +4303,13 @@ menuDispPageOptions:
 	BNE a0, 0, @@BRANCH_FLAT_COURSES_ON //If turned off, flatten the battle courses
 		LUI a0, 0x3F80
 		SW a0, 0x800DC608
+		LI a0, 0x0C023D25 //jal   SetRolloverFall //Re-enable tumbling
+		SW a0, 0x8002E154 
+		SW a0, 0x8002CA08
+		// LI a0, 0x0C01E6D0 //jal   func_80079B40 //re-enable Lakitu for out of bounds
+		// SW a0, 0x8007A9D0
+		LI a0, 0x0D //re-enable Lakitu for out of bounds
+		SB a0, 0x800798E7
 	@@BRANCH_FLAT_COURSES_ON:
 
 	//Display "WIDESCREEN"
@@ -3816,7 +4338,7 @@ menuDispPageOptions:
 
 	//Display Game Temp
 	LI a2, text_options_gametempo
-	LI a0, 0x3C //x pos
+	LI a0, 0x8 //x pos
 	JAL FUNCTION_DISPLAY_TEXT //display text
 	LI a1, 0x7C //y pos
 	//Display selected option
@@ -3851,7 +4373,7 @@ menuDispPageOptions:
 		LI a2, text_tempo_60fps
 	@@BRANCH_TEMPO_60FPS:
 	//Show the selected option
-	LI a0, 0xA4 //x pos
+	LI a0, 0x90 //x pos
 	JAL FUNCTION_DISPLAY_TEXT //display text
 	LI a1, 0x7C //y pos
 
@@ -3867,8 +4389,35 @@ menuDispPageOptions:
 	JAL menuDispOnOff
 	LI a1, 0x94 //y
 
+	//Display restore defaults
+	LBU a3, status_restore_defaults
+	LI a2, text_restore_defaults
+	LI a0, 1
+	BNE a3, a0, @@branch_display_restore_defaults_text_1
+	LI a0, 3
+		LI a2, text_restore_defaults_are_you_sure
+		@@branch_display_restore_defaults_text_1:
+	BNE a3, a0, @@branch_display_restore_defaults_text_2
+	LI a0, 2
+		LI a2, text_restore_defaults_are_you_sure
+		LI a0, 1
+		SB a0, status_restore_defaults
+		@@branch_display_restore_defaults_text_2:
+	BNE a3, a0, @@branch_display_restore_defaults_text_3
+		NOP
+		JAL setDefaults
+		NOP
+		LI a0, 1 
+		SB a0, boot_flag//Ensure boot flag is correct
+		LI a0, -1
+		SB a0, game_mode //Keep game mode from moving to the right one after reset
+		@@branch_display_restore_defaults_text_3:
+	LI a0, 0x8 //x pos
+	JAL FUNCTION_DISPLAY_TEXT //display text
+	LI a1, 0xA0 //y pos
+
 	//Set max distance you can scroll down in y on the menu
-	LI a1, 8
+	LI a1, 9
 	SB a1, MENU_Y_MAX
 
 	LW ra, 0x0020 (sp)
@@ -4058,92 +4607,50 @@ menuToggleGameTraditional:
 	addi sp, sp, -0x24
 	sw ra, 0x1C (sp)
 
-	//if menu selection is scoring
-	LI a0, score_mode //load status pointer
+
+	//If menu selection is FFA or Teams
+	LI a0, ffa_or_teams //Load status pointer
 	LI a2, 1 //menu index
 	JAL menuToggleByte
-	LI t0, 3
+	LI t0, 1
+
+
+	//if menu selection is scoring
+	LI a0, score_mode //load status pointer
+	LI a2, 2 //menu index
+	JAL menuToggleByte
+	LI t0, 1
 	
 
 	//if scoring is set to stock
-	lbu v0, score_mode
-	li a2, 2
-	BNE v0, zero, @@branch_selection_hp //if menu selection is hp
-		LI a0, max_hp
-		JAL menuToggleHalf
-		LI t0, 9999 //How high can the HP go
-		@@branch_selection_hp:
-	LI v1, 2
-	BNE v0, v1, @@branch_selection_team_points //if menu selection is team points
-		LI a0, max_team_points
-		JAL menuToggleHalf
-		LI t0, 9999 //How high can the points go
-		@@branch_selection_team_points:
-	//If scoring is set to time or team time
-	LI v1, 1
-	BNE v0, v1, @@branch_selection_time //if menu selection is timer
-		nop
-		jal menuToggleTimer
-		nop
-		@@branch_selection_time:
-	LI v1, 3
-	BNE v0, v1, @@branch_selection_team_time //if menu selection is timer
-		nop
-		jal menuToggleTimer
-		nop
-		@@branch_selection_team_time:
-
-	//if menu selection is respawn
-	li a0, status_respawn //load status pointer
-	jal menuToggleOnoff
 	li a2, 3 //menu index
-
-	lw ra, 0x1C (sp)
-	jr ra
-	addi sp, sp, 0x24
-
-//Menu toggling on game page for hot potato battle
-menuToggleGameHotpotato:
-	addi sp, sp, -0x24
-	sw ra, 0x1C (sp)
-
-	//if menu selection is scoring
-	LI a0, score_mode //load status pointer
-	LI a2, 1 //menu index
-	JAL menuToggleByte
-	LI t0, 3
-
-	//if scoring is set to stock
 	lbu v0, score_mode
-	li a2, 2
-	BNE v0, zero, @@branch_selection_hp //if menu selection is hp
-		LI a0, max_hp
-		JAL menuToggleHalf
-		LI t0, 9999 //How high can the HP go
-		@@branch_selection_hp:
-	LI v1, 2
-	BNE v0, v1, @@branch_selection_team_points //if menu selection is team points
-		LI a0, max_team_points
-		JAL menuToggleHalf
-		LI t0, 9999 //How high can the points go
-		@@branch_selection_team_points:
-	//If scoring is set to time or team time
+	bne v0, zero, @@branch_selection_stock
+		LBU t9, ffa_or_teams
+		BNE t9, zero, @@branch_selection_stock_hp
+			LI a0, max_hp
+			JAL menuToggleHalf
+			LI t0, 9999 //How high can the HP go'
+			SB zero, hp_or_points //Set byte to show we are storing hp and not points
+			@@branch_selection_stock_hp:
+		BEQ t9, zero, @@branch_selection_stock_points
+			LI a0, max_points
+			JAL menuToggleHalf
+			LI t0, 9999 //How high can the points go
+			LI t0, 1
+			SB t0, hp_or_points //Set byte to show we are storing points and not hp
+			@@branch_selection_stock_points:
+		@@branch_selection_stock:
+	//If scoring is set to TIME
 	LI v1, 1
-	BNE v0, v1, @@branch_selection_time //if menu selection is timer
+	BNE v1, v0, @@branch_selection_time
 		nop
 		jal menuToggleTimer
 		nop
+		LI t0, 1
+		SB t0, hp_or_points //Set byte to show we are storing points and not hp
 		@@branch_selection_time:
-	LI v1, 3
-	BNE v0, v1, @@branch_selection_team_time //if menu selection is timer
-		nop
-		jal menuToggleTimer
-		nop
-		@@branch_selection_team_time:
 
-	//If menu selection is countdown
-	jal menuToggleCountdown
-	li a2, 3 //menu index
 
 
 	//if menu selection is respawn
@@ -4155,32 +4662,152 @@ menuToggleGameHotpotato:
 	jr ra
 	addi sp, sp, 0x24
 
+//Menu toggling on game page for hot potato battle
+menuToggleGameHotpotato:
+	addi sp, sp, -0x24
+	sw ra, 0x1C (sp)
+
+	//If menu selection is FFA or Teams
+	LI a0, ffa_or_teams //Load status pointer
+	LI a2, 1 //menu index
+	JAL menuToggleByte
+	LI t0, 1
+
+	//if menu selection is scoring
+	LI a0, score_mode //load status pointer
+	LI a2, 2 //menu index
+	JAL menuToggleByte
+	LI t0, 1
+
+	//if scoring is set to stock
+	li a2, 3 //menu index
+	lbu v0, score_mode
+	bne v0, zero, @@branch_selection_stock
+		LBU t9, ffa_or_teams
+		BNE t9, zero, @@branch_selection_stock_hp
+			LI a0, max_hp
+			JAL menuToggleHalf
+			LI t0, 9999 //How high can the HP go
+			SB zero, hp_or_points //Set byte to show we are storing hp and not points
+			@@branch_selection_stock_hp:
+		BEQ t9, zero, @@branch_selection_stock_points
+			LI a0, max_points
+			JAL menuToggleHalf
+			LI t0, 9999 //How high can the points go
+			SB zero, hp_or_points //Set byte to show we are storing points and not hp
+			LI t0, 1
+			SB t0, hp_or_points //Set byte to show we are storing points and not hp
+			@@branch_selection_stock_points:
+		@@branch_selection_stock:
+	//If scoring is set to TIME
+	LI v1, 1
+	BNE v1, v0, @@branch_selection_time
+		nop
+		jal menuToggleTimer
+		nop
+		LI t0, 1
+		SB t0, hp_or_points //Set byte to show we are storing points and not hp
+		@@branch_selection_time:
+
+
+	//If menu selection is countdown
+	jal menuToggleCountdown
+	li a2, 4 //menu index
+
+
+	//if menu selection is respawn
+	li a0, status_respawn //load status pointer
+	jal menuToggleOnoff
+	li a2, 5 //menu index
+
+	lw ra, 0x1C (sp)
+	jr ra
+	addi sp, sp, 0x24
+
 
 //Menu toggling on game page for squish battle
 menuToggleGameSquish:
 	addi sp, sp, -0x24
 	sw ra, 0x1C (sp)
 
-	//if menu selection is scoring
-	LI a0, score_mode //load status pointer
+	//If menu selection is FFA or Teams
+	LI a0, ffa_or_teams //Load status pointer
 	LI a2, 1 //menu index
 	JAL menuToggleByte
-	LI t0, 3
+	LI t0, 1
+
+	//if menu selection is scoring
+	LI a0, score_mode //load status pointer
+	LI a2, 2 //menu index
+	JAL menuToggleByte
+	LI t0, 1
 
 	//if scoring is set to stock
+	li a2, 3 //menu index
 	lbu v0, score_mode
-	li a2, 2
-	BNE v0, zero, @@branch_selection_hp //if menu selection is hp
-		LI a0, max_hp
-		JAL menuToggleHalf
-		LI t0, 9999 //How high can the HP go
-		@@branch_selection_hp:
-	LI v1, 2
-	BNE v0, v1, @@branch_selection_team_points //if menu selection is team points
-		LI a0, max_team_points
+	bne v0, zero, @@branch_selection_stock
+		LBU t9, ffa_or_teams
+		BNE t9, zero, @@branch_selection_stock_hp
+			LI a0, max_hp
+			JAL menuToggleHalf
+			LI t0, 9999 //How high can the HP go
+			SB zero, hp_or_points //Set byte to show we are storing hp and not points
+			@@branch_selection_stock_hp:
+		BEQ t9, zero, @@branch_selection_stock_points
+			LI a0, max_points
+			JAL menuToggleHalf
+			LI t0, 9999 //How high can the points go
+			LI t0, 1
+			SB t0, hp_or_points //Set byte to show we are storing points and not hp
+			@@branch_selection_stock_points:
+		@@branch_selection_stock:
+	//If scoring is set to TIME
+	LI v1, 1
+	BNE v1, v0, @@branch_selection_time
+		nop
+		jal menuToggleTimer
+		nop
+		LI t0, 1
+		SB t0, hp_or_points //Set byte to show we are storing points and not hp
+		@@branch_selection_time:
+
+
+	//if menu selection is respawn
+	li a0, status_respawn //load status pointer
+	jal menuToggleOnoff
+	li a2, 4 //menu index
+
+
+	lw ra, 0x1C (sp)
+	jr ra
+	addi sp, sp, 0x24
+
+
+//Menu toggling on game page for test battle
+menuToggleGameCaptureTheFlag:
+	addi sp, sp, -0x24
+	sw ra, 0x1C (sp)
+
+
+	//If menu selection is FFA or Teams
+	LI a0, ffa_or_teams //Load status pointer
+	LI a2, 1 //menu index
+	JAL menuToggleByte
+	LI t0, 1
+
+	//if menu selection is scoring
+	LI a0, score_mode //load status pointer
+	LI a2, 2 //menu index
+	JAL menuToggleByte
+	LI t0, 1
+
+	LI a2, 3 //menu index
+	lbu v0, score_mode
+	BNE v0, zero, @@branch_selection_points //if menu selection is team points
+		LI a0, max_points
 		JAL menuToggleHalf
 		LI t0, 9999 //How high can the points go
-		@@branch_selection_team_points:
+		@@branch_selection_points:
 	//If scoring is set to time or team time
 	LI v1, 1
 	BNE v0, v1, @@branch_selection_time //if menu selection is timer
@@ -4188,23 +4815,116 @@ menuToggleGameSquish:
 		jal menuToggleTimer
 		nop
 		@@branch_selection_time:
-	LI v1, 3
-	BNE v0, v1, @@branch_selection_team_time //if menu selection is timer
-		nop
-		jal menuToggleTimer
-		nop
-		@@branch_selection_team_time:
+	LI t0, 1
+	SB t0, hp_or_points //Set byte to show we are storing points and not hp
+
+
+
+
+	//if menu selection is ctf scoring
+	LI a0, ctf_game_mode //load status pointer
+	LI a2, 4 //menu index
+	JAL menuToggleByte
+	LI t0, 1
+
+
+	//if menu selection is no items when holding flag
+	li a0, no_items_when_holding_flag //load status pointer
+	jal menuToggleOnoff
+	li a2, 5 //menu index
+
+
+	//if menu selection is slow when holding flag
+	li a0, slow_when_holding_flag //load status pointer
+	jal menuToggleOnoff
+	li a2, 6 //menu index
 
 	//if menu selection is respawn
 	li a0, status_respawn //load status pointer
 	jal menuToggleOnoff
-	li a2, 3 //menu index
+	li a2, 7 //menu index
 
 	lw ra, 0x1C (sp)
 	jr ra
 	addi sp, sp, 0x24
 
 
+//Menu toggling on game page for test battle
+menuToggleGameKeepAway:
+	addi sp, sp, -0x24
+	sw ra, 0x1C (sp)
+
+	//If menu selection is FFA or Teams
+	LI a0, ffa_or_teams //Load status pointer
+	LI a2, 1 //menu index
+	JAL menuToggleByte
+	LI t0, 1
+
+	//if menu selection is scoring
+	LI a0, score_mode //load status pointer
+	LI a2, 2 //menu index
+	JAL menuToggleByte
+	LI t0, 1
+
+	LI a2, 3 //menu index
+	lbu v0, score_mode
+	BNE v0, zero, @@branch_selection_points //if menu selection is team points
+		LI a0, max_points
+		JAL menuToggleHalf
+		LI t0, 9999 //How high can the points go
+		@@branch_selection_points:
+	//If scoring is set to time or team time
+	LI v1, 1
+	BNE v0, v1, @@branch_selection_time //if menu selection is timer
+		nop
+		jal menuToggleTimer
+		nop
+		@@branch_selection_time:
+	LI t0, 1
+	SB t0, hp_or_points //Set byte to show we are storing points and not hp
+
+
+
+
+	//if menu selection is no items when holding flag
+	li a0, no_items_when_holding_flag //load status pointer
+	jal menuToggleOnoff
+	li a2, 4 //menu index
+
+
+	//if menu selection is slow when holding flag
+	li a0, slow_when_holding_flag //load status pointer
+	jal menuToggleOnoff
+	li a2, 5 //menu index
+
+	//if menu selection is respawn
+	li a0, status_respawn //load status pointer
+	jal menuToggleOnoff
+	li a2, 6 //menu index
+
+	lw ra, 0x1C (sp)
+	jr ra
+	addi sp, sp, 0x24
+
+
+
+//Menu toggling for game mode Zombombs
+menuToggleGameZombombs:
+	addi sp, sp, -0x24
+	sw ra, 0x1C (sp)
+
+	//If menu selection is timer
+	jal menuToggleTimer
+	LI a2, 1
+
+	//If menu selection is bombs respawn
+	LI a0, status_bombs_respawn
+	jal menuToggleOnoff
+	li a2, 2 //menu index
+
+	lw ra, 0x1C (sp)
+	jr ra
+	addi sp, sp, 0x24
 
 
 //Menu toggling on game page for test battle
@@ -4227,37 +4947,9 @@ menuToggleGame:
 	LI a0, game_mode //load status pointer
 	LI a2, 0 //menu index
 	JAL menuToggleByte
-	LI t0, 2 //max value
+	LI t0, 5 //max value
 
-	// //If menu selection is mode
-	// bne a3, zero, @@branch_mode_select
-	// 	lbu a0, game_mode //load game mode
-	// 	li a2, 2 //if joystick was left
-	// 	bne a1, a2, @@branch_joystick_left
-	// 		nop
-	// 		addi a0, a0, -1 //subtract 1 from game mode vriable
-	// 		li a1, 4 //set menu selection in progress byte to state indicating the selection has finished
-	// 	@@branch_joystick_left:
-	// 	li a2, 1 //if joystick was right
-	// 	bne a1, a2, @@branch_joystick_right
-	// 		nop
-	// 		addi a0, a0, 1 //add 1 to game mode vriable
-	// 		li a1, 4 //set menu selection in progress byte to state indicating the selection has finished
-	// 	@@branch_joystick_right:	
-	// 	//if game mode is too low, loop to max
-	// 	li a2, -1
-	// 	bne a0, a2, @@branch_too_low
-	// 		nop
-	// 		li a0, 3
-	// 	@@branch_too_low:
-	// 	//if game mode is too high, loop to min
-	// 	li a2, 4
-	// 	bne a0, a2, @@branch_too_high
-	// 		nop
-	// 		li a0, 0
-	// 	@@branch_too_high:
-	// 	sb a0, game_mode //store updated game mode
-	// @@branch_mode_select:
+
 
 	//If mode is traditional battle
 	lbu a0, game_mode //load game mode
@@ -4285,14 +4977,43 @@ menuToggleGame:
 		nop
 	@@branch_squish_mode:
 
-	//If mode is squish
+
+	//If mode is capture the flag
 	lbu a0, game_mode //load game mode
 	li a2, 3
-	bne a0, a2, @@branch_test_mode
+	bne a0, a2, @@branch_ctf_mode
 		nop
-		jal menuToggleGameTest
+		jal menuToggleGameCaptureTheFlag
 		nop
-	@@branch_test_mode:
+	@@branch_ctf_mode:
+
+	//If mode is keep away
+	lbu a0, game_mode //load game mode
+	li a2, 4
+	bne a0, a2, @@branch_keepaway_mode
+		nop
+		jal menuToggleGameKeepAway
+		nop
+	@@branch_keepaway_mode:
+
+
+	//If mode is zombombs
+	lbu a0, game_mode //load game mode
+	li a2, 5
+	bne a0, a2, @@branch_zombombs_mode
+		nop
+		jal menuToggleGameZombombs
+		nop
+	@@branch_zombombs_mode:
+
+	// //If mode is test
+	// lbu a0, game_mode //load game mode
+	// li a2, 4
+	// bne a0, a2, @@branch_test_mode
+	// 	nop
+	// 	jal menuToggleGameTest
+	// 	nop
+	// @@branch_test_mode:
 
 
 	lw ra, 0x1C (sp)
@@ -4367,23 +5088,61 @@ menuToggleBots:
 
 	//If menu selection is Player 1 on/off
 	li a0, bot_status_p1 //Load status pointer
-	JAL menuToggleOnoff
 	li a2, 0 //Load menu index
+	JAL menuToggleByte
+	LI t0, 8 //max value
 
 	//If menu selection is Player 2 on/off
 	li a0, bot_status_p2 //Load status pointer
-	JAL menuToggleOnoff
 	li a2, 1 //Load menu index
+	JAL menuToggleByte
+	LI t0, 8 //max value
 
 	//If menu selection is Player 3 on/off
 	li a0, bot_status_p3//Load status pointer
-	JAL menuToggleOnoff
 	li a2, 2 //Load menu index
+	JAL menuToggleByte
+	LI t0, 8 //max value
 
 	//If menu selection is Player 4 on/off
 	li a0, bot_status_p4 //Load status pointer
-	JAL menuToggleOnoff
 	li a2, 3 //Load menu index
+	JAL menuToggleByte
+	LI t0, 8 //max value
+
+
+	//If menu selection is bot AI type
+	li a0, bot_ai_type //Load status pointer
+	LI a2, 4 //menu index
+	JAL menuToggleByte
+	LI t0, 2 //max value
+
+
+	//If menu selection is bots can fall on/off
+	li a0, bot_respawn_flag //Load status pointer
+	JAL menuToggleOnoff
+	li a2, 5 //Load menu index
+
+	//If menu sleection is bots use items
+	LI a0, bot_use_items
+	JAL menuToggleOnoff
+	li a2, 6 //Load menu index
+
+
+	//If menu sleection is 1P full screen
+	LI a0, one_player_full_screen
+	JAL menuToggleOnoff
+	li a2, 7 //Load menu index
+
+
+	//Set camera zoom distance based on 1P full screen mode being on or off 
+	LI a0, 0x1040000A
+	SW a0, 0x8001C6E8 //Store default assembly code for the init camera code
+	LBU a2, one_player_full_screen
+	BEQ a2, zero, @@branch_fix_camera_zoom_in_1_player_full_screen
+		LI a0, 0x080071DA //assembly instruction J 0x8001C768
+		SW a0, 0x8001C6E8 //Store jump that forces player 1 zoom
+		@@branch_fix_camera_zoom_in_1_player_full_screen:
 
 
 	LW ra, 0x001C (sp)
@@ -4427,85 +5186,6 @@ menuToggleOptions:
 	JAL menuToggleByte
 	LI t0, 4 //max value
 
-	// BNE a3, a2, @@BRANCH_SELECTION_TEMPO
-	// 	LBU a0, status_options_tempo //Load game tempo status
-	// 	Li a2, 2
-	// 	BNE a1, a2, @@BRANCH_JOYSTICK_LEFT //If joystick is left
-	// 		NOP
-	// 		ADDI a0, a0, -1 //Subtract 1 from variable
-	// 		Li a1, 4 //Set menu selection in progress byte to state indicating the selection has finished
-	// 	@@BRANCH_JOYSTICK_LEFT:
-	// 	LI a2, 1
-	// 	BNE a1, a2, @@BRANCH_JOYSTICK_RIGHT
-	// 		NOP
-	// 		ADDI a0, a0, 1 //Add 1 to variable
-	// 		Li a1, 4 //Set menu selection in progress byte to state indicating the selection has finished
-	// 	@@BRANCH_JOYSTICK_RIGHT:
-	// 	LI a2, -1
-	// 	BNE a0, a2, @@BRANCH_SELECTION_LOW //If option status is too low, loop to max 
-	// 		NOP
-	// 		LI a0, 3
-	// 	@@BRANCH_SELECTION_LOW:
-	// 	LI a2, 4
-	// 	BNE a0, a2, @@BRANCH_SELECTION_HIGH //If option status is too high, loop to min
-	// 		NOP
-	// 		LI a0, 0
-	// 	@@BRANCH_SELECTION_HIGH:
-	// 	SB a0, status_options_tempo //Store updated tempo
-	// @@BRANCH_SELECTION_TEMPO:
-
-
-
-	//Tempo control
-	LBU v0, status_options_tempo //(0 = Default, 1 = 15 FPS, 2 = 20 FPS, 3=30 FPS)
-	LUI v1, 0x8000
-	BNE v0, zero, @@branch_tempo_off //If tempo is set to default
-		LI a0, 0x3C0F8015 //1P tempo default code
-		SW a0, 0x15C4 (v1)
-		LI a0, 0x8DEF0114
-		SW a0, 0x15C8 (v1)
-		LI a0, 0x3C098015 //2P default tempo code
-		SW a0, 0x1A38 (v1)
-		LI a0, 0x8D290114
-		SW a0, 0x1A3C (v1)
-		LI a0, 0x3C0A8015 //3/4P default dempo code
-		SW a0, 0x1C90 (v1)
-		LI a0, 0x8D4A0114
-		SW a0, 0x1C94 (v1)
-	@@branch_tempo_off:
-	BEQ v0, zero, @@branch_tempo_on //If tempo is not set to default
-		//Set assembly
-		LI a0, 0x240F //1P tempo
-		SH a0, 0x15C4 (v1)
-		SH a0, 0x15C8 (v1)
-		LI a0, 0x2409 //2P tempo
-		SH a0, 0x1A38 (v1)
-		SH a0, 0x1A3C (v1)
-		LI a0, 0x240A //3P/4P tempo
-		SH a0, 0x1C90 (v1)
-		SH a0, 0x1C94 (v1)
-		//Set tempo number
-		LI a2, 5
-		SUB a0, a2, v0
-		SH a0, 0x15C6 (v1) //1P tempo
-		SH a0, 0x15CA (v1)
-		SH a0, 0x1A3A (v1) //2P tempo
-		SH a0, 0x1A3E (v1)
-		SH a0, 0x1C92 (v1) //3P/4P tempo
-		SH a0, 0x1C96 (v1)
-		// //If tempo set to 60 FPS, run a few extra things so that it runs correctly in emulator at 2x speed, source: http://forum.pj64-emu.com/showthread.php?t=8848)
-		// LI k1, 1
-		// BNE k0, k1, @@branch_tempo_on
-		// 	LUI k0, 0x8000
-		// 	SB zero, 0x0FE3 (k0)
-		// 	SB k1, 0x14CF (k0)
-		// 	LI k1, 0x24010001
-		// 	SW k1, 0x1890 (k0)
-		// 	SW k1, 0x1894 (k0)
-		// 	LUI k0, 0x800B
-		// 	LI k1, 0x24010006
-		// 	SW k1, 0xC5D4 (k0)
-	@@branch_tempo_on:
 
 
 	//If menu selection is minimap
@@ -4525,6 +5205,14 @@ menuToggleOptions:
 	LI a0, status_options_ludicrousspeed //Load status pointer
 	JAL menuToggleOnoff
 	LI a2, 7 //Load menu index
+
+	//If menu is restore defaults
+	LI a0, status_restore_defaults
+	LI a2, 8 //menu index 
+	JAL menuToggleByte
+	LI t0, 3 //max value
+
+
 
 
 	LW ra, 0x001C (sp)
@@ -4547,24 +5235,57 @@ menuPlaySound:
 	LW a0, 0x0010 (sp)
 	LW a1, 0x0014 (sp)
 	LW a2, 0x0018 (sp)
-	LW a3, 0x001C (sp)
 	LW ra, 0x0020 (sp)
+	LW a3, 0x001C (sp)
+
 	JR ra
 	ADDI sp, sp, 0x0024
 
 
-titleScreen:
+// titleScreen:
+titleMenu:
+	ADDI sp, sp, -0x48 
+	SW ra, 0x0038 (sp)
 
-	.word 0x0C02555D //#Run lines that were replaced by hook first, COMMENTING OUT DISABLES TITLE SCREEN LOGO AND BACKGROUND which is what I want
-	.word 0x00000000
 
-	// //set boot flag
-	// LI a0, 1
-	// SB a0, boot_flag
-	//Force crash screen to always display
-	LI a0, 0x08001192
-	LUI a1, hi(0x800045F0)
-	SW a0, lo(0x800045F0) (a1)
+	LI a0, 1 //Set in title screen flag
+	SB a0, in_title_screen
+
+	//set boot flag
+	LB a0, boot_flag
+	BNE a0, zero, @@run_boot_flag
+		NOP
+
+		JAL setDefaults //Set defaults as the first thing that happens
+		NOP
+
+		LI a0, VARIABLE_RAM_BASE
+		JAL loadEEPROM //Load stored variables from save file
+		NOP
+		LH a0, save_flag //Load save_flag and compare to the save_key
+		LI a1, save_key
+		BEQ a0, a1, @@run_if_no_good_save
+			NOP
+			JAL setDefaults //Set default values for battle kart variables
+			NOP
+			@@run_if_no_good_save:
+
+		JAL bootCustomCourseStuff
+		NOP
+
+		//Load flag and base models for capture the flag into segment 8
+		LI a1, theModels
+		JAL SetSegment
+		LI a0, 8
+
+		LI a0, 1 //Set boot flag at end here
+		SB a0, boot_flag
+
+		@@run_boot_flag:
+	// //Force crash screen to always display
+	// LI a0, 0x08001192
+	// LUI a1, hi(0x800045F0)
+	// SW a0, lo(0x800045F0) (a1)
 	//Force starting lap to be 1, this forces the balloon with the blue shell to display in Luigi's raceway
 	SH zero, 0x8000F94A
 
@@ -4577,21 +5298,11 @@ titleScreen:
 	SW zero, 0xEE00 (a0) //Stop title demo counter at 8018EE00 from counting anything
 
 
-	ADDI sp, sp, 0xFFB8 //Store registers
-	SW a0, 0x0028 (sp)
-	SW a1, 0x002C (sp)
-	SW a2, 0x0030 (sp)
-	SW a3, 0x0034 (sp)
-	SW ra, 0x0038 (sp)
-	SW t6, 0x003C (sp)
-
-
-
 	//Display a semi-transparent background for the menu
 	LW a0, 0x80150298 //Load dlistBuffer from to 0x80150298 to $a0
-	ORI a1, zero, 0x1C //x1
+	ORI a1, zero, 0x10 //x1
 	ORI a2, zero, 0xC //y1
-	ORI a3, zero, 0x11C //x2
+	ORI a3, zero, 0x12E //x2
 	ORI t6, zero, 0xDC //y2
 	SW t6, 0x0010 (sp) //(argument passing starts at offset of 0x10 in stack)
 	SW zero, 0x0014 (sp) //u32 r
@@ -4605,9 +5316,9 @@ titleScreen:
 
 	//Display menu border left
 	LW a0, 0x80150298 //Load dlistBuffer from to 0x80150298 to $a0
-	ORI a1, zero, 0x1C //x1
+	ORI a1, zero, 0x10 //x1
 	ORI a2, zero, 0xC //y1
-	ORI a3, zero, 0x1E //x2
+	ORI a3, zero, 0x12 //x2
 	ORI t6, zero, 0xDC //y2
 	SW t6, 0x0010 (sp) //(argument passing starts at offset of 0x10 in stack)
 	ORI t6, zero, 0x80
@@ -4622,9 +5333,9 @@ titleScreen:
 
 	//Display menu border right
 	LW a0, 0x80150298 //Load dlistBuffer from to 0x80150298 to $a0
-	ORI a1, zero, 0x11C //x1
+	ORI a1, zero, 0x12E //x1
 	ORI a2, zero, 0xC //y1
-	ORI a3, zero, 0x11E //x2
+	ORI a3, zero, 0x130 //x2
 	ORI t6, zero, 0xDC //y2
 	SW t6, 0x0010 (sp) //(argument passing starts at offset of 0x10 in stack)
 	ORI t6, zero, 0x80
@@ -4639,9 +5350,9 @@ titleScreen:
 
 	//Display menu border bottom
 	LW a0, 0x80150298 //Load dlistBuffer from to 0x80150298 to $a0
-	ORI a1, zero, 0x1C //x1
+	ORI a1, zero, 0x10 //x1
 	ORI a2, zero, 0xDA //y1
-	ORI a3, zero, 0x11C //x2
+	ORI a3, zero, 0x12E //x2
 	ORI t6, zero, 0xDC //y2
 	SW t6, 0x0010 (sp) //(argument passing starts at offset of 0x10 in stack)
 	ORI t6, zero, 0x80
@@ -4656,9 +5367,9 @@ titleScreen:
 
 	//Display menu border top
 	LW a0, 0x80150298 //Load dlistBuffer from to 0x80150298 to $a0
-	ORI a1, zero, 0x1C //x1
+	ORI a1, zero, 0x10 //x1
 	ORI a2, zero, 0xC //y1
-	ORI a3, zero, 0x11C //x2
+	ORI a3, zero, 0x12E //x2
 	ORI t6, zero, 0xE //y2
 	SW t6, 0x0010 (sp) //(argument passing starts at offset of 0x10 in stack)
 	ORI t6, zero, 0x80
@@ -4673,9 +5384,9 @@ titleScreen:
 
 	//Display menu seperator between battle kart and credit title and tabs
 	LW a0, 0x80150298 //Load dlistBuffer from to 0x80150298 to $a0
-	ORI a1, zero, 0x1C //x1
+	ORI a1, zero, 0x10 //x1
 	ORI a2, zero, 0x2A //y1
-	ORI a3, zero, 0x11C //x2
+	ORI a3, zero, 0x12E //x2
 	ORI t6, zero, 0x2C //y2
 	SW t6, 0x0010 (sp) //(argument passing starts at offset of 0x10 in stack)
 	ORI t6, zero, 0x80
@@ -4690,9 +5401,9 @@ titleScreen:
 
 	//Display menu seperator between tabs and rest of menu
 	LW a0, 0x80150298 //Load dlistBuffer from to 0x80150298 to $a0
-	ORI a1, zero, 0x1C //x1
+	ORI a1, zero, 0x10 //x1
 	ORI a2, zero, 0x40 //y1
-	ORI a3, zero, 0x11C //x2
+	ORI a3, zero, 0x12E //x2
 	ORI t6, zero, 0x42 //y2
 	SW t6, 0x0010 (sp) //(argument passing starts at offset of 0x10 in stack)
 	ORI t6, zero, 0x80
@@ -4804,8 +5515,10 @@ titleScreen:
 	MFLO a1
 	ADDI a2, a1, 0x51 //a1 is the y positiion
 	LW a0, 0x80150298 //Load dlistBuffer from to 0x80150298 to $a0
-	LI a1, 0x34 //x1
-	LI a3, 0x106 //x2
+	//LI a1, 0x34 //x1
+	//LI a3, 0x106 //x2
+	LI a1, 0x12 //x1
+	LI a3, 0x12E //x2
 	ADDI t6, a2, 0xE //y2
 	SW t6, 0x0010 (sp) //(argument passing starts at offset of 0x10 in stack)
 	SW zero, 0x0014 (sp) //u32 r
@@ -4815,7 +5528,6 @@ titleScreen:
 	JAL 0x80098DF8 //Call drawBox function 0x80098DF8
 	NOP
 	SW v0, 0x80150298 //Store dlistBuffer back to 0x80150298
-
 
 
 
@@ -4998,11 +5710,59 @@ titleScreen:
 	//Store menu selection in progress byte back to ram
 	SB a1, MENU_X_PROGRESS
 
+	JAL DisplayBattleKartTitle
+	NOP
+
 
 	//Load font
 	JAL 0x80057710
 	NOP
 
+
+	// LB a0, text_flicker_flag
+	// ADDI a0, a0, 1
+	// SLTI a1, a0, 30
+	// BNE a1, zero, @@reset_text_flicker_flag
+	// 	NOP
+	// 	LI a0, 0 
+	// 	@@reset_text_flicker_flag:
+	// SB a0, text_flicker_flag
+	// SLTI a1, a0, 15
+	// BEQ a1, zero, @@text_flicker_a
+	// 	//Set font color (divide RGB values by 8)
+	// 	LI a0, 31 //R
+	// 	LI a1, 20 //G
+	// 	LI a2, 8 //B
+	// 	LI a3, 21 //R shadow
+	// 	LI t0, 8 //G shadow
+	// 	LI t1, 0 //B shadow
+	// 	SW t0, 0x10 (sp)	
+	// 	JAL SetFontColor
+	// 	SW t1, 0x14 (sp)
+	// 	SB zero, text_flicker_flag
+	// 	BEQ zero, zero, @@text_flicker_done
+	// 	NOP
+	// 	@@text_flicker_a:
+
+	// //Set font color (divide RGB values by 8)
+	// LB a0, text_flicker_flag
+	// SLTI a1, a0, 15
+	// BNE a1, zero, @@text_flicker_b
+	// 	LI a0, 28 //R
+	// 	LI a1, 28 //G
+	// 	LI a2, 28 //B
+	// 	LI a3, 10 //R shadow
+	// 	LI t0, 10 //G shadow
+	// 	LI t1, 19 //B shadow
+	// 	SW t0, 0x10 (sp)	
+	// 	JAL SetFontColor
+	// 	SW t1, 0x14 (sp)
+	// 	LI a0, 1
+	// 	SB a0, text_flicker_flag
+	// 	@@text_flicker_b:
+
+
+	// @@text_flicker_done:
 
 
 	//Display page corrisponding to whatever tab is selected
@@ -5030,34 +5790,36 @@ titleScreen:
 
 
 
-	//Display title "BATTLE KART 64"
-	LI a0, 0x54 //a0 is the X pos
-	LI a2, text_title_1 //text pointer
-	JAL FUNCTION_DISPLAY_TEXT //Print text
-	LI a1, 0x00 //a1 is the y pos
 
-	//Display title "VX.X BY TRICLON"
-	LI a0, 0x50 //a0 is the X pos
-	LI a2, text_title_2 //text pointer
-	JAL FUNCTION_DISPLAY_TEXT //Print text
-	LI a1, 0x0C //a1 is the y pos
+
+	// //Display title "BATTLE KART 64"
+	// LI a0, 0x54 //a0 is the X pos
+	// LI a2, text_title_1 //text pointer
+	// JAL FUNCTION_DISPLAY_TEXT //Print text
+	// LI a1, 0x00 //a1 is the y pos
+
+	// //Display title "VX.X BY TRICLON"
+	// LI a0, 0x48 //a0 is the X pos
+	// LI a2, text_title_2 //text pointer
+	// JAL FUNCTION_DISPLAY_TEXT //Print text
+	// LI a1, 0x0C //a1 is the y pos
 
 	//Display "Z", "L", and "R for menu pages
 	//Z
-	LI a0, 0x00 //a0 is the X pos
-	LI a2, text_Z //text pointer
-	JAL FUNCTION_DISPLAY_TEXT //Print text
-	LI a1, 0x25 //a1 is the y pos
+	// LI a0, -0x6 //a0 is the X pos
+	// LI a2, text_Z //text pointer
+	// JAL FUNCTION_DISPLAY_TEXT //Print text
+	// LI a1, 0x25 //a1 is the y pos
 	//L
-	LI a0, 0x00 //a0 is the X pos
-	LI a2, text_L //text pointer
-	JAL FUNCTION_DISPLAY_TEXT //Print text
-	LI a1, 0x19 //a1 is the y pos
+	// LI a0, -0x6 //a0 is the X pos
+	// LI a2, text_L //text pointer
+	// JAL FUNCTION_DISPLAY_TEXT //Print text
+	// LI a1, 0x19 //a1 is the y pos
 	//R
-	LI a0, 0x10B //a0 is the X pos
-	LI a2, text_R //text pointer
-	JAL FUNCTION_DISPLAY_TEXT //Print text
-	LI a1, 0x20 //a1 is the y pos
+	// LI a0, 0x116 //a0 is the X pos
+	// LI a2, text_R //text pointer
+	// JAL FUNCTION_DISPLAY_TEXT //Print text
+	// LI a1, 0x20 //a1 is the y pos
 
 	//Display text for page tab names
 	//Items
@@ -5093,155 +5855,603 @@ titleScreen:
 	// sb s1, boot_flag
 
 
-	LW a0, 0x0028 (sp)
-	LW a1, 0x002C (sp)
-	LW a2, 0x0030 (sp)
-	LW a3, 0x0034 (sp)
+
+
+
 	LW ra, 0x0038 (sp)
-	LW t6, 0x003C (sp)
+	JR ra  //Jump back
 	ADDI sp, sp, 0x48 
 
-
-
-	J 0x80094bd8 //Jump back to after title screen hook
-	NOP
 
 
 //Function to blank a chunk of ram (needs to be double 0x8 aligned)
 //a0 = start address
 //a1 = end address
 blankRam:
-	SD zero, (a0)
+	SW zero, (a0)
 	BNE a0, a1, blankRam
-	ADDI a0, a0, 0x8
+	ADDI a0, a0, 0x4
 	JR ra
 	NOP
 
-//Function to detect if game is running in an emulator or not
-//Run before blanking any ram in the expansion pak memory
-//v0 = boolean that is 1 if on emulator, 0 if on console
-detectEmulator:
-	LW a0, 0x80700000 //Chunk of ram to check
-	LI v0, 0 //Default return value
-	BNE a0, zero, @@branch_emulator_detected
+
+
+//Set the course select menu to VS or Battle mode dependong on
+//the circumstances
+setCourseSelectVSorBattle:
+	ADDI sp, sp, -0x30
+	SW ra, 0x20 (sp)
+
+	LBU a0, player_count  //Grab number of players
+	LI a1, 2 //If 2 players
+	BNE a0, a1, @@branch_course_select_control_2p
+		LUI a1, hi(0x800E86AD)
+		LBU a0, lo(0x800E86AD) (a1)
+		LI a1, 1 //If VS mode selected
+		BNE a0, a1, @@branch_course_init_skip
+			LI a1, 2 //Force VS mode to ensure course selection menu is correct
+			LUI a0, 0x800E
+			SH a1, 0xC53E (a0)
+		BEQ zero, zero, @@branch_course_init_skip
 		NOP
-		LI v0, 1
-		@@branch_emulator_detected:
+		@@branch_course_select_control_2p:
+	LI a1, 3 //If 3 players
+	BNE a0, a1, @@branch_course_select_control_3p
+		LUI a1, hi(0x800E86AE)
+		LBU a0, lo(0x800E86AE) (a1)
+		BNE a0, zero, @@branch_course_init_skip  //If VS mode selected
+			LI a1, 2 //Force VS mode to ensure course selection menu is correct
+			LUI a0, 0x800E
+			SH a1, 0xC53E (a0)
+		BEQ zero, zero, @@branch_course_init_skip
+		NOP
+		@@branch_course_select_control_3p:
+	LI a1, 4 //If 4 players
+	BNE a0, a1, @@branch_course_select_control_4p
+		LUI a1, hi(0x800E86AF)
+		LBU a0, lo(0x800E86AF) (a1)
+		BNE a0, zero, @@branch_course_init_skip  //If VS mode selected
+			LI a1, 2 //Force VS mode to ensure course selection menu is correct
+			LUI a0, 0x800E
+			SH a1, 0xC53E (a0)
+		@@branch_course_select_control_4p:
+	@@branch_course_init_skip:
+
+	JAL 0x8000262C//Run InitialMapselectSequence which was overwritten by the hook
+	NOP
+	LW ra, 0x20 (sp)
+	JR RA
+	ADDI sp, sp, 0x30
+
+
+runAtCourseInitialization:
+	ADDI sp, sp, -0x30
+	SW ra, 0x20 (sp)
+
+
+
+
+	//Set course start flag to zero so that we know the course is in the middle of loading
+	SB zero, course_start_flag
+
+	//
+
+	//Flatten courses
+	LUI a0, hi(status_options_flatcourses)
+	LBU a1, lo(status_options_flatcourses) (a0)
+	BEQ a1, zero, @@branch_flatten_battle_courses
+		LUI a1, 0x800E
+		LUI a0, 0x3CCC
+		SW a0, 0xC608 (a1)
+		SW zero, 0x8002E154 //disable tumbling
+		SW zero, 0x8002CA08
+		// SW zero, 0x8007A9D0 //disable Laktiu from picking you up if you go off course (still should pick you up in the water)
+		//disable Laktiu from picking you up if you go off course (still should pick you up in the water)
+		LI a0, 0x11
+		SB a0, 0x800798E7
+	@@branch_flatten_battle_courses:
+
+
+
+
+	//Turn on music in 3P/4P mode if set to on
+	LBU a0, status_options_3P4Pmusic
+	BEQ a0, zero, @@branch_3p4p_music_on
+		NOP
+		SW zero, 0x8028ECAC
+		SW zero, 0x8028F9D4
+	@@branch_3p4p_music_on:
+
+
+	//Default lose HP/balloons when falling off course, certain game modes might overwrite this
+	LI a0, 0x0C01AE2D
+	LUI a1, 0x8009
+	SW a0, 0x0F78 (a1)
+	//If respawn mode is on,  turn off losing balloons/HP when falling off course
+	LBU a0, status_respawn
+	BEQ a0, zero, @@branch_respawn_mode_on
+		NOP
+		SW zero, 0x0F78 (a1)
+		@@branch_respawn_mode_on:
+
+
+
+	//If game mode is traditional, and HP is <= 4, set the number of ballons displayed to be this and set the max balloons so that the game's own code can take care of that
+	LUI a0, 0x8007 //Default zero out left and right baloons
+	SW zero, 0xB82C (a0)
+	SW zero, 0xB850 (a0)
+	LBU a1, status_respawn
+	BNE a1, zero, @@skip_balloon_display_code //If respawning is on, display only one balloon, and skip the rest of  this code
+		LUI a0, 0x8007 //Default max balloon count to three
+		LI a1, 2
+		SH a1, 0xB86E (a0)
+		LBU a0, score_mode //check if stock is on (not timed), and if it is on run the following code below
+		BNE a0, zero, @@skip_balloon_display_code
+			LBU a0, game_mode //Load game mode
+			BNE a0, zero, @@skip_balloon_display_code //If game mode is traditional battle
+				LBU a0, ffa_or_teams
+				BNE a0, zero, @@skip_balloon_display_code //If game mode is not teams
+					//HP = 1
+					LHU a0, max_hp //Load max HP
+					LI a1, 1
+					BNE a0, a1, @@branch_hp_equals_1 //If HP == 1
+						LUI a0, 0x8007 //Set max ballon count to one
+						SH zero, 0xB86E (a0)
+						@@branch_hp_equals_1:
+					//HP = 2
+					LHU a0, max_hp //Load max HP
+					LI a1, 2
+					BNE a0, a1, @@branch_hp_equals_2 //If HP == 2
+						LI a0, 0x0C01A943 //Load instruction that causes balloons to load "JAL 0x8006A50C" into $a2
+						LUI a1, 0x8007
+						SW a0, 0xB82C (a1) //display left balloon
+						LUI a0, 0x8007 //Set max balloon count to two
+						LI a1, 1
+						SH a1, 0xB86E (a0)
+						@@branch_hp_equals_2:
+					//HP = 3
+					LHU a0, max_hp
+					LI a1, 3
+					BNE a0, a1, @@branch_hp_equals_3 //If HP == 3
+						LI a0, 0x0C01A943 //Load instruction that causes balloons to load "JAL 0x8006A50C" into $a2
+						LUI a1, 0x8007
+						SW a0, 0xB82C (a1) //Display left balloon
+						SW a0, 0xB850 (a1) //Display right balloon
+						@@branch_hp_equals_3:
+		@@skip_balloon_display_code:
+
+
+	//Force all courses to load in battle mode
+	//If starting a battle course, use default initialization, otherwise use big donut initialization
+	LUI a0, 0x8004 //By default, do not force battle mode initialization for big donut
+	LI a1, 0x01600008
+	SW a1, 0xC1E8 (a0)
+	LBU a1, 0x800DC5A1 //Load current track from cup course index 0x8018EE0B
+	LI a0, 0x13 //Check if Big Donut, if it is, skip the rest of this
+	BEQ a0, a1, @@branch_course_init_skip
+	LI a0, 0x11 //Check if double deck, if it is, skip the rest of this
+	BEQ a0, a1, @@branch_course_init_skip
+	LI a0, 0x10 //check if Skyscraper, if it is, skip the rest of this
+	BEQ a0, a1, @@branch_course_init_skip
+	LI a0, 0xF //check if block Fort, if it is, skip the rest of this
+	BEQ a0, a1, @@branch_course_init_skip
+		LI a1, 0x0800F263 //Force battle mode initialization for Big Donut
+		LUI a0, 0x8004
+		SW a1, 0xC1E8 (a0)
+	@@branch_course_init_skip:
+
+	LI a1, 3 //Always Force battle mode upon course initialization
+	LUI a0, 0x800E
+	SH a1, 0xC53E (a0)
+
+
+	// //Test setting starting positiosn automatically in race courses
+	// JAL getStartingPositions
+	// NOP
+
+	JAL 0x80002A18//Run InitialRaceSequence which was overwritten by the hook
+	NOP
+
+
+	// SB zero, 0x800F6A5B //Disable lakitu
+	// SB zero, 0x800f7833
+	// SB zero, 0x800f860b
+	// SB zero, 0x800f93e3
+
+
+	LW ra, 0x20 (sp)
+	JR RA
+	ADDI sp, sp, 0x30
+
+
+
+KillBombKartWrapper:
+	ADDI sp, sp, -0x40
+	SW ra, 0x20 (sp)
+	SW a3, 0x24 (sp)
+	SW a2, 0x28 (sp)
+	SW a0, 0x2C (sp)
+	SW a1, 0x30 (sp)
+
+	LBU t6, game_mode //If game mode is zombombs
+	LI t7, 5
+	BNE t6, t7, @@branch_game_mode_zombombs
+		NOP
+		//STUFF
+		JAL 0x80027D00 //JAL CheckKartNumber, Get kart number for car1
+		LW a0, 0x24 (sp)
+		//JAL killPlayer //Kill first kart
+		JAL makePlayerBomb
+		MOVE a0, v0
+		JAL 0x80027D00 //JAL CheckKartNumber, Get kart number for car2
+		LW a0, 0x28 (sp)
+		//JAL killPlayer //Kill second kart
+		JAL makePlayerBomb
+		MOVE a0, v0
+		BEQ zero, zero, @@skip
+		NOP
+		@@branch_game_mode_zombombs:
+	JAL 0x8008FC1C //JAL KillBombKart
+	NOP
+	@@skip:
+
+	LW ra, 0x20 (sp)
+	LW a3, 0x24 (sp)
+	LW a2, 0x28 (sp)
+	LW a0, 0x2C (sp)
+	LW a1, 0x30 (sp)
 	JR ra
+	ADDI sp, sp, 0x40
+
+
+//Run code to find starting positions for race courses after the map data loads
+afterMapDataLoads:
+	.word 0x0C00F03C //Run jal   func_8003C0F0
+	NOP
+	JAL getStartingPositions
+	NOP
+	J 0x8003D0BC //Jump back
 	NOP
 
 
 
+//Jump to hook for 
+.align 0x10
+//runMinimapCode:
+gameCode:
+	ADDI sp, sp, -0x30
+	SW ra, 0x20 (sp)
 
-// testThisHook:
-// 	ADDI sp, sp, -0x30
-// 	SW ra, 0x20 (sp)
+	// JAL setBKCheckAddress
+	// NOP
 
-// 	JAL FUNCTION_LOAD_FONT
-// 	NOP
+	JAL 0x80057C60 //run KWSetViewportFull to ensure whole minimap is rendered
+	NOP
+	JAL inRace //Test in race hook in the minimap code
+	NOP
+	// lbu a0, game_mode //Load game mode (0=traditional, 1=hot potato, and so on and so forth...)
+	// LI a1, 3
+	// BNE a0, a1, @@branch_game_mode_ctf //If game mode is CTF
+	// 	NOP
+	// 	JAL minimap_display_flags_and_bases
+	// 	NOP
+	// 	@@branch_game_mode_ctf:
+	JAL 0x80057CE4 //run KWReturnViewportto go back to what viewport used to be
+	NOP
+	// JAL 0x80093E20 //run KawanoDrawFinal which is what the hook overwrote
+	// NOP
+	LW ra, 0x20 (sp)
+	JR ra
+	ADDI sp, sp, 0x30 //End of hook, jump back
 
-// 	LI a0, 0
-// 	LI a1, 0
-// 	LI a2, text_sudden_death
-// 	JAL FUNCTION_DISPLAY_TEXT
-// 	NOP
 
-// 	LW ra, 0x20 (sp)
-// 	JR ra
-// 	ADDI sp, sp, 0x30
 
-// // .align 0x10
-// // .importobj "MarioKart.o"
+//Include binary file of the flag and base used for capture the flag
+.align 0x10
+theModels:
+	.import "BattleKartObjects/BattleKartObjects.raw"
+
+
+//Include binary file for flag and base minimap sprites for CTF mode
+.align 0x10
+theMinimapSprites:
+	.import "MinimapSprites/ImageData.RAW"
+.align 0x10
+
+//Import DeadHamster's stuff at the bottom fo the ram
+.align 0x10
+.importobj "BattleKartFlag/BattleKartFlag.o"
+.align 0x10
+// .importobj "BattleKartFlag/BattleKartPathData.o"
+// .align 0x10
+.importobj "BattleKartVariables.o"
+.align 0x10
+
+//Import paths for bot AI
+.importobj "BattleKartPaths/BlockFortPaths.o"
+
+
+//universalHook:
+//allRun:
+PrintMenuFunction:
+
+	ADDIU sp, sp, -0x30
+	SW ra, 0x20 (sp)
+	//JAL test_universal_hook
+	//NOP
+	JAL menuStuff
+	NOP
+
+
+	//Enable mirror mode
+	LI a0, 0xFF00
+	LUI a1, hi(0x8018ED12)
+	SH a0, lo(0x8018ED12) (a1)
+
+	LUI a0, hi(currentMenu)
+	LW a0, lo(currentMenu) (a0)
+	LI a1, 0x24 //value for character selection menu
+	BNE a0, a1, @@branch_in_character_select_menu
+		//Add same character selection if set to on
+		LB a0, status_options_samechars
+		BEQ a0, zero, @@branch_samechars_on
+			LUI a0, 0x800B
+			LI a1, 0x7FFFF
+			SW zero, 0x3924 (a0)
+			SH a1, 0x3936 (a0)
+			SW zero, 0x39A4 (a0)
+			SH a1, 0x39B6 (a0)
+			SW zero, 0x3A38 (a0)
+			SH a1, 0x3A4E (a0)
+			@@branch_samechars_on:
+		//Bots auto select character in cahracter selection screen
+		LBU a0, bot_status_p1 //Check if bot is on
+		LUI a2, 0x8019 //Load mem address hi for bot character setting and selection
+		LI a1, 1 //Auto selet character for bot
+		BEQ a0, zero, @@branch_bot_menu_select_p1
+			// LUI a1, 0x8019 //Auto selet character for bot
+			// LI a1, 1
+			// SB a1, 0xEDE8 (a0)
+			//ADDI a0, a0, -1 //Set bot character
+			NOP
+			SB a0, 0xEDE4 (a2)
+			@@branch_bot_menu_select_p1:
+		LBU a0, bot_status_p2 //Check if bot is on
+		BEQ a0, zero, @@branch_bot_menu_select_p2
+			NOP
+			SB a0, 0xEDE5 (a2)	
+			SB a1, 0xEDE9 (a2)//Auto selet character for bot
+			@@branch_bot_menu_select_p2:
+		LBU a0, bot_status_p3 //Check if bot is on
+		BEQ a0, zero, @@branch_bot_menu_select_p3
+			NOP
+			SB a0, 0xEDE6 (a2)
+			SB a1, 0xEDEA (a2) //Auto selet character for bot
+			@@branch_bot_menu_select_p3:
+		LBU a0, bot_status_p4 //Check if bot is on
+		BEQ a0, zero, @@branch_bot_menu_select_p4
+			NOP
+			SB a0, 0xEDE7 (a2)
+			SB a1, 0xEDEB (a2) //Auto selet character for bot
+			@@branch_bot_menu_select_p4:
+
+		@@branch_in_character_select_menu:
+
+	// J 0x80001F64
+	// LW ra, 0x14 (sp)
+	LW ra, 0x20 (sp)
+	JR ra
+	ADDIU sp, sp, 0x30
+
+
+
+
+
+//Runs in controller input, used for setting bot controller inputs
+controllerLoop:
+
+
+	ADDIU sp, sp, -0x30	//Run two instructions overwritten by hook, this handles storing the RA so we dont have to worry about it later
+	sw ra, 0x14 (sp)
+	SW a0, 0x18 (sp)
+	sw a1, 0x1C (sp)
+	sw a2, 0x20 (sp)
+
+
+	//If on results screen, skip bot constrols
+	LUI a0, hi(insideMenu)
+	LBU a0, lo(insideMenu) (a0) //Load current screen state
+	//LI a1, 5 //Results screen state
+	//LI a1, 3 //In race and players can move state
+	BNE a0, zero, @@branch_skip_bot_control
+
+
+	//If doing ctf but game hasn't started yet, skip bot controls
+	LUI a0, hi(ctf_game_started)
+	LBU a0, lo(ctf_game_started) (a0)
+	BEQ a0, zero, @@branch_skip_bot_control
+	NOP
+
+
+
+	//Copy battle bot controller input generated by battle bot function to the current button activators (because we need to use the exception handler hook)
+	//Player 1
+	LBU a0, bot_status_p1 //Check if bot is on
+	BEQ a0, zero, @@branch_bot_control_p1
+		LBU a0, 0x800F6990 //check if in game and player is not starting or dead
+		//LI a1, 0xC0
+		ANDI a1, a0, 0xC0
+		//BNE a0, a1, @@branch_bot_control_p1
+		BEQ a1, zero, @@branch_bot_control_p1
+			LUI a0, 0x8019
+			LW a1, bot_controller_input_p1 //Copy controller input into correct button activator
+			SW a1, 0x6504 (a0) 
+			LI a1, 0xFF010401 //Trick console/emulator into thinking controller is plugged in
+			SW a1, 0x6500 (a0)
+	@@branch_bot_control_p1:
+	//Player 2
+	LBU a0, bot_status_p2 //Check if bot is on
+	BEQ a0, zero, @@branch_bot_control_p2
+		LBU a0, 0x800F7768 //check if in game and player is not starting or dead
+		//LI a1, 0xC0
+		ANDI a1, a0, 0xC0
+		//BNE a0, a1, @@branch_bot_control_p2
+		BEQ a1, zero, @@branch_bot_control_p2
+			LUI a0, 0x8019
+			LW a1, bot_controller_input_p2 //Copy controller input into correct button activator
+			SW a1, 0x650C (a0)
+			LI a1, 0xFF010401 //Trick console/emulator into thinking controller is plugged in
+			SW a1, 0x6508 (a0)
+	@@branch_bot_control_p2:
+	//Player 3
+	LBU a0, bot_status_p3 //Check if bot is on
+	BEQ a0, zero, @@branch_bot_control_p3
+		LBU a0, 0x800F8540 //check if in game and player is not starting or dead
+		//LI a1, 0xC0
+		ANDI a1, a0, 0xC0
+		//BNE a0, a1, @@branch_bot_control_p3
+		BEQ a1, zero, @@branch_bot_control_p3
+			LUI a0, 0x8019
+			LW a1, bot_controller_input_p3 //Copy controller input into correct button activator
+			SW a1, 0x6514 (a0)
+			LI a1, 0xFF010401 //Trick console/emulator into thinking controller is plugged in
+			SW a1, 0x6510 (a0)
+	@@branch_bot_control_p3:
+	//Player 4
+	LBU a0, bot_status_p4 //Check if bot is on
+	BEQ a0, zero, @@branch_bot_control_p4
+		LBU a0, 0x800F9318 //check if in game and player is not starting or dead
+		//LI a1, 0xC0
+		ANDI a1, a0, 0xC0
+		//BNE a0, a1, @@branch_bot_control_p4
+		BEQ a1, zero, @@branch_bot_control_p4
+			LUI a0, 0x8019
+			LW a1, bot_controller_input_p4 //Copy controller input into correct button activator
+			SW a1, 0x651C (a0)
+			LI a1, 0xFF010401 //Trick console/emulator into thinking controller is plugged in
+			SW a1, 0x6518 (a0)
+	@@branch_bot_control_p4:
+	@@branch_skip_bot_control:
+
+
+	// .word 0x27BDFFE8
+	// .word 0xAFBF0014
+	// J 0x800381B4
+	// NOP
+	// J 0x80038248 //Jump back
+	// NOP
+
+	LW a0, 0x18 (sp)
+	LW a1, 0x1C (sp)
+	.word 0x0C00DF3F //JAL ManualStickDrive 
+	LW a2, 0x20 (sp)
+
+
+ 	LW ra, 0x14 (sp)
+	JR RA
+	ADDIU sp, sp, 0x30	//Run two instructions overwritten by hook, this handles storing the RA so we dont have to worry about it later
+	// // J 0x80000A30 //Jump back to ReadController
+	// NOP
+
+
+	// lw ra, 0x001C (sp)
+	// .word 0x3C02800E //run instructions hook overwrote 
+	// .word 0x8C42C52C
+	// J 0x800382E4 //Jump to back to DriveStickControl
+	// addi sp, sp, 0x30
+	// .word 0x3C03800E
+	// .word 0x3C04800E
+	// J 0x80000A84
+	// NOP
+
+
+//Control bot acceleratiron and turning
+botControlWrapper:
+	ADDIU sp, sp, -0x30	//Run two instructions overwritten by hook, this handles storing the RA so we dont have to worry about it later
+	sw ra, 0x14 (sp)
+	SW a0, 0x18 (sp)
+	sw a1, 0x1C (sp)
+	sw a2, 0x20 (sp)
+
+	JAL botControl
+	NOP
+
+
+	LW a0, 0x18 (sp)
+	LW a1, 0x1C (sp)
+	.word 0x0C00DF3F //JAL ManualStickDrive 
+	LW a2, 0x20 (sp)
+
+
+ 	LW ra, 0x14 (sp)
+	JR RA
+	ADDIU sp, sp, 0x30	//Run two instructions overwritten by hook, this handles storing the RA so we dont have to worry about it later
+
+
+// //For custom courses
+
 
 .align 0x10
-.importobj "Core/SharedFunctions.o"
+set0:
+.import "Library/data/Stock.png.MIO0"            ;;  87c
+.align 0x10
+set0end:
 
 .align 0x10
-.importobj "Core/MarioKartObjects.o"
+set1:
+.import "Library/data/Set1.png.MIO0"            ;;  7f5
+.align 0x10
+set1end:
 
 .align 0x10
-.importobj "Core/MarioKart3D.o"
-
+set2:
+.import "Library/data/Set2.png.MIO0"            ;;  7fc
+.align 0x10
+set2end:
 
 .align 0x10
-DisplayHop:
-MOVE  $a0, $s1
-JAL   DisplayObject
-MOVE  $a1, $s0
-J     0x802A34D4
-NOP
+set3:
+.import "Library/data/Set3.png.MIO0"            ;;  808
+.align 0x10
+set3end:
 
 .align 0x10
-CollisionHop:
-LW    $t4, 0xbc($a3)
-MOVE  $a0, $a3
-LW    $ra, 0x1c($sp)
-JAL  CollideObject
-MOVE  $a1, $s0
-J     0x802A0D44
-LW    $ra, 0x1c($sp)
+set4:
+.import "Library/data/Set4.png.MIO0"            ;;  800
+.align 0x10
+set4end:
 
+.align 0x10
+.include "Library/LIBRARYBUILD.asm"
+.align 0x10
 
-DisplayHopTable:
-.word 0x802A31E4, 0x802A31FC, 0x802A3214, 0x802A32EC
-.word 0x802A3318, 0x802A3330, 0x802A3348, 0x802A34C0
-.word 0x802A3378, 0x802A34D4, 0x802A34D4, 0x802A34D4
-.word 0x802A34D4, 0x802A3390, 0x802A33A4, 0x802A33B8
-.word 0x802A33CC, 0x802A322C, 0x802A33E4, 0x802A34D4  //19
-.word 0x802A34D4, 0x802A33FC, 0x802A34D4, 0x802A3428
-.word 0x802A3244, 0x802A34D4, 0x802A325C, 0x802A328C
-.word 0x802A32A4, 0x802A32BC, 0x802A32D4, 0x802A3274
-.word 0x802A34D4, 0x802A3414, 0x802A34D4, 0x802A345C
-.word 0x802A3440, 0x802A34AC, 0x802A3470, 0x802A3484  //39
-.word 0x802A3360, 0x802A34D4, 0x802A3498, 0x802A3300
-.word 0x802A33E4, DisplayHop, 0x802A33E4, 0x802A33E4
-.word 0x802A33E4, 0x802A33E4, 0x802A33E4, 0x802A33E4
-.word 0x802A33E4, 0x802A33E4, 0x802A33E4, 0x802A33E4
-.word 0x802A33E4, 0x802A33E4, 0x802A33E4, 0x802A33E4 //59
-.word 0x802A33E4, 0x802A33E4, 0x802A33E4, 0x802A33E4
-.word 0x802A33E4, 0x802A33E4, 0x802A33E4, 0x802A33E4
-.word 0x802A33E4, 0x802A33E4, 0x802A33E4, 0x802A33E4
-.word 0x802A33E4, 0x802A33E4, 0x802A33E4, 0x802A33E4
-.word 0x802A33E4, 0x802A33E4, 0x802A33E4, 0x802A33E4  //79
-.word 0x802A33E4, 0x802A33E4, 0x802A33E4, 0x802A33E4
-.word 0x802A33E4, 0x802A33E4, 0x802A33E4, 0x802A33E4
-.word 0x802A33E4, 0x802A33E4, 0x802A33E4, 0x802A33E4
-.word 0x802A33E4, 0x802A33E4, 0x802A33E4, 0x802A33E4
-.word 0x802A33E4, 0x802A33E4, 0x802A33E4, 0x802A33E4 //99
-
-
-CollisionJumpTable:
-.word 0x802A09B0, 0x802A09B0, 0x802A09B0, 0x802A09D4
-.word 0x802A04E0, 0x802A063C, 0x802A0858, 0x802A04AC
-.word 0x802A0968, 0x802A0D40, 0x802A0CBC, 0x802A0AA4
-.word 0x802A0D40, 0x802A0D40, 0x802A0D40, 0x802A0D40
-.word 0x802A0D40, 0x802A09B0, 0x802A0D40, 0x802A0D40 //19
-.word 0x802A0D40, 0x802A098C, 0x802A0D40, 0x802A09B0
-.word 0x802A09B0, 0x802A0D40, 0x802A09B0, 0x802A09B0
-.word 0x802A09B0, 0x802A09B0, 0x802A09B0, 0x802A09B0
-.word 0x802A0D40, 0x802A0D40, 0x802A0D40, 0x802A0D40
-.word 0x802A0D40, 0x802A0D40, 0x802A0D40, 0x802A0D40 //39
-.word 0x802A0744, 0x802A0C34, 0x802A09B0, 0x802A09B0
-.word 0x802A09B0, CollisionHop, 0x802A09B0, 0x802A09B0
-.word 0x802A09B0, 0x802A09B0, 0x802A09B0, 0x802A09B0
-.word 0x802A09B0, 0x802A09B0, 0x802A09B0, 0x802A09B0
-.word 0x802A09B0, 0x802A09B0, 0x802A09B0, 0x802A09B0 //59
-.word 0x802A09B0, 0x802A09B0, 0x802A09B0, 0x802A09B0
-.word 0x802A09B0, 0x802A09B0, 0x802A09B0, 0x802A09B0
-.word 0x802A09B0, 0x802A09B0, 0x802A09B0, 0x802A09B0
-.word 0x802A09B0, 0x802A09B0, 0x802A09B0, 0x802A09B0
-.word 0x802A09B0, 0x802A09B0, 0x802A09B0, 0x802A09B0 //79
-.word 0x802A09B0, 0x802A09B0, 0x802A09B0, 0x802A09B0
-.word 0x802A09B0, 0x802A09B0, 0x802A09B0, 0x802A09B0
-.word 0x802A09B0, 0x802A09B0, 0x802A09B0, 0x802A09B0
-.word 0x802A09B0, 0x802A09B0, 0x802A09B0, 0x802A09B0
-.word 0x802A09B0, 0x802A09B0, 0x802A09B0, 0x802A09B0 //99
-
-
-
-
+.fill VARIABLE_RAM_SIZE //Create space for battle kart 64 variables
 
 end_label:
+
+
+
+.headersize 0
+
+
+//Texturex and stuff for previews and crash screens, outside of ram
+.align 0x10
+previewN:
+.import "Library/data/preview_n.mio0.bin"       ;;  c10
+.align 0x10
+previewU:
+.import "Library/data/preview_U.mio0.bin"       ;;  c64
+RAMCheck:
+     .import "Library/data/test/BKRAMCheck.bin"
+     .align 0x10
+RAMCheckEnd:
+
+//LIBRARYBUILD2 needs to be EOF
+.align 0x10
+.include "Library/LIBRARYBUILD2.asm"
+.align 0x10
+.include "Library/LIBRARYBUILD4.asm"
+.align 0x10
 
 
 
