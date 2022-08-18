@@ -23,6 +23,7 @@
 //Standard libraries
 #include <stdbool.h>
 #include <stdlib.h>
+#include <math.h>
 
 // #include "../USB/usb.c"
 // #include "../USB/usb.h"
@@ -1936,6 +1937,12 @@ void runBots()
                 }
                 else if (bot_ai_type == 1) //Seeker bot AI type
                 {
+                    float rival_x = GlobalPlayer[0].position[0]; //x,y,z coords of rival
+                    float rival_y = GlobalPlayer[0].position[1];
+                    float rival_z = GlobalPlayer[0].position[2];
+                    float bot_x = GlobalPlayer[i].position[0]; //x,y,z coordinates of current bot
+                    float bot_y = GlobalPlayer[i].position[1];
+                    float bot_z = GlobalPlayer[i].position[2];
                     // if (bot_timer_p1[i] <= 0) //If bot timer is <= 0, roll the dice and maybe get a new rival
                     // {
                     //     bot_rival_p1[i] = getRival(i);
@@ -1944,7 +1951,7 @@ void runBots()
                     //     AIPathfinder[i].Target[0] = GlobalPlayer[0].position[0]; //Reset path finding in case bot gets lost
                     //     AIPathfinder[i].Target[1] = GlobalPlayer[0].position[1];
                     //     AIPathfinder[i].Target[2] = GlobalPlayer[0].position[2];
-                    //     UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 300, BlockFortPaths_Paths, BlockFortPaths_PathLengths, 28, i); 
+                    //     UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 300, BlockFortPaths_Paths, BlockFortPaths_PathLengths, 28, i, 0); 
                     // }
 
  
@@ -1953,32 +1960,35 @@ void runBots()
                     {
 
 
-                        printStringNumber(80,100,"P2 Target Path", AIPathfinder[1].TargetPath);
-                        printStringNumber(80,110,"P2 Last Path", AIPathfinder[1].LastPath);
-                        printFloat(80,120,AIPathfinder[1].Distance);
-                        printStringNumber(80,130,"P2 path progress", AIPathfinder[1].Progression);
-                        printStringNumber(80,140,"P2 path direction", AIPathfinder[1].Direction);
-                        printStringNumber(80, 150, "", BlockFortPaths_Paths[AIPathfinder[1].TargetPath][AIPathfinder[1].Progression].Position[0]);
-                        printStringNumber(120, 150, "", BlockFortPaths_Paths[AIPathfinder[1].TargetPath][AIPathfinder[1].Progression].Position[1]);
-                        printStringNumber(140, 150, "", BlockFortPaths_Paths[AIPathfinder[1].TargetPath][AIPathfinder[1].Progression].Position[2]);
-                        //printStringUnsignedHex(10, 160, "P2 controller input", bot_controller_input_p1[1]);
+                        // printStringNumber(0,110,"P2 Target Path", AIPathfinder[1].TargetPath);
+                        // printStringNumber(0,120,"P2 Last Path", AIPathfinder[1].LastPath);
+                        // // printFloat(0,130,AIPathfinder[1].Distance);
+                        // printStringNumber(0,130,"P2 path progress", AIPathfinder[1].Progression);
+                        // printStringNumber(0,140,"P2 path direction", AIPathfinder[1].Direction);
+                        // printStringNumber(0,150,"P2 path type", AIPathfinder[1].PathType);
 
-                        // printStringUnsignedHex(10, 160, "P2 Bot buttons",  bot_buttons[1]);
-                        // printStringNumber(10, 170, "P2 Bot x stick value",  bot_x_stick[1]);
-                        // printStringUnsignedHex(10, 160, "P1 controller thing",  *(uint*)(0x1FC007C0));
-                        // printStringUnsignedHex(10, 170, "P1 controller thing2", *(uint*)(0x1FC007C4));
-                        printStringNumber(10, 180, "P2 BOT TIMER", bot_timer_p1[1]);
-                        printStringUnsignedNumber(10, 190, "P2 bot status", bot_status_p1[1]);
+                        // // printStringNumber(0, 150, "", BlockFortPaths_Paths[AIPathfinder[1].TargetPath][AIPathfinder[1].Progression].Position[0]);
+                        // // printStringNumber(40, 150, "", BlockFortPaths_Paths[AIPathfinder[1].TargetPath][AIPathfinder[1].Progression].Position[1]);
+                        // // printStringNumber(80, 150, "", BlockFortPaths_Paths[AIPathfinder[1].TargetPath][AIPathfinder[1].Progression].Position[2]);
+                        // //printStringUnsignedHex(10, 160, "P2 controller input", bot_controller_input_p1[1]);
+
+                        // // printStringUnsignedHex(10, 160, "P2 Bot buttons",  bot_buttons[1]);
+                        // // printStringNumber(10, 170, "P2 Bot x stick value",  bot_x_stick[1]);
+                        // // printStringUnsignedHex(10, 160, "P1 controller thing",  *(uint*)(0x1FC007C0));
+                        // // printStringUnsignedHex(10, 170, "P1 controller thing2", *(uint*)(0x1FC007C4));
+                        // printStringNumber(10, 180, "P2 BOT TIMER", bot_timer_p1[1]);
+                        // printStringUnsignedNumber(10, 190, "P2 bot status", bot_status_p1[1]);
 
                         // printStringUnsignedHex(10, 200, "insideMenu", insideMenu);
 
-                        if ((AIPathfinder[i].TargetPath == 0 && AIPathfinder[i].LastPath==0) || (AIPathfinder[i].Direction == 0))//Initialize the path finding if course is just starting
+                        if ((AIPathfinder[i].TargetPath == 0 && AIPathfinder[i].LastPath==0) && (AIPathfinder[i].Direction == 0))//Initialize the path finding if course is just starting
                         {
+
                             //First set up BKPathfinder for P2 to follow P1
-                            AIPathfinder[i].Target[0] = GlobalPlayer[0].position[0];
-                            AIPathfinder[i].Target[1] = GlobalPlayer[0].position[1];
-                            AIPathfinder[i].Target[2] = GlobalPlayer[0].position[2];
-                            UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 300, BlockFortPaths_Paths, BlockFortPaths_PathLengths, 28, i);                            
+                            AIPathfinder[i].Target[0] = rival_x;
+                            AIPathfinder[i].Target[1] = rival_y;
+                            AIPathfinder[i].Target[2] = rival_z;
+                            UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 300, BlockFortPaths_Paths, BlockFortPaths_PathLengths, 28, i, 0);                            
                         }
 
 
@@ -1987,67 +1997,114 @@ void runBots()
                         int marker_index = AIPathfinder[i].Progression;
                         int target_path = AIPathfinder[i].TargetPath;
                         int direction = AIPathfinder[i].Direction;
-                        objectPosition[0] = (float)BlockFortPaths_Paths[target_path][marker_index].Position[0];
-                        objectPosition[1] = (float)BlockFortPaths_Paths[target_path][marker_index].Position[1];
-                        objectPosition[2] = (float)BlockFortPaths_Paths[target_path][marker_index].Position[2]; 
+                        switch (AIPathfinder[i].PathType) //Get position of current marker to drive towards
+                        {
+                            case 0: //flat paths
+                                objectPosition[0] = (float)BlockFortPaths_Paths[target_path][marker_index].Position[0];
+                                objectPosition[1] = (float)BlockFortPaths_Paths[target_path][marker_index].Position[1];
+                                objectPosition[2] = (float)BlockFortPaths_Paths[target_path][marker_index].Position[2]; 
+                                break;
+                            case 1: //ramps
+                                objectPosition[0] = (float)BlockFortPaths_Ramps[target_path][marker_index].Position[0];
+                                objectPosition[1] = (float)BlockFortPaths_Ramps[target_path][marker_index].Position[1];
+                                objectPosition[2] = (float)BlockFortPaths_Ramps[target_path][marker_index].Position[2]; 
+                                break;
+                            case 2: //drops 
+                                objectPosition[0] = (float)BlockFortPaths_Drops[target_path][marker_index].Position[0];
+                                objectPosition[1] = (float)BlockFortPaths_Drops[target_path][marker_index].Position[1];
+                                objectPosition[2] = (float)BlockFortPaths_Drops[target_path][marker_index].Position[2]; 
+                                break;
+                        }
 
-                        float x_distance = GlobalPlayer[i].position[0]-objectPosition[0];
-                        float y_distance = GlobalPlayer[i].position[1]-objectPosition[1];
-                        float z_distance = GlobalPlayer[i].position[2]-objectPosition[2];
-                        float distance_from_marker = x_distance*x_distance + y_distance*y_distance + z_distance*z_distance;
-                        //float distance_from_marker = x_distance*x_distance + z_distance*z_distance;
 
-                        if (distance_from_marker < 100) //If near the next path marker, advance to the next path marker
+                        float x_distance = bot_x - objectPosition[0];
+                        //float y_distance = bot_y;
+                        float z_distance = bot_z - objectPosition[2];
+                        float distance_from_marker = x_distance*x_distance + z_distance*z_distance;
+
+                        if (distance_from_marker < 400) //If near the next path marker, advance to the next path marker
                         {
                             marker_index += direction;
                             AIPathfinder[i].Progression = marker_index;
                         }
-                        // else if (y_distance*y_distance > 500.0) //If bot falls or for some reason gets pushed far away from the path... reset the path finding
-                        // {
-                        //     AIPathfinder[i].Target[0] = GlobalPlayer[0].position[0];
-                        //     AIPathfinder[i].Target[1] = GlobalPlayer[0].position[1];
-                        //     AIPathfinder[i].Target[2] = GlobalPlayer[0].position[2];
-                        //     UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 50.0, BlockFortPaths_Paths, BlockFortPaths_PathLengths, 28, i);
-                        // }
-                        
-                        if ( (marker_index==0 && direction==-1)  || (marker_index==BlockFortPaths_PathLengths[target_path]-1 && direction==1) || (marker_index < 0) || (marker_index > BlockFortPaths_PathLengths[target_path]-1)) //If bot reaches end of path
+
+                        float diff_y = rival_y - bot_y;
+                        switch (AIPathfinder[i].PathType)
                         {
-                            //First set up BKPathfinder for P2 to follow P1
-                            AIPathfinder[i].Target[0] = GlobalPlayer[0].position[0];
-                            AIPathfinder[i].Target[1] = GlobalPlayer[0].position[1];
-                            AIPathfinder[i].Target[2] = GlobalPlayer[0].position[2];
-                            UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 300.0, BlockFortPaths_Paths, BlockFortPaths_PathLengths, 28, i);
+                            case 0:  //If bot is following a flat path
+                                if ( (marker_index==0 && direction==-1)  || (marker_index==BlockFortPaths_PathLengths[target_path]-1 && direction==1) || (marker_index < 0) || (marker_index > BlockFortPaths_PathLengths[target_path]-1)) //If bot reaches end of path
+                                {                               
+                                    if ((diff_y > -20.0) && (diff_y < 20.0)) //If bots are on same plane
+                                    {
+                                        AIPathfinder[i].Target[0] = rival_x;
+                                        AIPathfinder[i].Target[1] = rival_y;
+                                        AIPathfinder[i].Target[2] = rival_z;
+                                        UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 300.0, BlockFortPaths_Paths, BlockFortPaths_PathLengths, 28, i, 0);
+                                    }
+                                    else if (diff_y >= 20.0) //If player is above bot
+                                    {
+                                        float nodePosition[] = {0.,0.,0.};
+                                        //First find nearest ramp
+                                        FindNearestPathNode(GlobalPlayer[i].position, nodePosition, BlockFortPaths_Ramps, BlockFortPaths_RampLengths, 12);
+                                        float diff_x = bot_x - nodePosition[0];
+                                        float diff_z = bot_z - nodePosition[2];
+                                        if (diff_x*diff_x + diff_z*diff_z < 22500.0) //If bot is at ramp, use ramp
+                                        {
+                                            AIPathfinder[i].Target[0] = rival_x;
+                                            AIPathfinder[i].Target[1] = rival_y;
+                                            AIPathfinder[i].Target[2] = rival_z;
+                                            UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 300.0, BlockFortPaths_Ramps, BlockFortPaths_RampLengths, 12, i, 1);
+                                        }
+                                        else{// Else find path to nearest ramp
+                                            AIPathfinder[i].Target[0] = nodePosition[0];
+                                            AIPathfinder[i].Target[1] = nodePosition[1];
+                                            AIPathfinder[i].Target[2] = nodePosition[2];
+                                            UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 300.0, BlockFortPaths_Paths, BlockFortPaths_PathLengths, 28, i, 0);                                            
+                                        }
+
+                                    }
+                                    else if (diff_y <= -20.0)
+                                    {
+                                        //FOR NOW JUST USE RAMPS, LATER WILL ADD RAMPS AND DROPS
+                                        float nodePosition[] = {0.,0.,0.};
+                                        //First find nearest ramp
+                                        FindNearestPathNode(GlobalPlayer[i].position, nodePosition, BlockFortPaths_Ramps, BlockFortPaths_RampLengths, 12);
+                                        float diff_x = bot_x - nodePosition[0];
+                                        float diff_z = bot_z - nodePosition[2];
+                                        if (diff_x*diff_x + diff_z*diff_z < 22500.0) //If bot is at ramp, use ramp
+                                        {
+                                            AIPathfinder[i].Target[0] = rival_x;
+                                            AIPathfinder[i].Target[1] = rival_y;
+                                            AIPathfinder[i].Target[2] = rival_z;
+                                            UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 300.0, BlockFortPaths_Ramps, BlockFortPaths_RampLengths, 12, i, 1);
+                                        }
+                                        else{// Else find path to nearest ramp
+                                            AIPathfinder[i].Target[0] = nodePosition[0];
+                                            AIPathfinder[i].Target[1] = nodePosition[1];
+                                            AIPathfinder[i].Target[2] = nodePosition[2];
+                                            UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 300.0, BlockFortPaths_Paths, BlockFortPaths_PathLengths, 28, i, 0);                                            
+                                        }
+                                    }
+                                }
+                                break;
+                            case 1: //If bot is following a ramp
+                                if ( (marker_index==0 && direction==-1)  || (marker_index==BlockFortPaths_RampLengths[target_path]-1 && direction==1) || (marker_index < 0) || (marker_index > BlockFortPaths_RampLengths[target_path]-1)) //If bot reaches end of path
+                                {
+                                    AIPathfinder[i].Target[0] = rival_x; //Done with the ramp so go back to a flat path
+                                    AIPathfinder[i].Target[1] = rival_y;
+                                    AIPathfinder[i].Target[2] = rival_z;
+                                    UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 300.0, BlockFortPaths_Paths, BlockFortPaths_PathLengths, 28, i, 0);                                   
+                                }
+                                break;
+                            case 2: //If bot is following a drop
+                                break;
                         }
-                        //bot_distance_from_path_marker[i] = x_distance*x_distance + y_distance*y_distance + z_distance*z_distance;
-                        // if ((bot_distance_from_path_marker[i] <= max_bot_distance_path_marker) && (AIPathfinder[i].Progression <= 26))
-                        // {
-                        //     bot_path_progression[i] += 1; //Move to the next marker if close enough to the current marker
-                        // }
-                        // bool bot_reached_end_of_path = bot_path_progression[i] == BlockFortPaths_PathLengths[bot_path_index[i]]-1;
-                        // if (bot_reached_end_of_path)
-                        // {
-                        //     //First set up BKPathfinder for P2 to follow P1
-                        //     AIPathfinder[i].Target[0] = GlobalPlayer[0].position[0];
-                        //     AIPathfinder[i].Target[1] = GlobalPlayer[0].position[1];
-                        //     AIPathfinder[i].Target[2] = GlobalPlayer[0].position[2];
-                        //     UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), BlockFortPaths_Paths, BlockFortPaths_PathLengths, 40, i);
 
-                        //     bot_path_progression[i] = 0; //reset bot progression along path once they complete it
-                        //     // if (bot_path_index[i] == 0) //Test finish going up first ramp
-                        //     // {
-                        //     //     bot_path_index[i] = 2; //now go up second ramp
-                        //     // }
-                        //     // else if (bot_path_index[i] == 2) //test finish going up second ramp
-                        //     // {
-                        //     //     bot_path_index[i] = 0; //reset to first ramp
-                        //     // }
-                        // }
-                        // else
-                        // {
-                        //     bot_path_progression[i] = 0; //Start over if off the path or fell or finished following the path
-                        // }
 
-                        switch( ObjectSubBehaviorTurnTarget(GlobalPlayer[i].position, GlobalPlayer[i].direction[1], objectPosition, 0x7) ) //Returns -1 or 1, to give direction to turn
+
+
+
+                        switch( ObjectSubBehaviorTurnTarget(GlobalPlayer[i].position, GlobalPlayer[i].direction[1], objectPosition, 0x9) ) //Returns -1 or 1, to give direction to turn
                         {
 
                             case 0:
@@ -2056,11 +2113,11 @@ void runBots()
                                 break;
                             case 1:
                                 bot_buttons[i] = BTN_A + BTN_B;
-                                bot_x_stick[i] = 0x50;
+                                bot_x_stick[i] = 0x70;
                                 break;
                             case -1:
                                 bot_buttons[i] = BTN_A + BTN_B;
-                                bot_x_stick[i] = -0x50;
+                                bot_x_stick[i] = -0x70;
                                 break;
                         }
 
