@@ -2018,14 +2018,20 @@ void runBots()
 
 
                         float x_distance = bot_x - objectPosition[0];
-                        //float y_distance = bot_y;
+                        float y_distance = bot_y - objectPosition[1]; 
                         float z_distance = bot_z - objectPosition[2];
-                        float distance_from_marker = x_distance*x_distance + z_distance*z_distance;
 
-                        if (distance_from_marker < 400) //If near the next path marker, advance to the next path marker
+                        if (x_distance*x_distance + z_distance*z_distance < 2500) //If near the next path marker, advance to the next path marker
                         {
                             marker_index += direction;
                             AIPathfinder[i].Progression = marker_index;
+                        }
+                        else if (y_distance < -20) //If bot has fallen such that they are below the marker, try reacquiring the path finding
+                        {
+                            AIPathfinder[i].Target[0] = rival_x;
+                            AIPathfinder[i].Target[1] = rival_y;
+                            AIPathfinder[i].Target[2] = rival_z;
+                            UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 300.0, BlockFortPaths_Paths, BlockFortPaths_PathLengths, 28, i, 0);                            
                         }
 
                         float diff_y = rival_y - bot_y;
@@ -2045,7 +2051,7 @@ void runBots()
                                     {
                                         float nodePosition[] = {0.,0.,0.};
                                         //First find nearest ramp
-                                        FindNearestPathNode(GlobalPlayer[i].position, nodePosition, BlockFortPaths_Ramps, BlockFortPaths_RampLengths, 12);
+                                        FindNearestRampNode(GlobalPlayer[i].position, nodePosition, true, BlockFortPaths_Ramps, BlockFortPaths_RampLengths, 12);
                                         float diff_x = bot_x - nodePosition[0];
                                         float diff_z = bot_z - nodePosition[2];
                                         if (diff_x*diff_x + diff_z*diff_z < 22500.0) //If bot is at ramp, use ramp
@@ -2068,7 +2074,7 @@ void runBots()
                                         //FOR NOW JUST USE RAMPS, LATER WILL ADD RAMPS AND DROPS
                                         float nodePosition[] = {0.,0.,0.};
                                         //First find nearest ramp
-                                        FindNearestPathNode(GlobalPlayer[i].position, nodePosition, BlockFortPaths_Ramps, BlockFortPaths_RampLengths, 12);
+                                        FindNearestRampNode(GlobalPlayer[i].position, nodePosition, false, BlockFortPaths_Ramps, BlockFortPaths_RampLengths, 12);
                                         float diff_x = bot_x - nodePosition[0];
                                         float diff_z = bot_z - nodePosition[2];
                                         if (diff_x*diff_x + diff_z*diff_z < 22500.0) //If bot is at ramp, use ramp
@@ -2104,7 +2110,7 @@ void runBots()
 
 
 
-                        switch( ObjectSubBehaviorTurnTarget(GlobalPlayer[i].position, GlobalPlayer[i].direction[1], objectPosition, 0x9) ) //Returns -1 or 1, to give direction to turn
+                        switch( ObjectSubBehaviorTurnTarget(GlobalPlayer[i].position, GlobalPlayer[i].direction[1], objectPosition, 0x3) ) //Returns -1 or 1, to give direction to turn
                         {
 
                             case 0:
@@ -2112,14 +2118,40 @@ void runBots()
                                 bot_x_stick[i] = 0x00;
                                 break;
                             case 1:
+                                bot_buttons[i] = BTN_A;
+                                bot_x_stick[i] = 0x20;
+                                break;
+                            case -1:
+                                bot_buttons[i] = BTN_A;
+                                bot_x_stick[i] = -0x20;
+                                break;
+                        }
+                        switch( ObjectSubBehaviorTurnTarget(GlobalPlayer[i].position, GlobalPlayer[i].direction[1], objectPosition, 0x5) ) //Returns -1 or 1, to give direction to turn
+                        {
+
+                            case 0:
+                                break;
+                            case 1:
+                                bot_x_stick[i] = 0x38;
+                                break;
+                            case -1:
+                                bot_x_stick[i] = -0x38;
+                                break;
+                        }
+                        switch( ObjectSubBehaviorTurnTarget(GlobalPlayer[i].position, GlobalPlayer[i].direction[1], objectPosition, 0xE) ) //Returns -1 or 1, to give direction to turn
+                        {
+                            case 0:
+                                break;
+                            case 1:
                                 bot_buttons[i] = BTN_A + BTN_B;
-                                bot_x_stick[i] = 0x70;
+                                bot_x_stick[i] = 0x50;
                                 break;
                             case -1:
                                 bot_buttons[i] = BTN_A + BTN_B;
-                                bot_x_stick[i] = -0x70;
+                                bot_x_stick[i] = -0x50;
                                 break;
                         }
+
 
                         //Testing pathfinding
 
