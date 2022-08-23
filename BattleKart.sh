@@ -37,7 +37,7 @@ cd /Users/kfkaplan/Dropbox/battlekart64
 
 
 ~/Desktop/N64/armips/build/armips "BattleKart.asm"
-~/Desktop/N64/n64crc "BattleKart.z64"
-#loader64 -vwf BattleKart.z64 
+~/Desktop/N64/n64crc "BattleKart64.z64"
+#loader64 -vwf BattleKart64.z64 
 #loader64 -p
-#UNFLoader -r BattleKart.z64
+#UNFLoader -r BattleKart64.z64
