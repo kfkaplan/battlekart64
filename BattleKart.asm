@@ -3025,6 +3025,9 @@ inRace:
 		SH a2, 0x800F952C //Update top speeds for all 4 players
 	@@branch_ludicrousspeed_on:
 
+	// JAL DynamicTempo
+	// NOP
+
 
 	JAL runBots //Test running battle bots in c
 	NOP
