@@ -2017,9 +2017,25 @@ void runBots()
                         }
 
 
+
+
                         float x_distance = bot_x - objectPosition[0];
                         float y_distance = bot_y - objectPosition[1]; 
                         float z_distance = bot_z - objectPosition[2];
+
+                        if (i == 1)
+                        {
+                            loadFont();
+                            printString(10, 120, "P2 target");
+                            printStringNumber(10, 130, "Target[0]", AIPathfinder[i].Target[0]);
+                            printStringNumber(10, 140, "Target[1]", AIPathfinder[i].Target[1]);
+                            printStringNumber(10, 150, "Target[2]", AIPathfinder[i].Target[2]);
+                            printStringNumber(10, 160, "Progression",  AIPathfinder[i].Progression);
+                            printStringNumber(10, 170, "Direction",  AIPathfinder[i].Direction);
+                            printStringNumber(10, 180, "PathType",  AIPathfinder[i].PathType);
+
+                        }
+
 
                         if (x_distance*x_distance + z_distance*z_distance < 2500) //If near the next path marker, advance to the next path marker
                         {
@@ -2050,16 +2066,24 @@ void runBots()
                                     else if (diff_y >= 20.0) //If player is above bot
                                     {
                                         float nodePosition[] = {0.,0.,0.};
+                                        int ramp_path_index;
                                         //First find nearest ramp
-                                        FindNearestRampNode(GlobalPlayer[i].position, nodePosition, rival_y, BlockFortPaths_Ramps, BlockFortPaths_RampLengths, 12);
+                                        ramp_path_index = FindNearestRampNode(GlobalPlayer[i].position, nodePosition, rival_y, BlockFortPaths_Ramps, BlockFortPaths_RampLengths, 12);
                                         float diff_x = bot_x - nodePosition[0];
                                         float diff_z = bot_z - nodePosition[2];
+
+
                                         if (diff_x*diff_x + diff_z*diff_z < 22500.0) //If bot is at ramp, use ramp
                                         {
                                             AIPathfinder[i].Target[0] = rival_x;
                                             AIPathfinder[i].Target[1] = rival_y;
                                             AIPathfinder[i].Target[2] = rival_z;
-                                            UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 300.0, BlockFortPaths_Ramps, BlockFortPaths_RampLengths, 12, i, 1);
+                                            //UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 300.0, BlockFortPaths_Ramps, BlockFortPaths_RampLengths, 12, i, 1);
+                                            AIPathfinder[i].LastPath = AIPathfinder[i].TargetPath;
+                                            AIPathfinder[i].TargetPath = ramp_path_index;
+                                            AIPathfinder[i].Progression = 1;
+                                            AIPathfinder[i].Direction = 1;
+                                            AIPathfinder[i].PathType = 1;
                                         }
                                         else{// Else find path to nearest ramp
                                             AIPathfinder[i].Target[0] = nodePosition[0];
@@ -2073,16 +2097,25 @@ void runBots()
                                     {
                                         //FOR NOW JUST USE RAMPS, LATER WILL ADD RAMPS AND DROPS
                                         float nodePosition[] = {0.,0.,0.};
+                                        int ramp_path_index;
                                         //First find nearest ramp
-                                        FindNearestRampNode(GlobalPlayer[i].position, nodePosition, rival_y, BlockFortPaths_Ramps, BlockFortPaths_RampLengths, 12);
+                                        ramp_path_index = FindNearestRampNode(GlobalPlayer[i].position, nodePosition, rival_y, BlockFortPaths_Ramps, BlockFortPaths_RampLengths, 12);
                                         float diff_x = bot_x - nodePosition[0];
                                         float diff_z = bot_z - nodePosition[2];
+                                        
+
+
                                         if (diff_x*diff_x + diff_z*diff_z < 22500.0) //If bot is at ramp, use ramp
                                         {
                                             AIPathfinder[i].Target[0] = rival_x;
                                             AIPathfinder[i].Target[1] = rival_y;
                                             AIPathfinder[i].Target[2] = rival_z;
-                                            UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 300.0, BlockFortPaths_Ramps, BlockFortPaths_RampLengths, 12, i, 1);
+                                            // UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 300.0, BlockFortPaths_Ramps, BlockFortPaths_RampLengths, 12, i, 1);
+                                            AIPathfinder[i].LastPath = AIPathfinder[i].TargetPath;
+                                            AIPathfinder[i].TargetPath = ramp_path_index;
+                                            AIPathfinder[i].Progression = BlockFortPaths_RampLengths[ramp_path_index]-2;
+                                            AIPathfinder[i].Direction = -1;
+                                            AIPathfinder[i].PathType = 1;
                                         }
                                         else{// Else find path to nearest ramp
                                             AIPathfinder[i].Target[0] = nodePosition[0];
@@ -2094,6 +2127,9 @@ void runBots()
                                 }
                                 break;
                             case 1: //If bot is following a ramp
+
+
+
                                 if ( (marker_index==0 && direction==-1)  || (marker_index==BlockFortPaths_RampLengths[target_path]-1 && direction==1) || (marker_index < 0) || (marker_index > BlockFortPaths_RampLengths[target_path]-1)) //If bot reaches end of path
                                 {
                                     AIPathfinder[i].Target[0] = rival_x; //Done with the ramp so go back to a flat path
