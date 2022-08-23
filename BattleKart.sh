@@ -32,6 +32,7 @@ cd /Users/kfkaplan/Dropbox/battlekart64
 
 #Battlekart related c files
 /Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "BattleKartFlag/BattleKartFlag.c" -o "BattleKartFlag/BattleKartFlag.o" 
+/Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "BattleBots/BattleBotAI.c" -o "BattleBots/BattleBotAI.o" 
 /Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "BattleKartVariables.c" -o "BattleKartVariables.o" 
 
 

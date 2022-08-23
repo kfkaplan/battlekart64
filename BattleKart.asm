@@ -1,23 +1,21 @@
 .n64
-.open "/Users/kfkaplan/Desktop/N64/unaltered_roms/Mario Kart 64.z64", "BattleKart.z64", 0 //Path to the MK64 rom and output name of battle kart rom
-// .open "Mario Kart 64 (U) [!].z64", "BattleKart.z64", 0 //Path to the MK64 rom with custom courses put in and output name of battle kart rom
-// .open "BattleFarm.z64", "BattleKart.z64", 0 //Path to the MK64 rom with custom courses put in and output name of battle kart rom
+.open "../Mario Kart 64.z64", "BattleKart64.z64", 0 //Path to the MK64 rom and output name of battle kart rom
 
-//LIBRARYBUILD3 needs to be start of file
+//LibraryBUILD3 needs to be start of file
 //.align 0x10
-.include "Library/LIBRARYBUILD3.asm"
+.include "../Library/LibraryBUILD3.asm"
 
 
 
-.definelabel RAM_END, org(end_label) //For Library/OKHeader.asm
+.definelabel RAM_END, org(end_label) //For ../Library/OKHeader.asm
 
 
 .definelabel ok_ModelDataRawSize,     0
 //.align 0x10
-.include "Library/GameVariables/NTSC/GameOffsets.asm"
-.include "Library/GameVariables/NTSC/StatsOffsets.asm"
-.include "library/OKHeader.asm"
-.include "Library/GameVariables/NTSC/OKAssembly.asm"
+.include "../Library/GameVariables/NTSC/GameOffsets.asm"
+.include "../Library/GameVariables/NTSC/StatsOffsets.asm"
+.include "../Library/OKHeader.asm"
+.include "../Library/GameVariables/NTSC/OKAssembly.asm"
 
 
 
@@ -6162,6 +6160,8 @@ theMinimapSprites:
 .align 0x10
 .importobj "BattleKartFlag/BattleKartFlag.o"
 .align 0x10
+.importobj "BattleBots/BattleBotAI.o"
+.align 0x10
 // .importobj "BattleKartFlag/BattleKartPathData.o"
 // .align 0x10
 .importobj "BattleKartVariables.o"
@@ -6393,36 +6393,36 @@ botControlWrapper:
 
 .align 0x10
 set0:
-.import "Library/data/Stock.png.MIO0"            ;;  87c
+.import "../Library/data/Stock.png.MIO0"            ;;  87c
 .align 0x10
 set0end:
 
 .align 0x10
 set1:
-.import "Library/data/Set1.png.MIO0"            ;;  7f5
+.import "../Library/data/Set1.png.MIO0"            ;;  7f5
 .align 0x10
 set1end:
 
 .align 0x10
 set2:
-.import "Library/data/Set2.png.MIO0"            ;;  7fc
+.import "../Library/data/Set2.png.MIO0"            ;;  7fc
 .align 0x10
 set2end:
 
 .align 0x10
 set3:
-.import "Library/data/Set3.png.MIO0"            ;;  808
+.import "../Library/data/Set3.png.MIO0"            ;;  808
 .align 0x10
 set3end:
 
 .align 0x10
 set4:
-.import "Library/data/Set4.png.MIO0"            ;;  800
+.import "../Library/data/Set4.png.MIO0"            ;;  800
 .align 0x10
 set4end:
 
 .align 0x10
-.include "Library/LIBRARYBUILD.asm"
+.include "../Library/LibraryBUILD.asm"
 .align 0x10
 
 .fill VARIABLE_RAM_SIZE //Create space for battle kart 64 variables
@@ -6437,20 +6437,20 @@ end_label:
 //Texturex and stuff for previews and crash screens, outside of ram
 .align 0x10
 previewN:
-.import "Library/data/preview_n.mio0.bin"       ;;  c10
+.import "../Library/data/preview_n.mio0.bin"       ;;  c10
 .align 0x10
 previewU:
-.import "Library/data/preview_U.mio0.bin"       ;;  c64
+.import "../Library/data/preview_U.mio0.bin"       ;;  c64
 RAMCheck:
-     .import "Library/data/test/BKRAMCheck.bin"
+     .import "Data\BKRAMCheck.bin"
      .align 0x10
 RAMCheckEnd:
 
-//LIBRARYBUILD2 needs to be EOF
+//LibraryBUILD2 needs to be EOF
 .align 0x10
-.include "Library/LIBRARYBUILD2.asm"
+.include "../Library/LibraryBUILD2.asm"
 .align 0x10
-.include "Library/LIBRARYBUILD4.asm"
+.include "../Library/LibraryBUILD4.asm"
 .align 0x10
 
 
