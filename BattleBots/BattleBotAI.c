@@ -294,7 +294,7 @@ void SeekerBattleBot(int i)
             AIPathfinder[i].Target[0] = rival_x;
             AIPathfinder[i].Target[1] = rival_y;
             AIPathfinder[i].Target[2] = rival_z;
-            UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 300, BlockFortPaths_Paths, BlockFortPaths_PathLengths, 28, i, 0);                            
+            UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 400, BlockFortPaths_Paths, BlockFortPaths_PathLengths, 28, i, 0);                            
         }
 
 
@@ -331,7 +331,7 @@ void SeekerBattleBot(int i)
 
         if (i == 1)
         {
-            /*
+            
             loadFont();
             printString(10, 120, "P2 target");
             printStringNumber(10, 130, "Target[0]", AIPathfinder[i].Target[0]);
@@ -340,7 +340,7 @@ void SeekerBattleBot(int i)
             printStringNumber(10, 160, "Progression",  AIPathfinder[i].Progression);
             printStringNumber(10, 170, "Direction",  AIPathfinder[i].Direction);
             printStringNumber(10, 180, "PathType",  AIPathfinder[i].PathType);
-            */
+            printStringNumber(10, 190, "TargetPath",  AIPathfinder[i].TargetPath);
 
         }
 
@@ -349,24 +349,27 @@ void SeekerBattleBot(int i)
         GlobalShortA = 3600;
         if (direction > 0)
         {
-            if (marker_index > 6)
+            if (marker_index > 4)
             {
-                GlobalShortA = 2500;
+                GlobalShortA = 1600;
             }
         }
         else
         {
-            if (BlockFortPaths_PathLengths[target_path]-marker_index > 6)
+            if (BlockFortPaths_PathLengths[target_path]-marker_index > 4)
             {
-                GlobalShortA = 2500;
+                GlobalShortA = 1600;
             }
         }
 
-        if (x_distance*x_distance + z_distance*z_distance + y_distance * y_distance < GlobalShortA) //If near the next path marker, advance to the next path marker
+        if (x_distance*x_distance + z_distance*z_distance < GlobalShortA) //If near the next path marker, advance to the next path marker
         {
             marker_index += direction;
             AIPathfinder[i].Progression = marker_index;
         }
+
+
+        /*
         else if (y_distance < -20) //If bot has fallen such that they are below the marker, try reacquiring the path finding
         {
             AIPathfinder[i].Target[0] = rival_x;
@@ -374,19 +377,20 @@ void SeekerBattleBot(int i)
             AIPathfinder[i].Target[2] = rival_z;
             UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 300.0, BlockFortPaths_Paths, BlockFortPaths_PathLengths, 28, i, 0);                            
         }
+        */
 
         float diff_y = rival_y - bot_y;
         switch (AIPathfinder[i].PathType)
         {
             case 0:  //If bot is following a flat path
-                if ( (marker_index==0 && direction==-1)  || (marker_index==BlockFortPaths_PathLengths[target_path]-1 && direction==1) || (marker_index < 0) || (marker_index > BlockFortPaths_PathLengths[target_path]-1)) //If bot reaches end of path
+                if ( (marker_index==0 && direction==-1)  || (marker_index==BlockFortPaths_PathLengths[target_path] && direction==1) || (marker_index < 0) || (marker_index > BlockFortPaths_PathLengths[target_path])) //If bot reaches end of path
                 {                               
                     if ((diff_y > -20.0) && (diff_y < 20.0)) //If bots are on same plane
                     {
                         AIPathfinder[i].Target[0] = rival_x;
                         AIPathfinder[i].Target[1] = rival_y;
                         AIPathfinder[i].Target[2] = rival_z;
-                        UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 300.0, BlockFortPaths_Paths, BlockFortPaths_PathLengths, 28, i, 0);
+                        UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 400.0, BlockFortPaths_Paths, BlockFortPaths_PathLengths, 28, i, 0);
                     }
                     else if (diff_y >= 20.0) //If player is above bot
                     {
@@ -414,7 +418,7 @@ void SeekerBattleBot(int i)
                             AIPathfinder[i].Target[0] = nodePosition[0];
                             AIPathfinder[i].Target[1] = nodePosition[1];
                             AIPathfinder[i].Target[2] = nodePosition[2];
-                            UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 300.0, BlockFortPaths_Paths, BlockFortPaths_PathLengths, 28, i, 0);                                            
+                            UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 400.0, BlockFortPaths_Paths, BlockFortPaths_PathLengths, 28, i, 0);                                            
                         }
 
                     }
@@ -446,7 +450,7 @@ void SeekerBattleBot(int i)
                             AIPathfinder[i].Target[0] = nodePosition[0];
                             AIPathfinder[i].Target[1] = nodePosition[1];
                             AIPathfinder[i].Target[2] = nodePosition[2];
-                            UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 300.0, BlockFortPaths_Paths, BlockFortPaths_PathLengths, 28, i, 0);                                            
+                            UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 400.0, BlockFortPaths_Paths, BlockFortPaths_PathLengths, 28, i, 0);                                            
                         }
                     }
                 }
@@ -460,7 +464,7 @@ void SeekerBattleBot(int i)
                     AIPathfinder[i].Target[0] = rival_x; //Done with the ramp so go back to a flat path
                     AIPathfinder[i].Target[1] = rival_y;
                     AIPathfinder[i].Target[2] = rival_z;
-                    UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 300.0, BlockFortPaths_Paths, BlockFortPaths_PathLengths, 28, i, 0);                                   
+                    UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 400.0, BlockFortPaths_Paths, BlockFortPaths_PathLengths, 28, i, 0);                                   
                 }
                 break;
             case 2: //If bot is following a drop
