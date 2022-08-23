@@ -2051,7 +2051,7 @@ void runBots()
                                     {
                                         float nodePosition[] = {0.,0.,0.};
                                         //First find nearest ramp
-                                        FindNearestRampNode(GlobalPlayer[i].position, nodePosition, true, BlockFortPaths_Ramps, BlockFortPaths_RampLengths, 12);
+                                        FindNearestRampNode(GlobalPlayer[i].position, nodePosition, rival_y, BlockFortPaths_Ramps, BlockFortPaths_RampLengths, 12);
                                         float diff_x = bot_x - nodePosition[0];
                                         float diff_z = bot_z - nodePosition[2];
                                         if (diff_x*diff_x + diff_z*diff_z < 22500.0) //If bot is at ramp, use ramp
@@ -2074,7 +2074,7 @@ void runBots()
                                         //FOR NOW JUST USE RAMPS, LATER WILL ADD RAMPS AND DROPS
                                         float nodePosition[] = {0.,0.,0.};
                                         //First find nearest ramp
-                                        FindNearestRampNode(GlobalPlayer[i].position, nodePosition, false, BlockFortPaths_Ramps, BlockFortPaths_RampLengths, 12);
+                                        FindNearestRampNode(GlobalPlayer[i].position, nodePosition, rival_y, BlockFortPaths_Ramps, BlockFortPaths_RampLengths, 12);
                                         float diff_x = bot_x - nodePosition[0];
                                         float diff_z = bot_z - nodePosition[2];
                                         if (diff_x*diff_x + diff_z*diff_z < 22500.0) //If bot is at ramp, use ramp
