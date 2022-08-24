@@ -1,5 +1,4 @@
 #include "../../Library/MainInclude.h"
-
  extern Marker BlockFortPaths_MidPath_11[6];
  extern Marker BlockFortPaths_MidPath_10[8];
  extern Marker BlockFortPaths_MidPath_9[5];
@@ -13,7 +12,6 @@
  extern Marker BlockFortPaths_LowPath_2[13];
  extern Marker BlockFortPaths_LowPath_3[14];
  extern Marker BlockFortPaths_LowPath_4[13];
-
  extern Marker BlockFortPaths_LowPath_5[14];
  extern Marker BlockFortPaths_LowPath_6[14];
  extern Marker BlockFortPaths_LowPath_7[13];
@@ -33,16 +31,16 @@
 
 extern Marker *BlockFortPaths_Paths[28];
 extern short BlockFortPaths_PathLengths[28];
- extern Marker BlockFortPaths_YellowTopRamp[5];
+ extern Marker BlockFortPaths_YellowTopRamp[7];
  extern Marker BlockFortPaths_YellowRampB[11];
  extern Marker BlockFortPaths_YellowRampA[11];
- extern Marker BlockFortPaths_RedTopRamp[5];
+ extern Marker BlockFortPaths_RedTopRamp[7];
  extern Marker BlockFortPaths_RedRampB[11];
  extern Marker BlockFortPaths_RedRampA[11];
- extern Marker BlockFortPaths_GreenTopRamp[5];
+ extern Marker BlockFortPaths_GreenTopRamp[7];
  extern Marker BlockFortPaths_GreenRampB[11];
  extern Marker BlockFortPaths_GreenRampA[11];
- extern Marker BlockFortPaths_BlueTopRamp[5];
+ extern Marker BlockFortPaths_BlueTopRamp[7];
  extern Marker BlockFortPaths_BlueRampB[9];
  extern Marker BlockFortPaths_BlueRampA[11];
 extern Marker *BlockFortPaths_Ramps[12];

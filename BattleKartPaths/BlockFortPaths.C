@@ -1,6 +1,4 @@
-
 #include "../../Library/MainInclude.h"
-
 Marker BlockFortPaths_MidPath_11[6] = 
 {
 	{ {-525, 48, 175} , 1},
@@ -377,13 +375,15 @@ Marker *BlockFortPaths_Paths[] =
 { BlockFortPaths_MidPath_11, BlockFortPaths_MidPath_10, BlockFortPaths_MidPath_9, BlockFortPaths_MidPath_8, BlockFortPaths_MidPath_6, BlockFortPaths_MidPath_4, BlockFortPaths_MidPath_2, BlockFortPaths_MidPath_1, BlockFortPaths_LowPath_0, BlockFortPaths_LowPath_1, BlockFortPaths_LowPath_2, BlockFortPaths_LowPath_3, BlockFortPaths_LowPath_4, BlockFortPaths_LowPath_5, BlockFortPaths_LowPath_6, BlockFortPaths_LowPath_7, BlockFortPaths_LowPath_8, BlockFortPaths_LowPath_9, BlockFortPaths_LowPath_10, BlockFortPaths_LowPath_11, BlockFortPaths_HighPath_0, BlockFortPaths_HighPath_1, BlockFortPaths_HighPath_2, BlockFortPaths_HighPath_3, BlockFortPaths_MidPath_7, BlockFortPaths_MidPath_5, BlockFortPaths_MidPath_3, BlockFortPaths_MidPath_0};
 short BlockFortPaths_PathLengths[28] = 
 { 5, 7, 4, 6, 6, 6, 6, 6, 13, 12, 12, 13, 12, 13, 13, 12, 12, 12, 13, 13, 13, 13, 13, 13, 3, 3, 3, 3};
-Marker BlockFortPaths_YellowTopRamp[5] = 
+Marker BlockFortPaths_YellowTopRamp[7] = 
 {
 	{ {-260, 47, 204} , 1},
 	{ {-265, 53, 243} , 1},
 	{ {-265, 65, 281} , 1},
 	{ {-265, 78, 319} , 1},
-	{ {-266, 90, 357} , 1},
+	{ {-265, 90, 356} , 1},
+	{ {-294, 93, 382} , 1},
+	{ {-328, 93, 403} , 1},
 };
 Marker BlockFortPaths_YellowRampB[11] = 
 {
@@ -413,13 +413,15 @@ Marker BlockFortPaths_YellowRampA[11] =
 	{ {-257, 48, 576} , 1},
 	{ {-221, 48, 559} , 1},
 };
-Marker BlockFortPaths_RedTopRamp[5] = 
+Marker BlockFortPaths_RedTopRamp[7] = 
 {
 	{ {204, 47, 260} , 1},
 	{ {243, 53, 265} , 1},
 	{ {281, 65, 265} , 1},
 	{ {319, 78, 265} , 1},
-	{ {357, 90, 266} , 1},
+	{ {356, 90, 265} , 1},
+	{ {385, 93, 292} , 1},
+	{ {410, 93, 323} , 1},
 };
 Marker BlockFortPaths_RedRampB[11] = 
 {
@@ -449,13 +451,15 @@ Marker BlockFortPaths_RedRampA[11] =
 	{ {576, 48, 257} , 1},
 	{ {559, 48, 221} , 1},
 };
-Marker BlockFortPaths_GreenTopRamp[5] = 
+Marker BlockFortPaths_GreenTopRamp[7] = 
 {
 	{ {-204, 47, -260} , 1},
 	{ {-243, 53, -265} , 1},
 	{ {-281, 65, -265} , 1},
 	{ {-319, 78, -265} , 1},
-	{ {-357, 90, -266} , 1},
+	{ {-356, 90, -265} , 1},
+	{ {-385, 93, -292} , 1},
+	{ {-410, 93, -323} , 1},
 };
 Marker BlockFortPaths_GreenRampB[11] = 
 {
@@ -485,13 +489,15 @@ Marker BlockFortPaths_GreenRampA[11] =
 	{ {-576, 48, -257} , 1},
 	{ {-559, 48, -221} , 1},
 };
-Marker BlockFortPaths_BlueTopRamp[5] = 
+Marker BlockFortPaths_BlueTopRamp[7] = 
 {
 	{ {260, 47, -204} , 1},
 	{ {265, 53, -243} , 1},
 	{ {265, 65, -281} , 1},
 	{ {265, 78, -319} , 1},
-	{ {266, 90, -357} , 1},
+	{ {265, 90, -356} , 1},
+	{ {294, 93, -382} , 1},
+	{ {328, 93, -403} , 1},
 };
 Marker BlockFortPaths_BlueRampB[9] = 
 {
@@ -522,7 +528,7 @@ Marker BlockFortPaths_BlueRampA[11] =
 Marker *BlockFortPaths_Ramps[] = 
 { BlockFortPaths_YellowTopRamp, BlockFortPaths_YellowRampB, BlockFortPaths_YellowRampA, BlockFortPaths_RedTopRamp, BlockFortPaths_RedRampB, BlockFortPaths_RedRampA, BlockFortPaths_GreenTopRamp, BlockFortPaths_GreenRampB, BlockFortPaths_GreenRampA, BlockFortPaths_BlueTopRamp, BlockFortPaths_BlueRampB, BlockFortPaths_BlueRampA};
 short BlockFortPaths_RampLengths[12] = 
-{ 4, 10, 10, 4, 10, 10, 4, 10, 10, 4, 8, 10};
+{ 6, 10, 10, 6, 10, 10, 6, 10, 10, 6, 8, 10};
 Marker BlockFortPaths_GreenDropLow[7] = 
 {
 	{ {-170, 47, -170} , 1},
