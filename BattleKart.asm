@@ -6054,6 +6054,12 @@ runAtCourseInitialization:
 	NOP
 
 
+	//DeadHamster
+	JAL ResetPathfinderBots
+	NOP
+	//End DeadHamster <3
+	
+
 	// SB zero, 0x800F6A5B //Disable lakitu
 	// SB zero, 0x800f7833
 	// SB zero, 0x800f860b
