@@ -443,9 +443,7 @@ void SeekerBattleBot(int i)
 
 
         
-        int marker_index = AIPathfinder[i].Progression;
-        int target_path = AIPathfinder[i].TargetPath;
-        int direction = AIPathfinder[i].Direction;
+
         
         if (AIPathfinder[i].TargetPath != -1)
         {
@@ -456,16 +454,16 @@ void SeekerBattleBot(int i)
             //Check if at current target marker
 
             GlobalShortA = 3600;
-            if (direction > 0)
+            if (AIPathfinder[i].Direction > 0)
             {
-                if (marker_index > 4)
+                if (AIPathfinder[i].Progression > 4)
                 {
                     GlobalShortA = 1600;
                 }
             }
             else
             {
-                if (BlockFortPaths_PathLengths[target_path]-marker_index > 4)
+                if (BlockFortPaths_PathLengths[AIPathfinder[i].TargetPath]-AIPathfinder[i].Progression > 4)
                 {
                     GlobalShortA = 1600;
                 }
@@ -499,12 +497,13 @@ void SeekerBattleBot(int i)
 
             x_distance *= x_distance;
             z_distance *= z_distance;
+            y_distance *= y_distance;
             
 
             if (x_distance + z_distance + y_distance< GlobalShortA)//If near the next path marker, advance to the next path marker
             {
-                marker_index += direction;
-                AIPathfinder[i].Progression = marker_index;
+                AIPathfinder[i].Progression += AIPathfinder[i].Direction;
+                AIPathfinder[i].Progression = AIPathfinder[i].Progression;
                 AIPathfinder[i].ProgressTimer = 0;
             }
             else
@@ -520,7 +519,7 @@ void SeekerBattleBot(int i)
 
             //Now check if the nearest marker is further in the list than the Progression Value.
 
-            if (direction > 0)
+            if (AIPathfinder[i].Direction > 0)
             {
                 if (AIPathfinder[i].NearestMarker > AIPathfinder[i].Progression)
                 {
@@ -534,7 +533,7 @@ void SeekerBattleBot(int i)
                     AIPathfinder[i].Progression = AIPathfinder[i].NearestMarker;
                 }
             }
-            marker_index = AIPathfinder[i].Progression;
+            AIPathfinder[i].Progression = AIPathfinder[i].Progression;
         }
         
 
@@ -577,6 +576,7 @@ void SeekerBattleBot(int i)
                             AIPathfinder[i].Direction = 1;
                             AIPathfinder[i].PathType = 1;
                             AIPathfinder[i].NearestMarker = 0;
+                            AIPathfinder[i].ProgressTimer = 0;
                         }
                         else{// Else find path to nearest ramp
                             AIPathfinder[i].Target[0] = nodePosition[0];
@@ -610,6 +610,7 @@ void SeekerBattleBot(int i)
                             AIPathfinder[i].Direction = -1;
                             AIPathfinder[i].PathType = 1;
                             AIPathfinder[i].NearestMarker = BlockFortPaths_RampLengths[ramp_path_index];
+                            AIPathfinder[i].ProgressTimer = 0;
                         }
                         else{// Else find path to nearest ramp
                             AIPathfinder[i].Target[0] = nodePosition[0];
@@ -821,8 +822,8 @@ void runBots()
                 
                 if (bot_timer_p1[i] <= 0) //If bot timer is <= 0, roll the dice and maybe get a new rival
                 {
-                    bot_rival_p1[i] = getRival(i);
-                    bot_timer_p1[i] = MakeRandomLimmit(16) +  50; //Reset bot timer
+                    bot_rival_p1[i] = 0;
+                    bot_timer_p1[i] = MakeRandomLimmit(600) +  300; //Reset bot timer 5-15 seconds.
                     if (bot_steering_p1[i] == 0) //If bot was going straight
                     {               
                         bot_steering_p1[i] = MakeRandomLimmit(2) + 1; //Set bot to turn right or left
