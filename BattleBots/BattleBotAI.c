@@ -7,22 +7,6 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define FLATPATH     0
-#define RAMPPATH     1
-#define DROPPATH     2
-
-#define STANDARD_AI     0
-#define SEEKER_AI       1
-#define RANDOM_AI       2
-
-#define STOPTURN ((DEG1 * 60) * (DEG1 * 60))
-#define DRIFTTURN ((DEG1 * 40) * (DEG1 * 40))
-#define WIDETURN ((DEG1 * 25) * (DEG1 * 25))
-#define MIDTURN ((DEG1 * 12) * (DEG1 * 12))
-
-#define SHORTTURN ((DEG1 * 5) * (DEG1 * 5))
-#define NOTURN ((DEG1 * 2) * (DEG1 * 2))
-
 
 extern int getRival();
 
@@ -43,9 +27,23 @@ float test_bot_sphere_position[4][3] =
     {0., 0., 0.},
 };
 
+void ResetPathfinderBots()
+{
+    for(int i = 0; i < 4; i++)
+    {
+        AIPathfinder[i].TargetPath = -1;
+    }
+}
+
 
 void botControl(void *Car, Controller *cont,char kno)
 {
+    if(GlobalController[0]->ButtonPressed & BTN_DLEFT)
+    {
+        GlobalPlayer[0].position[0] = 450;
+        GlobalPlayer[0].position[1] = 98;
+        GlobalPlayer[0].position[2] = 450;
+    }
     int carID = (*(long*)&Car - (long)&g_PlayerStructTable) / 0xDD8;
 
     if (bot_status_p1[carID] > 0)
@@ -65,6 +63,32 @@ void botControl(void *Car, Controller *cont,char kno)
 
 void ProSteeringPlus(int i)
 {
+
+    
+    switch (AIPathfinder[i].PathType) //Get position of current marker to drive towards
+    {
+        case FLATPATH: //flat paths
+            objectPosition[0] = (float)BlockFortPaths_Paths[AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[0];
+            objectPosition[1] = (float)BlockFortPaths_Paths[AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[1];
+            objectPosition[2] = (float)BlockFortPaths_Paths[AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[2]; 
+            break;
+        case RAMPPATH: //ramps
+            objectPosition[0] = (float)BlockFortPaths_Ramps[AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[0];
+            objectPosition[1] = (float)BlockFortPaths_Ramps[AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[1];
+            objectPosition[2] = (float)BlockFortPaths_Ramps[AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[2]; 
+            break;
+        case DROPPATH: //drops 
+            objectPosition[0] = (float)BlockFortPaths_Drops[AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[0];
+            objectPosition[1] = (float)BlockFortPaths_Drops[AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[1];
+            objectPosition[2] = (float)BlockFortPaths_Drops[AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[2]; 
+            break;
+    }
+
+    GlobalShortA = (short)(MakeDirection(GlobalPlayer[i].position[0],GlobalPlayer[i].position[2], objectPosition[0], objectPosition[2]) * -1);
+    GlobalShortA -= GlobalPlayer[i].direction[1];
+    GlobalUInt64 = GlobalShortA * GlobalShortA;
+
+
     bot_buttons[i] = BTN_A;
     bot_pressed[i] = 0;
     
@@ -226,11 +250,6 @@ void StandardBattleBot(int i)
 
 
 
-
-
-
-
-
 void SeekerBattleBot(int i)
 {
     float rival_x = GlobalPlayer[bot_rival_p1[i]].position[0]; //x,y,z coords of rival
@@ -284,57 +303,18 @@ void SeekerBattleBot(int i)
 
 
         //Initialize the path finding if course is just starting
-        if ( (AIPathfinder[i].TargetPath == -1) || ( (AIPathfinder[i].TargetPath == 0 && AIPathfinder[i].LastPath==0) && (AIPathfinder[i].Direction == 0) ) )
+        if ( PathfinderComplete((BKPathfinder*)&AIPathfinder[i], BlockFortPaths_PathLengths, BlockFortPaths_RampLengths, BlockFortPaths_DropLengths) )
         {
 
             //First set up BKPathfinder for bot to follow rival
             AIPathfinder[i].Target[0] = rival_x;
             AIPathfinder[i].Target[1] = rival_y;
             AIPathfinder[i].Target[2] = rival_z;
-            UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 200, BlockFortPaths_Paths, BlockFortPaths_PathLengths, 28, i, 0);                            
+            UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), PATHDISTANCECHECK, BlockFortPaths_Paths, BlockFortPaths_PathLengths, 28, i, 0);                            
         }
 
 
 
-
-        int marker_index = AIPathfinder[i].Progression;
-        int target_path = AIPathfinder[i].TargetPath;
-        int direction = AIPathfinder[i].Direction;
-        switch (AIPathfinder[i].PathType) //Get position of current marker to drive towards
-        {
-            case FLATPATH: //flat paths
-                objectPosition[0] = (float)BlockFortPaths_Paths[target_path][marker_index].Position[0];
-                objectPosition[1] = (float)BlockFortPaths_Paths[target_path][marker_index].Position[1];
-                objectPosition[2] = (float)BlockFortPaths_Paths[target_path][marker_index].Position[2]; 
-                break;
-            case RAMPPATH: //ramps
-                objectPosition[0] = (float)BlockFortPaths_Ramps[target_path][marker_index].Position[0];
-                objectPosition[1] = (float)BlockFortPaths_Ramps[target_path][marker_index].Position[1];
-                objectPosition[2] = (float)BlockFortPaths_Ramps[target_path][marker_index].Position[2]; 
-                break;
-            case DROPPATH: //drops 
-                objectPosition[0] = (float)BlockFortPaths_Drops[target_path][marker_index].Position[0];
-                objectPosition[1] = (float)BlockFortPaths_Drops[target_path][marker_index].Position[1];
-                objectPosition[2] = (float)BlockFortPaths_Drops[target_path][marker_index].Position[2]; 
-                break;
-        }
-
-        if (i == 1)
-        {
-            
-            loadFont();
-            //printString(0, 120, "P2 target");
-            printStringNumber(0, 130, "Target[0]", AIPathfinder[i].Target[0]);
-            printStringNumber(0, 140, "Target[1]", AIPathfinder[i].Target[1]);
-            printStringNumber(0, 150, "Target[2]", AIPathfinder[i].Target[2]);
-            printStringNumber(0, 160, "Progression",  AIPathfinder[i].Progression);
-            printStringNumber(0, 170, "Nearest",  AIPathfinder[i].NearestMarker);
-            printStringNumber(0, 180, "Direction",  AIPathfinder[i].Direction);
-            printStringNumber(0, 190, "PathType",  AIPathfinder[i].PathType);
-            printStringNumber(0, 200, "TargetPath",  AIPathfinder[i].TargetPath);
-            
-
-        }
 
 
 
@@ -364,26 +344,26 @@ void SeekerBattleBot(int i)
                     float diff_y = BlockFortPaths_Paths[AIPathfinder[i].TargetPath][(int)AIPathfinder[i].NearestMarker].Position[1] - bot_y;
 
                     
-                    AIPathfinder[i].NearestMarker = -1;
 
                     //reset nearest marker 
-                    if (diff_y > 20)
+                    if (diff_y > 25)
                     {
                         //AI has fallen, reset paths.
                         AIPathfinder[i].TargetPath = -1;  
                     }
                     else
                     {
-                        for (int ThisMarker = 0; ThisMarker < BlockFortPaths_PathLengths[AIPathfinder[i].TargetPath]; ThisMarker++)
+                        for (int ThisMarker = 0; ThisMarker <= BlockFortPaths_PathLengths[AIPathfinder[i].TargetPath]; ThisMarker++)
                         {
-                            float diff_x = bot_x - BlockFortPaths_Paths[AIPathfinder[i].TargetPath][ThisMarker].Position[0];
-                            float diff_z = bot_z - BlockFortPaths_Paths[AIPathfinder[i].TargetPath][ThisMarker].Position[2];
-                            diff_y = bot_y - BlockFortPaths_Paths[AIPathfinder[i].TargetPath][ThisMarker].Position[1];
+                            float diff_x = GlobalPlayer[i].position[0] - BlockFortPaths_Paths[AIPathfinder[i].TargetPath][ThisMarker].Position[0];
+                            float diff_z = GlobalPlayer[i].position[2] - BlockFortPaths_Paths[AIPathfinder[i].TargetPath][ThisMarker].Position[2];
+                            diff_y = GlobalPlayer[i].position[1] - BlockFortPaths_Paths[AIPathfinder[i].TargetPath][ThisMarker].Position[1];
                             if ((diff_y * diff_y) < 324)
                             {   
-                                if ((diff_x * diff_x) + (diff_z * diff_z) < CheckMarkerDistance)
+                                GlobalFloatA = (diff_x * diff_x) + (diff_z * diff_z);
+                                if (GlobalFloatA < CheckMarkerDistance)
                                 {
-                                    CheckMarkerDistance = (diff_x * diff_x) + (diff_z * diff_z);
+                                    CheckMarkerDistance = GlobalFloatA;
                                     AIPathfinder[i].NearestMarker = ThisMarker;
                                 }
                             }
@@ -401,28 +381,29 @@ void SeekerBattleBot(int i)
                 {
 
                     //Check if Bot has fallen - compare to last Nearest Marker height
-                    float diff_y = BlockFortPaths_Paths[AIPathfinder[i].TargetPath][(int)AIPathfinder[i].NearestMarker].Position[1] - bot_y;
+                    float diff_y = BlockFortPaths_Ramps[AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[1] - bot_y;
 
-                    AIPathfinder[i].NearestMarker = -1;
+                    
 
                     //reset nearest marker 
-                    if (diff_y > 20)
+                    if (diff_y > 30)
                     {
                         //AI has fallen, reset paths.
-                        AIPathfinder[i].TargetPath = -1;  
+                        AIPathfinder[i].TargetPath = -1; 
                     }
                     else
                     {
-                        for (int ThisMarker = 0; ThisMarker < BlockFortPaths_RampLengths[AIPathfinder[i].TargetPath]; ThisMarker++)
+                        for (int ThisMarker = 0; ThisMarker <= BlockFortPaths_RampLengths[AIPathfinder[i].TargetPath]; ThisMarker++)
                         {
-                            float diff_x = bot_x - BlockFortPaths_Ramps[AIPathfinder[i].TargetPath][ThisMarker].Position[0];
-                            float diff_z = bot_z - BlockFortPaths_Ramps[AIPathfinder[i].TargetPath][ThisMarker].Position[2];
-                            diff_y = bot_y - BlockFortPaths_Ramps[AIPathfinder[i].TargetPath][ThisMarker].Position[1];
+                            float diff_x = GlobalPlayer[i].position[0] - BlockFortPaths_Ramps[AIPathfinder[i].TargetPath][ThisMarker].Position[0];
+                            float diff_z = GlobalPlayer[i].position[2] - BlockFortPaths_Ramps[AIPathfinder[i].TargetPath][ThisMarker].Position[2];
+                            diff_y = GlobalPlayer[i].position[1] - BlockFortPaths_Ramps[AIPathfinder[i].TargetPath][ThisMarker].Position[1];
                             if ((diff_y * diff_y) < 625)
                             {   
-                                if ((diff_x * diff_x) + (diff_z * diff_z) < CheckMarkerDistance)
+                                GlobalFloatA = (diff_x * diff_x) + (diff_z * diff_z);
+                                if (GlobalFloatA < CheckMarkerDistance)
                                 {
-                                    CheckMarkerDistance = (diff_x * diff_x) + (diff_z * diff_z);
+                                    CheckMarkerDistance = GlobalFloatA;
                                     AIPathfinder[i].NearestMarker = ThisMarker;
                                 }
                             }
@@ -441,10 +422,37 @@ void SeekerBattleBot(int i)
 
 
         
-        if (AIPathfinder[i].NearestMarker != -1)
+
+        if (i == 1)
+        {
+            
+            loadFont();
+            //printString(0, 120, "P2 target");
+            printStringUnsignedHex(0, 120, "Target[0]", (uint)&AIPathfinder[i]);
+            printStringNumber(0, 130, "Target[0]", AIPathfinder[i].Target[0]);
+            printStringNumber(0, 140, "Target[1]", AIPathfinder[i].Target[1]);
+            printStringNumber(0, 150, "Target[2]", AIPathfinder[i].Target[2]);
+            printStringNumber(0, 160, "Progression",  AIPathfinder[i].Progression);
+            printStringNumber(0, 170, "Nearest",  AIPathfinder[i].NearestMarker);
+            printStringNumber(0, 180, "Direction",  AIPathfinder[i].Direction);
+            printStringNumber(0, 190, "PathType",  AIPathfinder[i].PathType);
+            printStringNumber(0, 200, "TargetPath",  AIPathfinder[i].TargetPath);
+            
+
+        }
+
+
+        
+        int marker_index = AIPathfinder[i].Progression;
+        int target_path = AIPathfinder[i].TargetPath;
+        int direction = AIPathfinder[i].Direction;
+        
+        if (AIPathfinder[i].TargetPath != -1)
         {
 
             
+
+
             //Check if at current target marker
 
             GlobalShortA = 3600;
@@ -463,19 +471,50 @@ void SeekerBattleBot(int i)
                 }
             }
 
-
+            
+            switch (AIPathfinder[i].PathType) //Get position of current marker to drive towards
+            {
+                case FLATPATH: //flat paths
+                    objectPosition[0] = (float)BlockFortPaths_Paths[AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[0];
+                    objectPosition[1] = (float)BlockFortPaths_Paths[AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[1];
+                    objectPosition[2] = (float)BlockFortPaths_Paths[AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[2]; 
+                    GlobalIntA = BlockFortPaths_PathLengths[AIPathfinder[i].TargetPath];
+                    break;
+                case RAMPPATH: //ramps
+                    objectPosition[0] = (float)BlockFortPaths_Ramps[AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[0];
+                    objectPosition[1] = (float)BlockFortPaths_Ramps[AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[1];
+                    objectPosition[2] = (float)BlockFortPaths_Ramps[AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[2]; 
+                    GlobalIntA = BlockFortPaths_RampLengths[AIPathfinder[i].TargetPath];
+                    break;
+                case DROPPATH: //drops 
+                    objectPosition[0] = (float)BlockFortPaths_Drops[AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[0];
+                    objectPosition[1] = (float)BlockFortPaths_Drops[AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[1];
+                    objectPosition[2] = (float)BlockFortPaths_Drops[AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[2]; 
+                    GlobalIntA = BlockFortPaths_DropLengths[AIPathfinder[i].TargetPath];
+                    break;
+            }
             float x_distance = bot_x - objectPosition[0];
             float y_distance = bot_y - objectPosition[1]; 
             float z_distance = bot_z - objectPosition[2];
 
             x_distance *= x_distance;
             z_distance *= z_distance;
-            y_distance *= y_distance;
+            
 
-            if (x_distance + z_distance + y_distance< GlobalShortA) //If near the next path marker, advance to the next path marker
+            if (x_distance + z_distance + y_distance< GlobalShortA)//If near the next path marker, advance to the next path marker
             {
                 marker_index += direction;
                 AIPathfinder[i].Progression = marker_index;
+                AIPathfinder[i].ProgressTimer = 0;
+            }
+            else
+            {
+                AIPathfinder[i].ProgressTimer++;
+            }
+
+            if (AIPathfinder[i].Progression > GlobalIntA)
+            {
+                AIPathfinder[i].Progression = GlobalIntA;
             }
 
 
@@ -507,14 +546,14 @@ void SeekerBattleBot(int i)
         switch (AIPathfinder[i].PathType)
         {
             case FLATPATH:  //If bot is following a flat path
-                if ( ( AIPathfinder[i].TargetPath == -1) || (marker_index==0 && direction==-1)  || (marker_index==BlockFortPaths_PathLengths[target_path] && direction==1) || (marker_index < 0) || (marker_index > BlockFortPaths_PathLengths[target_path])) //If bot reaches end of path
+                if ( PathfinderComplete((BKPathfinder*)&AIPathfinder[i], BlockFortPaths_PathLengths, BlockFortPaths_RampLengths, BlockFortPaths_DropLengths) )
                 {                               
                     if ((diff_y > -20.0) && (diff_y < 20.0)) //If bots are on same plane
                     {
                         AIPathfinder[i].Target[0] = rival_x;
                         AIPathfinder[i].Target[1] = rival_y;
                         AIPathfinder[i].Target[2] = rival_z;
-                        UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 200, BlockFortPaths_Paths, BlockFortPaths_PathLengths, 28, i, 0);
+                        UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), PATHDISTANCECHECK, BlockFortPaths_Paths, BlockFortPaths_PathLengths, 28, i, 0);
                     }
                     else if (diff_y >= 20.0) //If player is above bot
                     {
@@ -526,7 +565,7 @@ void SeekerBattleBot(int i)
                         float diff_z = bot_z - nodePosition[2];
 
 
-                        if (diff_x*diff_x + diff_z*diff_z < 40000.0) //If bot is at ramp, use ramp
+                        if (diff_x*diff_x + diff_z*diff_z < RAMPDISTANCESQUARE) //If bot is at ramp, use ramp
                         {
                             AIPathfinder[i].Target[0] = rival_x;
                             AIPathfinder[i].Target[1] = rival_y;
@@ -537,12 +576,13 @@ void SeekerBattleBot(int i)
                             AIPathfinder[i].Progression = 0;
                             AIPathfinder[i].Direction = 1;
                             AIPathfinder[i].PathType = 1;
+                            AIPathfinder[i].NearestMarker = 0;
                         }
                         else{// Else find path to nearest ramp
                             AIPathfinder[i].Target[0] = nodePosition[0];
                             AIPathfinder[i].Target[1] = nodePosition[1];
                             AIPathfinder[i].Target[2] = nodePosition[2];
-                            UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 200, BlockFortPaths_Paths, BlockFortPaths_PathLengths, 28, i, 0);                                            
+                            UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), PATHDISTANCECHECK, BlockFortPaths_Paths, BlockFortPaths_PathLengths, 28, i, 0);                                            
                         }
 
                     }
@@ -553,12 +593,12 @@ void SeekerBattleBot(int i)
                         int ramp_path_index;
                         //First find nearest ramp
                         ramp_path_index = FindNearestRampNode(GlobalPlayer[i].position, nodePosition, rival_y, BlockFortPaths_Ramps, BlockFortPaths_RampLengths, 12);
-                        float diff_x = bot_x - nodePosition[0];
-                        float diff_z = bot_z - nodePosition[2];
+                        float diff_x = GlobalPlayer[i].position[0] - nodePosition[0];
+                        float diff_z = GlobalPlayer[i].position[2] - nodePosition[2];
                         
 
 
-                        if (diff_x*diff_x + diff_z*diff_z < 40000.0) //If bot is at ramp, use ramp
+                        if (diff_x*diff_x + diff_z*diff_z < RAMPDISTANCESQUARE) //If bot is at ramp, use ramp
                         {
                             AIPathfinder[i].Target[0] = rival_x;
                             AIPathfinder[i].Target[1] = rival_y;
@@ -569,12 +609,13 @@ void SeekerBattleBot(int i)
                             AIPathfinder[i].Progression = BlockFortPaths_RampLengths[ramp_path_index];
                             AIPathfinder[i].Direction = -1;
                             AIPathfinder[i].PathType = 1;
+                            AIPathfinder[i].NearestMarker = BlockFortPaths_RampLengths[ramp_path_index];
                         }
                         else{// Else find path to nearest ramp
                             AIPathfinder[i].Target[0] = nodePosition[0];
                             AIPathfinder[i].Target[1] = nodePosition[1];
                             AIPathfinder[i].Target[2] = nodePosition[2];
-                            UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 200, BlockFortPaths_Paths, BlockFortPaths_PathLengths, 28, i, 0);                                            
+                            UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), PATHDISTANCECHECK, BlockFortPaths_Paths, BlockFortPaths_PathLengths, 28, i, 0);                                            
                         }
                     }
                 }
@@ -583,12 +624,12 @@ void SeekerBattleBot(int i)
 
 
 
-                if ( ( AIPathfinder[i].TargetPath == -1) || (marker_index==0 && direction==-1)  || (marker_index==BlockFortPaths_RampLengths[target_path] && direction==1) || (marker_index < 0) || (marker_index > BlockFortPaths_RampLengths[target_path])) //If bot reaches end of path
+                if ( PathfinderComplete((BKPathfinder*)&AIPathfinder[i], BlockFortPaths_PathLengths, BlockFortPaths_RampLengths, BlockFortPaths_DropLengths) )
                 {
                     AIPathfinder[i].Target[0] = rival_x; //Done with the ramp so go back to a flat path
                     AIPathfinder[i].Target[1] = rival_y;
                     AIPathfinder[i].Target[2] = rival_z;
-                    UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 200, BlockFortPaths_Paths, BlockFortPaths_PathLengths, 28, i, 0);                                   
+                    UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), PATHDISTANCECHECK, BlockFortPaths_Paths, BlockFortPaths_PathLengths, 28, i, 0);                                   
                 }
                 break;
             case DROPPATH: //If bot is following a drop
@@ -599,9 +640,6 @@ void SeekerBattleBot(int i)
 
         
 
-        GlobalShortA = (short)(MakeDirection(GlobalPlayer[i].position[0],GlobalPlayer[i].position[2], objectPosition[0], objectPosition[2]) * -1);
-        GlobalShortA -= GlobalPlayer[i].direction[1];
-        GlobalUInt64 = GlobalShortA * GlobalShortA;
         
 
         ProSteeringPlus(i);
