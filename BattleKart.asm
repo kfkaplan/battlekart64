@@ -6445,7 +6445,7 @@ previewN:
 previewU:
 .import "../Library/data/preview_U.mio0.bin"       ;;  c64
 RAMCheck:
-     .import "Data\BKRAMCheck.bin"
+     .import "Data/BKRAMCheck.bin"
      .align 0x10
 RAMCheckEnd:
 
