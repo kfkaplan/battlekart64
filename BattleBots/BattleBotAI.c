@@ -103,7 +103,7 @@ void ProSteeringPlus(int i)
                 bot_buttons[i] |= BTN_R;  //continue drifting, otherwise stop.    
             }
 
-            bot_x_stick[i] = 127;  
+            bot_x_stick[i] = 0x70;  
         }
         else
         {
@@ -112,7 +112,7 @@ void ProSteeringPlus(int i)
                 bot_buttons[i] |= BTN_R;  //continue drifting, otherwise stop.    
             }
 
-            bot_x_stick[i] = -127;  
+            bot_x_stick[i] = -0x70;  
         }
     }                        
     else if (GlobalUInt64 > DRIFTTURN)
@@ -122,22 +122,22 @@ void ProSteeringPlus(int i)
         bot_buttons[i] |= BTN_B;
         if (GlobalShortA > 0)
         {   
-            bot_x_stick[i] = 75;
+            bot_x_stick[i] = 0x60;
         }
         else
         {
-            bot_x_stick[i] = -75;
+            bot_x_stick[i] = -0x60;
         }
     }
     else if (GlobalUInt64 > WIDETURN)
     {
         if (GlobalShortA > 0)
         {   
-            bot_x_stick[i] = 70;
+            bot_x_stick[i] = 0x50;
         }
         else
         {
-            bot_x_stick[i] = -70;
+            bot_x_stick[i] = -0x50;
         }
     }
     else if (GlobalUInt64 > MIDTURN)
@@ -146,11 +146,11 @@ void ProSteeringPlus(int i)
 
         if (GlobalShortA > 0)
         {   
-            bot_x_stick[i] = 55;
+            bot_x_stick[i] = 0x40;
         }
         else
         {
-            bot_x_stick[i] = -55;
+            bot_x_stick[i] = -0x40;
         }
     }
     else if (GlobalUInt64 > SHORTTURN)
@@ -158,11 +158,11 @@ void ProSteeringPlus(int i)
 
         if (GlobalShortA > 0)
         {   
-            bot_x_stick[i] = 45;
+            bot_x_stick[i] = 0x30;
         }
         else
         {
-            bot_x_stick[i] = -45;
+            bot_x_stick[i] = -0x30;
         }
 
     }
@@ -170,11 +170,11 @@ void ProSteeringPlus(int i)
     {
         if (GlobalShortA > 0)
         {   
-            bot_x_stick[i] = 29;
+            bot_x_stick[i] = 0x10;
         }
         else
         {
-            bot_x_stick[i] = -29;
+            bot_x_stick[i] = -0x10;
         }
     }
     else
@@ -227,6 +227,16 @@ void StandardBattleBot(int i)
             bot_x_stick[i] = -0x50;
             break;
     }
+    //Use item when close to rival
+    if ((TripleTap % 10) == 0)
+    {
+        if (TestCollideSphere(GlobalPlayer[bot_rival_p1[i]].position, 30, GlobalPlayer[i].position, 30)) 
+        {
+            bot_pressed[i] = BTN_Z;
+            bot_buttons[i] = BTN_A + BTN_Z;
+        }
+    }
+
 }
 
 
@@ -259,8 +269,9 @@ void SeekerBattleBot(int i)
     float bot_y = GlobalPlayer[i].position[1];
     float bot_z = GlobalPlayer[i].position[2];
 
-    if (TestCollideSphere(GlobalPlayer[bot_rival_p1[i]].position, 25, GlobalPlayer[i].position, 25))
-    {
+
+    if (TestCollideSphere(GlobalPlayer[bot_rival_p1[i]].position, 50, GlobalPlayer[i].position, 50) && (pow(bot_y-rival_y, 2) < 400))
+    {   
         return StandardBattleBot(i);
     }
     // if (bot_timer_p1[i] <= 0) //If bot timer is <= 0, roll the dice and maybe get a new rival
