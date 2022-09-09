@@ -6178,6 +6178,8 @@ theMinimapSprites:
 
 //Import paths for bot AI
 .importobj "BattleKartPaths/BlockFortPaths.o"
+.importobj "BattleKartPaths/DoubleDeckerPaths.o"
+
 
 
 //universalHook:

@@ -1,5 +1,3 @@
-#include "../../Library/MainInclude.h"
-
 extern Marker BlockFortPaths_MidPath_11[5];
 extern Marker BlockFortPaths_MidPath_10[8];
 extern Marker BlockFortPaths_MidPath_9[5];
@@ -20,10 +18,10 @@ extern Marker BlockFortPaths_LowPath_8[13];
 extern Marker BlockFortPaths_LowPath_9[13];
 extern Marker BlockFortPaths_LowPath_10[14];
 extern Marker BlockFortPaths_LowPath_11[14];
-extern Marker BlockFortPaths_HighPath_0[14];
-extern Marker BlockFortPaths_HighPath_1[14];
-extern Marker BlockFortPaths_HighPath_2[14];
-extern Marker BlockFortPaths_HighPath_3[14];
+extern Marker BlockFortPaths_HighPath_0[13];
+extern Marker BlockFortPaths_HighPath_1[13];
+extern Marker BlockFortPaths_HighPath_2[13];
+extern Marker BlockFortPaths_HighPath_3[13];
 extern Marker BlockFortPaths_MidPath_7[4];
 extern Marker BlockFortPaths_MidPath_5[4];
 extern Marker BlockFortPaths_MidPath_3[4];
@@ -52,3 +50,5 @@ extern Marker BlockFortPaths_RedDropLow[7];
 extern Marker BlockFortPaths_YellowDropLow[7];
 extern Marker *BlockFortPaths_Drops[4];
 extern short BlockFortPaths_DropLengths[4];
+
+extern short BlockFortPaths_LineCounts[3];
