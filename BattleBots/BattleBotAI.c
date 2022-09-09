@@ -282,7 +282,7 @@ void SeekerBattleBot(int i)
     //     AIPathfinder[i].Target[0] = GlobalPlayer[0].position[0]; //Reset path finding in case bot gets lost
     //     AIPathfinder[i].Target[1] = GlobalPlayer[0].position[1];
     //     AIPathfinder[i].Target[2] = GlobalPlayer[0].position[2];
-    //     UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 300, BlockFortPaths_Paths, BlockFortPaths_PathLengths, 28, i, 0); 
+    //     UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 300, BlockFortPaths_Paths, BlockFortPaths_PathLengths, i, 0); 
     // }
 
 
@@ -637,7 +637,7 @@ void SeekerBattleBot(int i)
                         int ramp_path_index, drop_path_index;
                         //First find nearest ramp and drop
                         ramp_path_index = FindNearestRampNode(GlobalPlayer[i].position, rampNodePosition, rival_y, BlockFortPaths_Ramps, BlockFortPaths_RampLengths, 12);
-                        drop_path_index = FindNearestDropNode(GlobalPlayer[i].position, dropNodePosition, rival_y, BlockFortPaths_Drops, BlockFortPaths_DropLengths, 12);
+                        drop_path_index = FindNearestDropNode(GlobalPlayer[i].position, dropNodePosition, rival_y, BlockFortPaths_Drops, BlockFortPaths_DropLengths, 4);
                         
 
                         float diff_x_ramps = GlobalPlayer[i].position[0] - rampNodePosition[0];
@@ -679,10 +679,10 @@ void SeekerBattleBot(int i)
                                 // UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 300.0, BlockFortPaths_Ramps, BlockFortPaths_RampLengths, 12, i, 1);
                                 AIPathfinder[i].LastPath = AIPathfinder[i].TargetPath;
                                 AIPathfinder[i].TargetPath = drop_path_index;
-                                AIPathfinder[i].Progression = BlockFortPaths_DropLengths[drop_path_index];
-                                AIPathfinder[i].Direction = -1;
+                                AIPathfinder[i].Progression = 0;
+                                AIPathfinder[i].Direction = 1;
                                 AIPathfinder[i].PathType = 2;
-                                AIPathfinder[i].NearestMarker = BlockFortPaths_DropLengths[drop_path_index];
+                                AIPathfinder[i].NearestMarker = 0;
                                 AIPathfinder[i].ProgressTimer = 0;
                             }
                             else{// Else find path to nearest ramp
