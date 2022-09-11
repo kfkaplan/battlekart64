@@ -79,23 +79,25 @@ void botControl(void *Car, Controller *cont,char kno)
 void ProSteeringPlus(int i, Marker* PathArray[], Marker* RampArray[], Marker* DropArray[])
 {
 
-    
+
+    short TargetPath = AIPathfinder[i].TargetPath;
+    short Progression = AIPathfinder[i].Progression; //(int)AIPathfinder[i].Progression;
     switch (AIPathfinder[i].PathType) //Get position of current marker to drive towards
     {
         case FLATPATH: //flat paths
-            objectPosition[0] = (float)PathArray[AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[0];
-            objectPosition[1] = (float)PathArray[AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[1];
-            objectPosition[2] = (float)PathArray[AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[2]; 
+            objectPosition[0] = (float)PathArray[TargetPath][Progression].Position[0];
+            objectPosition[1] = (float)PathArray[TargetPath][Progression].Position[1];
+            objectPosition[2] = (float)PathArray[TargetPath][Progression].Position[2]; 
             break;
         case RAMPPATH: //ramps
-            objectPosition[0] = (float)RampArray[AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[0];
-            objectPosition[1] = (float)RampArray[AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[1];
-            objectPosition[2] = (float)RampArray[AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[2]; 
+            objectPosition[0] = (float)RampArray[TargetPath][Progression].Position[0];
+            objectPosition[1] = (float)RampArray[TargetPath][Progression].Position[1];
+            objectPosition[2] = (float)RampArray[TargetPath][Progression].Position[2]; 
             break;
         case DROPPATH: //drops 
-            objectPosition[0] = (float)DropArray[AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[0];
-            objectPosition[1] = (float)DropArray[AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[1];
-            objectPosition[2] = (float)DropArray[AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[2]; 
+            objectPosition[0] = (float)DropArray[TargetPath][Progression].Position[0];
+            objectPosition[1] = (float)DropArray[TargetPath][Progression].Position[1];
+            objectPosition[2] = (float)DropArray[TargetPath][Progression].Position[2]; 
             break;
     }
 
@@ -336,7 +338,7 @@ void SeekerBattleBot(int i)
     //Find Nearest Marker
     
     float CheckMarkerDistance = 9999999999;
-
+    short TargetPath = AIPathfinder[i].TargetPath;
     
     switch (AIPathfinder[i].PathType)
     {
@@ -344,23 +346,24 @@ void SeekerBattleBot(int i)
         {   
 
             //Check if Bot has fallen - compare to last Nearest Marker height
-            if (AIPathfinder[i].TargetPath != -1)
+            if (TargetPath != -1)
             {
                 
                 //reset nearest marker 
-                if (CoursePaths[ci][AIPathfinder[i].TargetPath][(int)AIPathfinder[i].NearestMarker].Position[1] - bot_y > 25)
+                if (CoursePaths[ci][TargetPath][(int)AIPathfinder[i].NearestMarker].Position[1] - bot_y > 25)
                 {
                     //AI has fallen, reset paths.
                     AIPathfinder[i].TargetPath = -1;  
+                    TargetPath = -1;
                 }
                 else
                 {
-                    for (int ThisMarker = 0; ThisMarker <= CoursePathLengths[ci][AIPathfinder[i].TargetPath]; ThisMarker++)
+                    for (int ThisMarker = 0; ThisMarker <= CoursePathLengths[ci][TargetPath]; ThisMarker++)
                     {
-                        if (pow(GlobalPlayer[i].position[1] - CoursePaths[ci][AIPathfinder[i].TargetPath][ThisMarker].Position[1], 2) < 324) //If height is not too far off
+                        if (pow(GlobalPlayer[i].position[1] - CoursePaths[ci][TargetPath][ThisMarker].Position[1], 2) < 324) //If height is not too far off
                         {   
-                            GlobalFloatA =  pow(GlobalPlayer[i].position[0] - CoursePaths[ci][AIPathfinder[i].TargetPath][ThisMarker].Position[0], 2) + 
-                                            pow(GlobalPlayer[i].position[2] - CoursePaths[ci][AIPathfinder[i].TargetPath][ThisMarker].Position[2], 2)   ;
+                            GlobalFloatA =  pow(GlobalPlayer[i].position[0] - CoursePaths[ci][TargetPath][ThisMarker].Position[0], 2) + 
+                                            pow(GlobalPlayer[i].position[2] - CoursePaths[ci][TargetPath][ThisMarker].Position[2], 2)   ;
                             if (GlobalFloatA < CheckMarkerDistance)
                             {
                                 CheckMarkerDistance = GlobalFloatA;
@@ -377,25 +380,26 @@ void SeekerBattleBot(int i)
         case RAMPPATH:  //If bot is following a flat path
         {
             
-            if (AIPathfinder[i].TargetPath != -1)
+            if (TargetPath != -1)
             {
 
                 //Check if Bot has fallen - compare to last Nearest Marker height
 
                 //reset nearest marker 
-                if (CourseRamps[ci][AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[1] - bot_y > 30)
+                if (CourseRamps[ci][TargetPath][(int)AIPathfinder[i].Progression].Position[1] - bot_y > 30)
                 {
                     //AI has fallen, reset paths.
                     AIPathfinder[i].TargetPath = -1; 
+                    TargetPath = -1;
                 }
                 else
                 {
-                    for (int ThisMarker = 0; ThisMarker <= CourseRampLengths[ci][AIPathfinder[i].TargetPath]; ThisMarker++)
+                    for (int ThisMarker = 0; ThisMarker <= CourseRampLengths[ci][TargetPath]; ThisMarker++)
                     {
-                        if (pow(GlobalPlayer[i].position[1] - CourseRamps[ci][AIPathfinder[i].TargetPath][ThisMarker].Position[1], 2) < 625)
+                        if (pow(GlobalPlayer[i].position[1] - CourseRamps[ci][TargetPath][ThisMarker].Position[1], 2) < 625)
                         {   
-                            GlobalFloatA = pow(GlobalPlayer[i].position[0] - CourseRamps[ci][AIPathfinder[i].TargetPath][ThisMarker].Position[0], 2) + 
-                                            pow(GlobalPlayer[i].position[2] - CourseRamps[ci][AIPathfinder[i].TargetPath][ThisMarker].Position[2], 2)   ;
+                            GlobalFloatA = pow(GlobalPlayer[i].position[0] - CourseRamps[ci][TargetPath][ThisMarker].Position[0], 2) + 
+                                            pow(GlobalPlayer[i].position[2] - CourseRamps[ci][TargetPath][ThisMarker].Position[2], 2)   ;
                             if (GlobalFloatA < CheckMarkerDistance)
                             {
                                 CheckMarkerDistance = GlobalFloatA;
@@ -410,24 +414,25 @@ void SeekerBattleBot(int i)
         }
         case DROPPATH:  //If bot is following a flat path
         {
-            if (AIPathfinder[i].TargetPath != -1)
+            if (TargetPath != -1)
             {
 
                 //Check if Bot has fallen - compare to last Nearest Marker height
                 //reset nearest marker 
-                if (CourseDrops[ci][AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[1] - bot_y > 30)
+                if (CourseDrops[ci][TargetPath][(int)AIPathfinder[i].Progression].Position[1] - bot_y > 30)
                 {
                     //AI has fallen, reset paths.
                     AIPathfinder[i].TargetPath = -1; 
+                    TargetPath = -1;
                 }
                 else
                 {
-                    for (int ThisMarker = 0; ThisMarker <= CourseDropLengths[ci][AIPathfinder[i].TargetPath]; ThisMarker++)
+                    for (int ThisMarker = 0; ThisMarker <= CourseDropLengths[ci][TargetPath]; ThisMarker++)
                     {
-                        if (pow(GlobalPlayer[i].position[1] - CourseDrops[ci][AIPathfinder[i].TargetPath][ThisMarker].Position[1], 2) < 625)
+                        if (pow(GlobalPlayer[i].position[1] - CourseDrops[ci][TargetPath][ThisMarker].Position[1], 2) < 625)
                         {   
-                            GlobalFloatA = pow(GlobalPlayer[i].position[0] - CourseDrops[ci][AIPathfinder[i].TargetPath][ThisMarker].Position[0], 2) + 
-                                            pow(GlobalPlayer[i].position[2] - CourseDrops[ci][AIPathfinder[i].TargetPath][ThisMarker].Position[2], 2);
+                            GlobalFloatA = pow(GlobalPlayer[i].position[0] - CourseDrops[ci][TargetPath][ThisMarker].Position[0], 2) + 
+                                            pow(GlobalPlayer[i].position[2] - CourseDrops[ci][TargetPath][ThisMarker].Position[2], 2);
                             if (GlobalFloatA < CheckMarkerDistance)
                             {
                                 CheckMarkerDistance = GlobalFloatA;
@@ -463,10 +468,9 @@ void SeekerBattleBot(int i)
     }
 
 
-    
 
     
-    if (AIPathfinder[i].TargetPath != -1)
+    if (TargetPath != -1)
     {
 
         
@@ -474,49 +478,50 @@ void SeekerBattleBot(int i)
 
         //Check if at current target marker
 
-        GlobalShortA = 3600;
+        GlobalFloatA = 3600.0;
         if (AIPathfinder[i].Direction > 0)
         {
             if (AIPathfinder[i].Progression > 4)
             {
-                GlobalShortA = 1600;
+                GlobalFloatA = 1600.0;
             }
         }
         else
         {
-            if (CoursePathLengths[ci][AIPathfinder[i].TargetPath]-AIPathfinder[i].Progression > 4)
+            if (CoursePathLengths[ci][TargetPath]-AIPathfinder[i].Progression > 4)
             {
-                GlobalShortA = 1600;
+                GlobalFloatA = 1600.0;
             }
         }
 
-        
+        short Progression = AIPathfinder[i].Progression;
         switch (AIPathfinder[i].PathType) //Get position of current marker to drive towards
         {
+
             case FLATPATH: //flat paths
-                objectPosition[0] = (float)CoursePaths[ci][AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[0];
-                objectPosition[1] = (float)CoursePaths[ci][AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[1];
-                objectPosition[2] = (float)CoursePaths[ci][AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[2]; 
-                GlobalIntA = CoursePathLengths[ci][AIPathfinder[i].TargetPath];
+                objectPosition[0] = (float)CoursePaths[ci][TargetPath][Progression].Position[0];
+                objectPosition[1] = (float)CoursePaths[ci][TargetPath][Progression].Position[1];
+                objectPosition[2] = (float)CoursePaths[ci][TargetPath][Progression].Position[2]; 
+                GlobalIntA = CoursePathLengths[ci][TargetPath];
                 break;
             case RAMPPATH: //ramps
-                objectPosition[0] = (float)CourseRamps[ci][AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[0];
-                objectPosition[1] = (float)CourseRamps[ci][AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[1];
-                objectPosition[2] = (float)CourseRamps[ci][AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[2]; 
-                GlobalIntA = CourseRampLengths[ci][AIPathfinder[i].TargetPath];
+                objectPosition[0] = (float)CourseRamps[ci][TargetPath][Progression].Position[0];
+                objectPosition[1] = (float)CourseRamps[ci][TargetPath][Progression].Position[1];
+                objectPosition[2] = (float)CourseRamps[ci][TargetPath][Progression].Position[2]; 
+                GlobalIntA = CourseRampLengths[ci][TargetPath];
                 break;
             case DROPPATH: //drops 
-                objectPosition[0] = (float)CourseDrops[ci][AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[0];
-                objectPosition[1] = (float)CourseDrops[ci][AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[1];
-                objectPosition[2] = (float)CourseDrops[ci][AIPathfinder[i].TargetPath][(int)AIPathfinder[i].Progression].Position[2]; 
-                GlobalIntA = CourseDropLengths[ci][AIPathfinder[i].TargetPath];
+                objectPosition[0] = (float)CourseDrops[ci][TargetPath][Progression].Position[0];
+                objectPosition[1] = (float)CourseDrops[ci][TargetPath][Progression].Position[1];
+                objectPosition[2] = (float)CourseDrops[ci][TargetPath][Progression].Position[2]; 
+                GlobalIntA = CourseDropLengths[ci][TargetPath];
                 break;
         }
 
-        if (pow(bot_x-objectPosition[0], 2) + pow(bot_y-objectPosition[1], 2) + pow(bot_z-objectPosition[2], 2) < GlobalShortA)//If near the next path marker, advance to the next path marker
+        if (pow(bot_x-objectPosition[0], 2) + pow(bot_y-objectPosition[1], 2) + pow(bot_z-objectPosition[2], 2) < GlobalFloatA)//If near the next path marker, advance to the next path marker
         {
             AIPathfinder[i].Progression += AIPathfinder[i].Direction;
-            AIPathfinder[i].Progression = AIPathfinder[i].Progression;
+            AIPathfinder[i].NearestMarker = AIPathfinder[i].Progression;
             AIPathfinder[i].ProgressTimer = 0;
         }
         else
@@ -546,7 +551,6 @@ void SeekerBattleBot(int i)
                 AIPathfinder[i].Progression = AIPathfinder[i].NearestMarker;
             }
         }
-        AIPathfinder[i].Progression = AIPathfinder[i].Progression;
     }
     
 
@@ -583,7 +587,7 @@ void SeekerBattleBot(int i)
                         AIPathfinder[i].Target[1] = rival_y;
                         AIPathfinder[i].Target[2] = rival_z;
                         //UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 300.0, BlockFortPaths_Ramps, BlockFortPaths_RampLengths, 12, i, 1);
-                        AIPathfinder[i].LastPath = AIPathfinder[i].TargetPath;
+                        AIPathfinder[i].LastPath = TargetPath;
                         AIPathfinder[i].TargetPath = ramp_path_index;
                         AIPathfinder[i].Progression = 0;
                         AIPathfinder[i].Direction = 1;
@@ -604,10 +608,9 @@ void SeekerBattleBot(int i)
                     //FOR NOW JUST USE RAMPS, LATER WILL ADD RAMPS AND DROPS
                     float rampNodePosition[] = {0.,0.,0.};
                     float dropNodePosition[] = {0.,0.,0.};
-                    int ramp_path_index, drop_path_index;
                     //First find nearest ramp and drop
-                    ramp_path_index = FindNearestRampNode(GlobalPlayer[i].position, rampNodePosition, rival_y, CourseRamps[ci], CourseRampLengths[ci], LineCounts[ci][1]);
-                    drop_path_index = FindNearestDropNode(GlobalPlayer[i].position, dropNodePosition, rival_y, CourseDrops[ci], CourseDropLengths[ci], LineCounts[ci][2]);
+                    int ramp_path_index = FindNearestRampNode(GlobalPlayer[i].position, rampNodePosition, rival_y, CourseRamps[ci], CourseRampLengths[ci], LineCounts[ci][1]);
+                    int drop_path_index = FindNearestDropNode(GlobalPlayer[i].position, dropNodePosition, rival_y, CourseDrops[ci], CourseDropLengths[ci], LineCounts[ci][2]);
                     
 
                     float diff_x_ramps = GlobalPlayer[i].position[0] - rampNodePosition[0];
@@ -624,7 +627,7 @@ void SeekerBattleBot(int i)
                             AIPathfinder[i].Target[1] = rival_y;
                             AIPathfinder[i].Target[2] = rival_z;
                             // UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 300.0, BlockFortPaths_Ramps, BlockFortPaths_RampLengths, 12, i, 1);
-                            AIPathfinder[i].LastPath = AIPathfinder[i].TargetPath;
+                            AIPathfinder[i].LastPath = TargetPath;
                             AIPathfinder[i].TargetPath = ramp_path_index;
                             AIPathfinder[i].Progression = CourseRampLengths[ci][ramp_path_index];
                             AIPathfinder[i].Direction = -1;
@@ -647,7 +650,7 @@ void SeekerBattleBot(int i)
                             AIPathfinder[i].Target[1] = rival_y;
                             AIPathfinder[i].Target[2] = rival_z;
                             // UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), 300.0, BlockFortPaths_Ramps, BlockFortPaths_RampLengths, 12, i, 1);
-                            AIPathfinder[i].LastPath = AIPathfinder[i].TargetPath;
+                            AIPathfinder[i].LastPath = TargetPath;
                             AIPathfinder[i].TargetPath = drop_path_index;
                             AIPathfinder[i].Progression = 0;
                             AIPathfinder[i].Direction = 1;
