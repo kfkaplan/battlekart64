@@ -271,10 +271,9 @@ Marker BlockFortPaths_LowPath_11[14] =
 	{ {-1, 0, 566} , 1},
 	{ {-1, 0, 606} , 1},
 };
-Marker BlockFortPaths_HighPath_0[14] = 
+Marker BlockFortPaths_HighPath_0[13] = 
 {
-	{ {-453, 92, 301} , 1},
-	{ {-453, 93, 261} , 1},
+	{ {-444, 93, 256} , 1},
 	{ {-453, 92, 221} , 1},
 	{ {-453, 92, 181} , 1},
 	{ {-453, 93, 141} , 1},
@@ -288,10 +287,9 @@ Marker BlockFortPaths_HighPath_0[14] =
 	{ {-453, 93, -178} , 1},
 	{ {-453, 92, -218} , 1},
 };
-Marker BlockFortPaths_HighPath_1[14] = 
+Marker BlockFortPaths_HighPath_1[13] = 
 {
-	{ {-303, 92, -448} , 1},
-	{ {-263, 93, -448} , 1},
+	{ {-258, 93, -439} , 1},
 	{ {-223, 92, -448} , 1},
 	{ {-183, 92, -448} , 1},
 	{ {-143, 93, -448} , 1},
@@ -305,10 +303,9 @@ Marker BlockFortPaths_HighPath_1[14] =
 	{ {176, 93, -448} , 1},
 	{ {216, 92, -448} , 1},
 };
-Marker BlockFortPaths_HighPath_2[14] = 
+Marker BlockFortPaths_HighPath_2[13] = 
 {
-	{ {296, 92, 451} , 1},
-	{ {256, 93, 451} , 1},
+	{ {251, 93, 443} , 1},
 	{ {216, 92, 451} , 1},
 	{ {176, 92, 451} , 1},
 	{ {136, 93, 451} , 1},
@@ -322,10 +319,9 @@ Marker BlockFortPaths_HighPath_2[14] =
 	{ {-183, 93, 451} , 1},
 	{ {-223, 92, 451} , 1},
 };
-Marker BlockFortPaths_HighPath_3[14] = 
+Marker BlockFortPaths_HighPath_3[13] = 
 {
-	{ {446, 92, -298} , 1},
-	{ {446, 93, -258} , 1},
+	{ {437, 93, -253} , 1},
 	{ {446, 92, -218} , 1},
 	{ {446, 92, -178} , 1},
 	{ {446, 93, -138} , 1},
@@ -370,7 +366,7 @@ Marker BlockFortPaths_MidPath_0[4] =
 Marker *BlockFortPaths_Paths[] = 
 { BlockFortPaths_MidPath_11, BlockFortPaths_MidPath_10, BlockFortPaths_MidPath_9, BlockFortPaths_MidPath_8, BlockFortPaths_MidPath_6, BlockFortPaths_MidPath_4, BlockFortPaths_MidPath_2, BlockFortPaths_MidPath_1, BlockFortPaths_LowPath_0, BlockFortPaths_LowPath_1, BlockFortPaths_LowPath_2, BlockFortPaths_LowPath_3, BlockFortPaths_LowPath_4, BlockFortPaths_LowPath_5, BlockFortPaths_LowPath_6, BlockFortPaths_LowPath_7, BlockFortPaths_LowPath_8, BlockFortPaths_LowPath_9, BlockFortPaths_LowPath_10, BlockFortPaths_LowPath_11, BlockFortPaths_HighPath_0, BlockFortPaths_HighPath_1, BlockFortPaths_HighPath_2, BlockFortPaths_HighPath_3, BlockFortPaths_MidPath_7, BlockFortPaths_MidPath_5, BlockFortPaths_MidPath_3, BlockFortPaths_MidPath_0};
 short BlockFortPaths_PathLengths[28] = 
-{ 4, 7, 4, 6, 4, 6, 4, 6, 13, 12, 12, 13, 12, 13, 13, 12, 12, 12, 13, 13, 13, 13, 13, 13, 3, 3, 3, 3};
+{ 4, 7, 4, 6, 4, 6, 4, 6, 13, 12, 12, 13, 12, 13, 13, 12, 12, 12, 13, 13, 12, 12, 12, 12, 3, 3, 3, 3};
 Marker BlockFortPaths_YellowTopRamp[5] = 
 {
 	{ {-275, 47, 220} , 1},
@@ -563,3 +559,5 @@ Marker *BlockFortPaths_Drops[] =
 { BlockFortPaths_GreenDropLow, BlockFortPaths_BlueDropLow, BlockFortPaths_RedDropLow, BlockFortPaths_YellowDropLow};
 short BlockFortPaths_DropLengths[4] = 
 { 6, 6, 6, 6};
+short BlockFortPaths_LineCounts[3] = 
+{ 28, 12, 4};
