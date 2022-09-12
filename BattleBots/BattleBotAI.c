@@ -521,7 +521,6 @@ void SeekerBattleBot(int i)
         if (pow(bot_x-objectPosition[0], 2) + pow(bot_y-objectPosition[1], 2) + pow(bot_z-objectPosition[2], 2) < GlobalFloatA)//If near the next path marker, advance to the next path marker
         {
             AIPathfinder[i].Progression += AIPathfinder[i].Direction;
-            AIPathfinder[i].NearestMarker = AIPathfinder[i].Progression;
             AIPathfinder[i].ProgressTimer = 0;
         }
         else
