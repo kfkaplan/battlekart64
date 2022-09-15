@@ -6,9 +6,9 @@ extern bool flagDropped[];
 extern unsigned char game_paused;
 extern float currentFlagPositionsX[];
 extern float currentFlagPositionsY[];
-extern const int singleFlagPositions[][3];
-extern const int multiFlagPositions[4][20][4][3];
-extern const int basePositions[4][20][4][3];
+extern int singleFlagPositions[][3];
+extern int multiFlagPositions[4][20][4][3];
+extern int basePositions[4][20][4][3];
 extern char game_mode; // game mode, 3=CTF
 extern char player_count; //Byte storing number of players (1=1P, 2=2P, 3=3P, 4=4P)
 extern char ffa_or_teams; //1 byte, free for all = 0, teams = 1
