@@ -19,6 +19,7 @@ float bot_distance_from_path_marker[4] = {0., 0., 0., 0.};
 ushort bot_buttons[4] = {0, 0, 0, 0};
 ushort bot_pressed[4] = {0, 0, 0, 0};
 char bot_x_stick[4] = {0, 0, 0, 0};
+float nearest_item_box[4][3] = {{0.0, 0.0, 0.0,}, {0.0, 0.0, 0.0,}, {0.0, 0.0, 0.0,}, {0.0, 0.0, 0.0,}};
 char TripleTap = 0;
 Bump bot_bump[4];
 
@@ -280,22 +281,36 @@ void StandardBattleBot(int i)
 void SeekerBattleBot(int i)
 {
     float rival_x, rival_y, rival_z;
+    float turn_towards_rival_radius = 60.0; //Distance bot must get to rival to just start turning twoards them wholesale
 
     if (GlobalPlayer[i].item == 0)
     {
-        float item_box_position[3] = {0.0, 0.0, 0.0};
-        if (FindNearestItemBox(GlobalPlayer[i].position, item_box_position) != -1) //If an item box is found on the same level, target that
+
+
+        if (nearest_item_box[i][0] == 0.0)
         {
-            rival_x = item_box_position[0]; //x,y,z coords of rival
-            rival_y = item_box_position[1];
-            rival_z = item_box_position[2];            
+            //float item_box_position[3] = {0.0, 0.0, 0.0};
+            if (FindNearestItemBox(GlobalPlayer[i].position, nearest_item_box[i]) != -1) //If an item box is found on the same level, target that
+            {
+                rival_x = nearest_item_box[i][0]; //x,y,z coords of rival
+                rival_y = nearest_item_box[i][1];
+                rival_z = nearest_item_box[i][2];   
+                turn_towards_rival_radius = 80;         
+            }
+            else //else target rival
+            {
+                rival_x = GlobalPlayer[bot_rival_p1[i]].position[0]; //x,y,z coords of rival
+                rival_y = GlobalPlayer[bot_rival_p1[i]].position[1];
+                rival_z = GlobalPlayer[bot_rival_p1[i]].position[2];    
+            }            
         }
-        else //else target rival
+        else
         {
-            rival_x = GlobalPlayer[bot_rival_p1[i]].position[0]; //x,y,z coords of rival
-            rival_y = GlobalPlayer[bot_rival_p1[i]].position[1];
-            rival_z = GlobalPlayer[bot_rival_p1[i]].position[2];    
+            rival_x = nearest_item_box[i][0]; //x,y,z coords of rival
+            rival_y = nearest_item_box[i][1];
+            rival_z = nearest_item_box[i][2];   
         }
+
 
     }
     else{ //else target rival
@@ -310,7 +325,7 @@ void SeekerBattleBot(int i)
 
     short ci = BattleLevelConverts[g_courseID]; //Grab index for current course, used to index path arrays
 
-    if (TestCollideSphere(GlobalPlayer[bot_rival_p1[i]].position, 60, GlobalPlayer[i].position, 60) && (pow(bot_y-rival_y, 2) < 400))
+    if (TestCollideSphere(GlobalPlayer[bot_rival_p1[i]].position, turn_towards_rival_radius, GlobalPlayer[i].position, turn_towards_rival_radius) && (pow(bot_y-rival_y, 2) < 400))
     {   
         return StandardBattleBot(i);
     }
