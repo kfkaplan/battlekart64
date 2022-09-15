@@ -16,7 +16,7 @@ int keepAwayTimer = 0;
 
 
 //Flag spawning positions for single flag
-int singleFlagPositions[][3] = {
+const int singleFlagPositions[][3] = {
 	{1,4,-483}, //0x00 Mario Raceway
 	{20,16,-979}, //0x01 Choco Mountain
 	{13,5,-1486}, //0x02 Bowser's Castle
@@ -41,7 +41,7 @@ int singleFlagPositions[][3] = {
 
 //Flag spawning positions for multi flag
 //[courseID][flagNumber][x,y,z]
-int multiFlagPositions[4][20][4][3] = 
+const int multiFlagPositions[4][20][4][3] = 
 	{
 		{//Position 1
 			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x00 Mario Raceway
@@ -137,7 +137,7 @@ int multiFlagPositions[4][20][4][3] =
 
 //Base spawning positions
 //[courseID][baseNumber][x,y,z]
-int basePositions[4][20][4][3] = 
+const int basePositions[4][20][4][3] = 
 	{
 		{//Position 1
 			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x00 Mario Raceway
