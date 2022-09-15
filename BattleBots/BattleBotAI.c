@@ -279,9 +279,31 @@ void StandardBattleBot(int i)
 
 void SeekerBattleBot(int i)
 {
-    float rival_x = GlobalPlayer[bot_rival_p1[i]].position[0]; //x,y,z coords of rival
-    float rival_y = GlobalPlayer[bot_rival_p1[i]].position[1];
-    float rival_z = GlobalPlayer[bot_rival_p1[i]].position[2];
+    float rival_x, rival_y, rival_z;
+
+    if (GlobalPlayer[i].item == 0)
+    {
+        float item_box_position[3] = {0.0, 0.0, 0.0};
+        if (FindNearestItemBox(GlobalPlayer[i].position, item_box_position) != -1) //If an item box is found on the same level, target that
+        {
+            rival_x = item_box_position[0]; //x,y,z coords of rival
+            rival_y = item_box_position[1];
+            rival_z = item_box_position[2];            
+        }
+        else //else target rival
+        {
+            rival_x = GlobalPlayer[bot_rival_p1[i]].position[0]; //x,y,z coords of rival
+            rival_y = GlobalPlayer[bot_rival_p1[i]].position[1];
+            rival_z = GlobalPlayer[bot_rival_p1[i]].position[2];    
+        }
+
+    }
+    else{ //else target rival
+        rival_x = GlobalPlayer[bot_rival_p1[i]].position[0]; //x,y,z coords of rival
+        rival_y = GlobalPlayer[bot_rival_p1[i]].position[1];
+        rival_z = GlobalPlayer[bot_rival_p1[i]].position[2];        
+    }
+
     float bot_x = GlobalPlayer[i].position[0]; //x,y,z coordinates of current bot
     float bot_y = GlobalPlayer[i].position[1];
     float bot_z = GlobalPlayer[i].position[2];
@@ -576,11 +598,12 @@ void SeekerBattleBot(int i)
                     int ramp_path_index;
                     //First find nearest ramp
                     ramp_path_index = FindNearestRampNode(GlobalPlayer[i].position, nodePosition, rival_y, CourseRamps[ci], CourseRampLengths[ci], LineCounts[ci][1]);
-                    float diff_x = bot_x - nodePosition[0];
-                    float diff_z = bot_z - nodePosition[2];
+                    //float diff_x = bot_x - nodePosition[0];
+                    //float diff_z = bot_z - nodePosition[2];
 
 
-                    if (diff_x*diff_x + diff_z*diff_z < RAMPDISTANCESQUARE) //If bot is at ramp, use ramp
+                    //if (diff_x*diff_x + diff_z*diff_z < RAMPDISTANCESQUARE) //If bot is at ramp, use ramp
+                    if (PythagoreanTheorem(bot_x, nodePosition[0], bot_z, nodePosition[2]) < RAMPDISTANCESQUARE) //If bot is at ramp, use ramp
                     {
                         AIPathfinder[i].Target[0] = rival_x;
                         AIPathfinder[i].Target[1] = rival_y;
@@ -612,13 +635,15 @@ void SeekerBattleBot(int i)
                     int drop_path_index = FindNearestDropNode(GlobalPlayer[i].position, dropNodePosition, rival_y, CourseDrops[ci], CourseDropLengths[ci], LineCounts[ci][2]);
                     
 
-                    float diff_x_ramps = GlobalPlayer[i].position[0] - rampNodePosition[0];
-                    float diff_z_ramps = GlobalPlayer[i].position[2] - rampNodePosition[2];
-                    float diff_x_drops = GlobalPlayer[i].position[0] - dropNodePosition[0];
-                    float diff_z_drops = GlobalPlayer[i].position[2] - dropNodePosition[2];
-                    float dist_to_nearest_ramp = diff_x_ramps*diff_x_ramps + diff_z_ramps*diff_z_ramps;
-                    float dist_to_nearest_drop = diff_x_drops*diff_x_drops + diff_z_drops*diff_z_drops;
-                    if (dist_to_nearest_ramp < dist_to_nearest_drop) //If a ramp is closer than a drop, use the ramp
+                    // float diff_x_ramps = GlobalPlayer[i].position[0] - rampNodePosition[0];
+                    // float diff_z_ramps = GlobalPlayer[i].position[2] - rampNodePosition[2];
+                    // float diff_x_drops = GlobalPlayer[i].position[0] - dropNodePosition[0];
+                    // float diff_z_drops = GlobalPlayer[i].position[2] - dropNodePosition[2];
+                    //float dist_to_nearest_ramp = diff_x_ramps*diff_x_ramps + diff_z_ramps*diff_z_ramps;
+                    //float dist_to_nearest_drop = diff_x_drops*diff_x_drops + diff_z_drops*diff_z_drops;
+                    float dist_to_nearest_ramp = PythagoreanTheorem(GlobalPlayer[i].position[0], rampNodePosition[0], GlobalPlayer[i].position[2], rampNodePosition[2]);
+                    float dist_to_nearest_drop = PythagoreanTheorem(GlobalPlayer[i].position[0], dropNodePosition[0], GlobalPlayer[i].position[2], dropNodePosition[2]);
+                    if (dist_to_nearest_ramp < dist_to_nearest_drop || drop_path_index == -1) //If a ramp is closer than a drop, use the ramp
                     {
                         if (dist_to_nearest_ramp < RAMPDISTANCESQUARE) //If bot is at ramp, use ramp
                         {
@@ -657,7 +682,7 @@ void SeekerBattleBot(int i)
                             AIPathfinder[i].NearestMarker = 0;
                             AIPathfinder[i].ProgressTimer = 0;
                         }
-                        else{// Else find path to nearest ramp
+                        else{// Else find path to nearest drop
                             AIPathfinder[i].Target[0] = dropNodePosition[0];
                             AIPathfinder[i].Target[1] = dropNodePosition[1];
                             AIPathfinder[i].Target[2] = dropNodePosition[2];
