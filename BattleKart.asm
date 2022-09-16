@@ -2284,6 +2284,13 @@ resetGame:
 		SW zero, lo(bot_controller_input_p4) (a0)
 		//Reset zombomb startup flag
 		SB zero, zombomb_startup_flag
+		//Find nearest item boxes
+		ADDI sp, sp, -0x30
+		SW RA, 0x20 (sp)
+		JAL GetItemBoxIndexes
+		NOP
+		LW RA, 0x20 (sp)
+		ADDI sp, sp, 0x30
 		@@branch_reset_everything:
 	JR ra
 	NOP
@@ -6050,15 +6057,16 @@ runAtCourseInitialization:
 	// JAL getStartingPositions
 	// NOP
 
+
 	JAL 0x80002A18//Run InitialRaceSequence which was overwritten by the hook
 	NOP
+	
 
 
 	//DeadHamster
 	JAL ResetPathfinderBots
 	NOP
 	//End DeadHamster <3
-	
 
 	// SB zero, 0x800F6A5B //Disable lakitu
 	// SB zero, 0x800f7833

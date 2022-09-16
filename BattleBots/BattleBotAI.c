@@ -45,10 +45,14 @@ float test_bot_sphere_position[4][3] =
 
 void ResetPathfinderBots()
 {
-    for(int i = 0; i < 4; i++)
+    for (int i=0; i<4; i++)
     {
         AIPathfinder[i].TargetPath = -1;
-    }
+        for (int j=0; j<3; j++)
+        {
+            nearest_item_box[i][j] = 0.0;
+        }
+    } 
 }
 
 
@@ -248,10 +252,11 @@ void StandardBattleBot(int i)
     //Use item when close to rival
     if ((TripleTap % 10) == 0)
     {
-        if (TestCollideSphere(GlobalPlayer[bot_rival_p1[i]].position, 35, GlobalPlayer[i].position, 35)) 
+        if (TestCollideSphere(GlobalPlayer[bot_rival_p1[i]].position, 30, GlobalPlayer[i].position, 30)) 
         {
             bot_pressed[i] = BTN_Z;
             bot_buttons[i] = BTN_A + BTN_Z;
+            bot_timer_p1[i] = MakeRandomLimmit(160) +  400; //Once bot has used weapon, give them a few more seconds to chase their rival before finding a new rival
         }
     }
 
@@ -317,6 +322,9 @@ void SeekerBattleBot(int i)
         rival_x = GlobalPlayer[bot_rival_p1[i]].position[0]; //x,y,z coords of rival
         rival_y = GlobalPlayer[bot_rival_p1[i]].position[1];
         rival_z = GlobalPlayer[bot_rival_p1[i]].position[2];        
+        nearest_item_box[i][0] = 0.0; //Reset nearest item box
+        nearest_item_box[i][1] = 0.0;
+        nearest_item_box[i][2] = 0.0;
     }
 
     float bot_x = GlobalPlayer[i].position[0]; //x,y,z coordinates of current bot
@@ -500,7 +508,10 @@ void SeekerBattleBot(int i)
         printStringNumber(0, 180, "Direction",  AIPathfinder[i].Direction);
         printStringNumber(0, 190, "PathType",  AIPathfinder[i].PathType);
         printStringNumber(0, 200, "TargetPath",  AIPathfinder[i].TargetPath);
-        
+
+        printStringNumber(140, 120, "ixbox x", nearest_item_box[1][0]);
+        printStringNumber(140, 130, "ixbox y", nearest_item_box[1][1]);
+        printStringNumber(140, 140, "ixbox z", nearest_item_box[1][2]);
 
     }
 
@@ -887,18 +898,19 @@ void runBots()
                 
                 if (bot_timer_p1[i] <= 0) //If bot timer is <= 0, roll the dice and maybe get a new rival
                 {
-                    bot_rival_p1[i] = 0;
-                    bot_timer_p1[i] = MakeRandomLimmit(600) +  300; //Reset bot timer 5-15 seconds.
-                    if (bot_steering_p1[i] == 0) //If bot was going straight
-                    {               
-                        bot_steering_p1[i] = MakeRandomLimmit(2) + 1; //Set bot to turn right or left
-                        bot_timer_p1[i] = MakeRandomLimmit(8) +  8; //Reset bot timer
-                    }
-                    else
-                    {
-                        bot_steering_p1[i] = 0; //Set bot to go straight
-                        bot_timer_p1[i] = MakeRandomLimmit(16) +  16; //Reset bot timer
-                    }
+                    //bot_rival_p1[i] = 0;
+                    bot_rival_p1[i] = getRival(i);
+                    bot_timer_p1[i] = MakeRandomLimmit(1200) +  3000; //Reset bot timer 50-70 seconds. (600 = 10 seconds)
+                    // if (bot_steering_p1[i] == 0) //If bot was going straight
+                    // {               
+                    //     bot_steering_p1[i] = MakeRandomLimmit(2) + 1; //Set bot to turn right or left
+                    //     bot_timer_p1[i] = MakeRandomLimmit(8) +  8; //Reset bot timer
+                    // }
+                    // else
+                    // {
+                    //     bot_steering_p1[i] = 0; //Set bot to go straight
+                    //     bot_timer_p1[i] = MakeRandomLimmit(16) +  16; //Reset bot timer
+                    // }
                 }
                 //int angle_difference = abs(bot_angle_p1[i] - GlobalPlayer[i].direction[1]);
                 //bool hitting_wall = GlobalPlayer[i].wallhitcount != 0;
@@ -1153,7 +1165,8 @@ int getRival(int currentPlayer) //Note current player is 1,2,3,4, NOT 0,1,2,3
 
     }
     //else if game mode is anything else
-    else if (MakeRandomLimmit(4) == 0) //Find a new rival 25% of the time
+    //else if (MakeRandomLimmit(4) == 0) //Find a new rival 25% of the time
+    else //Turn off random chance of getting a rival for now
     {
         int enemy = 0;
 
