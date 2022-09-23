@@ -1,0 +1,71 @@
+#include "../../Library/MainInclude.h"
+
+
+extern Marker BigDonutPaths_OuterCircle15[12];
+extern Marker BigDonutPaths_OuterCircle14[12];
+extern Marker BigDonutPaths_OuterCircle13[12];
+extern Marker BigDonutPaths_OuterCircle12[12];
+extern Marker BigDonutPaths_OuterCircle11[12];
+extern Marker BigDonutPaths_OuterCircle10[12];
+extern Marker BigDonutPaths_OuterCircle09[12];
+extern Marker BigDonutPaths_OuterCircle08[12];
+extern Marker BigDonutPaths_OuterCircle07[9];
+extern Marker BigDonutPaths_OuterCircle06[9];
+extern Marker BigDonutPaths_OuterCircle05[12];
+extern Marker BigDonutPaths_OuterCircle04[12];
+extern Marker BigDonutPaths_OuterCircle03[12];
+extern Marker BigDonutPaths_OuterCircle02[12];
+extern Marker BigDonutPaths_OuterCircle01[9];
+extern Marker BigDonutPaths_OuterCircle00[9];
+extern Marker BigDonutPaths_InnerCircle15[12];
+extern Marker BigDonutPaths_InnerCircle14[12];
+extern Marker BigDonutPaths_InnerCircle13[12];
+extern Marker BigDonutPaths_InnerCircle12[12];
+extern Marker BigDonutPaths_InnerCircle11[12];
+extern Marker BigDonutPaths_InnerCircle10[12];
+extern Marker BigDonutPaths_InnerCircle09[12];
+extern Marker BigDonutPaths_InnerCircle08[12];
+extern Marker BigDonutPaths_InnerCircle07[12];
+extern Marker BigDonutPaths_InnerCircle06[9];
+extern Marker BigDonutPaths_InnerCircle05[12];
+extern Marker BigDonutPaths_InnerCircle04[12];
+extern Marker BigDonutPaths_InnerCircle03[12];
+extern Marker BigDonutPaths_InnerCircle02[12];
+extern Marker BigDonutPaths_InnerCircle01[12];
+extern Marker BigDonutPaths_InnerCircle00[12];
+extern Marker BigDonutPaths_Links03[2];
+extern Marker BigDonutPaths_Links00[2];
+extern Marker BigDonutPaths_Links09[2];
+extern Marker BigDonutPaths_Links07[2];
+extern Marker BigDonutPaths_Links01[2];
+extern Marker BigDonutPaths_Links14[2];
+extern Marker BigDonutPaths_Links18[2];
+extern Marker BigDonutPaths_Links16[2];
+extern Marker BigDonutPaths_Links13[2];
+extern Marker BigDonutPaths_Links20[2];
+extern Marker BigDonutPaths_Links11[2];
+extern Marker BigDonutPaths_Links04[2];
+extern Marker BigDonutPaths_Links24[1];
+extern Marker BigDonutPaths_Links25[1];
+extern Marker BigDonutPaths_Links12[1];
+extern Marker BigDonutPaths_Links10[1];
+extern Marker BigDonutPaths_Links05[1];
+extern Marker BigDonutPaths_Links06[1];
+extern Marker BigDonutPaths_Links08[1];
+extern Marker BigDonutPaths_Links02[1];
+extern Marker BigDonutPaths_Links22[1];
+extern Marker BigDonutPaths_Links23[1];
+extern Marker BigDonutPaths_Links17[1];
+extern Marker BigDonutPaths_Links15[1];
+extern Marker BigDonutPaths_Links21[1];
+extern Marker BigDonutPaths_Links19[1];
+
+
+extern Marker *BigDonutPaths_Paths[58];
+extern short BigDonutPaths_PathLengths[58];
+extern Marker *BigDonutPaths_Ramps[0];
+extern short BigDonutPaths_RampLengths[0];
+extern Marker *BigDonutPaths_Drops[0];
+extern short BigDonutPaths_DropLengths[0];
+
+extern short BigDonutPaths_LineCounts[3];

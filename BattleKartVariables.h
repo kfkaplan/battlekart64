@@ -56,6 +56,7 @@ extern char MENU_Y_OPTIONS;
 extern char insideMenu;
 
 
+extern bool checkItems(int player);
 extern int getTempo();
 extern void executeItem(void* Car);
 extern void makeBorder();

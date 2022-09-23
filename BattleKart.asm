@@ -813,6 +813,25 @@ getEnemy:
 	JR ra
 	ADDI sp, sp, 0x50
 
+//Check if player has an item or not
+//Inputs
+//a0 = player to check
+//Returns
+//v0 = True if an item is found, false if not
+checkItems:
+	LI a1, player_item_offset //#Calculate and add offset for current player
+	MULT a1, a0
+	LI v0, player_item_base //Load base for player has an item memory loc.
+	LBU a3, player_count_2 //IF player count is 3 or 4, add 0x1C0 to their item mem location
+	LI a2, 3
+	MFLO a0
+	BNE a3, a2, @@branch_add_3or4player_offset
+	ADDU a0, v0, a1 //Store total offset for player for item memory location
+		ADDIU a0, a0, 0x1C0
+		@@branch_add_3or4player_offset:
+	JR RA
+	LBU v0, 0x0000 (a0)
+
 
 //Given two players, this function returns the angle between them
 //Inputs
@@ -6187,6 +6206,8 @@ theMinimapSprites:
 //Import paths for bot AI
 .importobj "BattleKartPaths/BlockFortPaths.o"
 .importobj "BattleKartPaths/DoubleDeckerPaths.o"
+.importobj "BattleKartPaths/SkyscraperPaths.o"
+.importobj "BattleKartPaths/BigDonutPaths.o"
 
 
 
