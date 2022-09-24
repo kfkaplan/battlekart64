@@ -826,7 +826,7 @@ checkItems:
 	LI a2, 3
 	MFLO a0
 	BNE a3, a2, @@branch_add_3or4player_offset
-	ADDU a0, v0, a1 //Store total offset for player for item memory location
+	ADDU a0, v0, a0 //Store total offset for player for item memory location
 		ADDIU a0, a0, 0x1C0
 		@@branch_add_3or4player_offset:
 	JR RA
