@@ -45,13 +45,15 @@ float test_bot_sphere_position[4][3] =
     {0., 0., 0.},
 };
 
-void ResetPathfinderBots()
+void ResetPathfinderBots() //Runs at beginning of game
 {
     for (int i=0; i<4; i++)
     {
+        bot_rival_p1[i] = getRival(i);
         AIPathfinder[i].TargetPath = -1;
         for (int j=0; j<3; j++)
         {
+
             nearest_item_box[i][j] = 0.0;
         }
     } 
@@ -403,7 +405,7 @@ void SeekerBattleBot(int i)
             {
                 
                 //reset nearest marker 
-                if (CoursePaths[ci][TargetPath][(int)AIPathfinder[i].NearestMarker].Position[1] - bot_y > 25)
+                if ((float)CoursePaths[ci][TargetPath][AIPathfinder[i].NearestMarker].Position[1] - bot_y > 25)
                 {
                     //AI has fallen, reset paths.
                     AIPathfinder[i].TargetPath = -1;  
@@ -413,10 +415,10 @@ void SeekerBattleBot(int i)
                 {
                     for (int ThisMarker = 0; ThisMarker <= CoursePathLengths[ci][TargetPath]; ThisMarker++)
                     {
-                        if (pow(GlobalPlayer[i].position[1] - CoursePaths[ci][TargetPath][ThisMarker].Position[1], 2) < 324) //If height is not too far off
+                        if (pow(GlobalPlayer[i].position[1] - (float)CoursePaths[ci][TargetPath][ThisMarker].Position[1], 2) < 324) //If height is not too far off
                         {   
-                            GlobalFloatA =  pow(GlobalPlayer[i].position[0] - CoursePaths[ci][TargetPath][ThisMarker].Position[0], 2) + 
-                                            pow(GlobalPlayer[i].position[2] - CoursePaths[ci][TargetPath][ThisMarker].Position[2], 2)   ;
+                            GlobalFloatA =  pow(GlobalPlayer[i].position[0] - (float)CoursePaths[ci][TargetPath][ThisMarker].Position[0], 2) + 
+                                            pow(GlobalPlayer[i].position[2] - (float)CoursePaths[ci][TargetPath][ThisMarker].Position[2], 2)   ;
                             if (GlobalFloatA < CheckMarkerDistance)
                             {
                                 CheckMarkerDistance = GlobalFloatA;
@@ -439,7 +441,7 @@ void SeekerBattleBot(int i)
                 //Check if Bot has fallen - compare to last Nearest Marker height
 
                 //reset nearest marker 
-                if (CourseRamps[ci][TargetPath][(int)AIPathfinder[i].Progression].Position[1] - bot_y > 30)
+                if ((float)CourseRamps[ci][TargetPath][AIPathfinder[i].Progression].Position[1] - bot_y > 30)
                 {
                     //AI has fallen, reset paths.
                     AIPathfinder[i].TargetPath = -1; 
@@ -449,10 +451,10 @@ void SeekerBattleBot(int i)
                 {
                     for (int ThisMarker = 0; ThisMarker <= CourseRampLengths[ci][TargetPath]; ThisMarker++)
                     {
-                        if (pow(GlobalPlayer[i].position[1] - CourseRamps[ci][TargetPath][ThisMarker].Position[1], 2) < 625)
+                        if (pow(GlobalPlayer[i].position[1] - (float)CourseRamps[ci][TargetPath][ThisMarker].Position[1], 2) < 625)
                         {   
-                            GlobalFloatA = pow(GlobalPlayer[i].position[0] - CourseRamps[ci][TargetPath][ThisMarker].Position[0], 2) + 
-                                            pow(GlobalPlayer[i].position[2] - CourseRamps[ci][TargetPath][ThisMarker].Position[2], 2)   ;
+                            GlobalFloatA = pow(GlobalPlayer[i].position[0] - (float)CourseRamps[ci][TargetPath][ThisMarker].Position[0], 2) + 
+                                            pow(GlobalPlayer[i].position[2] - (float)CourseRamps[ci][TargetPath][ThisMarker].Position[2], 2)   ;
                             if (GlobalFloatA < CheckMarkerDistance)
                             {
                                 CheckMarkerDistance = GlobalFloatA;
@@ -472,7 +474,7 @@ void SeekerBattleBot(int i)
 
                 //Check if Bot has fallen - compare to last Nearest Marker height
                 //reset nearest marker 
-                if (CourseDrops[ci][TargetPath][(int)AIPathfinder[i].Progression].Position[1] - bot_y > 30)
+                if ((float)CourseDrops[ci][TargetPath][AIPathfinder[i].Progression].Position[1] - bot_y > 30)
                 {
                     //AI has fallen, reset paths.
                     AIPathfinder[i].TargetPath = -1; 
@@ -482,10 +484,10 @@ void SeekerBattleBot(int i)
                 {
                     for (int ThisMarker = 0; ThisMarker <= CourseDropLengths[ci][TargetPath]; ThisMarker++)
                     {
-                        if (pow(GlobalPlayer[i].position[1] - CourseDrops[ci][TargetPath][ThisMarker].Position[1], 2) < 625)
+                        if (pow(GlobalPlayer[i].position[1] - (float)CourseDrops[ci][TargetPath][ThisMarker].Position[1], 2) < 625)
                         {   
-                            GlobalFloatA = pow(GlobalPlayer[i].position[0] - CourseDrops[ci][TargetPath][ThisMarker].Position[0], 2) + 
-                                            pow(GlobalPlayer[i].position[2] - CourseDrops[ci][TargetPath][ThisMarker].Position[2], 2);
+                            GlobalFloatA = pow(GlobalPlayer[i].position[0] - (float)CourseDrops[ci][TargetPath][ThisMarker].Position[0], 2) + 
+                                            pow(GlobalPlayer[i].position[2] - (float)CourseDrops[ci][TargetPath][ThisMarker].Position[2], 2);
                             if (GlobalFloatA < CheckMarkerDistance)
                             {
                                 CheckMarkerDistance = GlobalFloatA;
@@ -520,11 +522,12 @@ void SeekerBattleBot(int i)
         printStringNumber(140, 120, "ixbox x", nearest_item_box[1][0]);
         printStringNumber(140, 130, "ixbox y", nearest_item_box[1][1]);
         printStringNumber(140, 140, "ixbox z", nearest_item_box[1][2]);
+        printStringNumber(140, 150, "ixbox count", ItemBoxCount);
 
-        printStringNumber(140, 150, "bot x", bot_x);
-        printStringNumber(140, 160, "bot y", bot_y);
-        printStringNumber(140, 170, "bot z", bot_z);
-        printStringNumber(140, 180, "ixbox count", ItemBoxCount);
+        printStringNumber(140, 160, "bot x", bot_x);
+        printStringNumber(140, 170, "bot y", bot_y);
+        printStringNumber(140, 180, "bot z", bot_z);
+        printStringNumber(140, 190, "Rival", bot_rival_p1[i]);
 
     }
 
@@ -539,19 +542,19 @@ void SeekerBattleBot(int i)
 
         //Check if at current target marker
 
-        GlobalFloatA = 3600.0;
+        GlobalFloatA = 1600.0;
         if (AIPathfinder[i].Direction > 0)
         {
             if (AIPathfinder[i].Progression > 4)
             {
-                GlobalFloatA = 1600.0;
+                GlobalFloatA = 3200.0;
             }
         }
         else
         {
-            if (CoursePathLengths[ci][TargetPath]-AIPathfinder[i].Progression > 4)
+            if (CoursePathLengths[ci][TargetPath]-AIPathfinder[i].Progression <= 4)
             {
-                GlobalFloatA = 1600.0;
+                GlobalFloatA = 3200.0;
             }
         }
 
@@ -612,7 +615,7 @@ void SeekerBattleBot(int i)
             }
         }
     }
-    else //else if bot HAS fallen]
+    else //else if bot HAS fallen
     {
         for (int j=0; j<3; j++) //Clear nearest item box so bot doesn't get stuck trying to go for an item box not on their level
         {
@@ -1138,6 +1141,7 @@ void runBots()
 //Function returns a bot rival if someone has picked up a flag, or their flag, or just runs the original find rival function if not
 int getRival(int currentPlayer) //Note current player is 1,2,3,4, NOT 0,1,2,3
 {
+    return 0;
 
     int flag_holder;
 
