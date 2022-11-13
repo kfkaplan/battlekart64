@@ -317,7 +317,9 @@ void SeekerBattleBot(int i)
                 rival_x = nearest_item_box[i][0]; //x,y,z coords of rival
                 rival_y = nearest_item_box[i][1];
                 rival_z = nearest_item_box[i][2];   
-                turn_towards_rival_radius = 80;         
+                turn_towards_rival_radius = 80;     
+                bot_rival_p1[i] = getRival(i); //Grab a new rival
+                bot_timer_p1[i] = MakeRandomLimmit(1200) +  3000; //Reset bot timer 50-70 seconds. (600 = 10 seconds)
             }
             else //else target rival
             {
@@ -394,18 +396,27 @@ void SeekerBattleBot(int i)
     
     float CheckMarkerDistance = 9999999999;
     short TargetPath = AIPathfinder[i].TargetPath;
-    
-    switch (AIPathfinder[i].PathType)
-    {
-        case FLATPATH:  //If bot is following a flat path
-        {   
 
-            //Check if Bot has fallen - compare to last Nearest Marker height
-            if (TargetPath != -1)
-            {
+    if (TargetPath != -1) //Check if Bot has fallen
+    {
+        switch (AIPathfinder[i].PathType)
+        {
+            case FLATPATH:  //If bot is following a flat path
+            {   
+    
+            //compare to last Nearest Marker height
                 
-                //reset nearest marker 
-                if ((float)CoursePaths[ci][TargetPath][AIPathfinder[i].NearestMarker].Position[1] - bot_y > 25)
+                // if (AIPathfinder[i].NearestMarker >= CoursePathLengths[ci][TargetPath]) //Catch the crash
+                // {
+                //     // //reset paths
+                //     // AIPathfinder[i].TargetPath = -1;  
+                //     // TargetPath = -1;
+                //     break;
+                // }
+
+                 //reset nearest marker                    
+                //if ((float)CoursePaths[ci][TargetPath][AIPathfinder[i].NearestMarker].Position[1] - bot_y > 25)
+                if (AIPathfinder[i].NearestMarkerHeight - bot_y > 25)
                 {
                     //AI has fallen, reset paths.
                     AIPathfinder[i].TargetPath = -1;  
@@ -423,23 +434,18 @@ void SeekerBattleBot(int i)
                             {
                                 CheckMarkerDistance = GlobalFloatA;
                                 AIPathfinder[i].NearestMarker = ThisMarker;
+                                AIPathfinder[i].NearestMarkerHeight = (float)CoursePaths[ci][TargetPath][ThisMarker].Position[1];
                             }
                         }
                     }
-                }
+                }                
+                
+                break;
             }
-            
-            
-            break;
-        }
-        case RAMPPATH:  //If bot is following a flat path
-        {
-            
-            if (TargetPath != -1)
+            case RAMPPATH:  //If bot is following a flat path
             {
-
-                //Check if Bot has fallen - compare to last Nearest Marker height
-
+                
+                //compare to last Nearest Marker height
                 //reset nearest marker 
                 if ((float)CourseRamps[ci][TargetPath][AIPathfinder[i].Progression].Position[1] - bot_y > 30)
                 {
@@ -459,21 +465,24 @@ void SeekerBattleBot(int i)
                             {
                                 CheckMarkerDistance = GlobalFloatA;
                                 AIPathfinder[i].NearestMarker = ThisMarker;
+                                AIPathfinder[i].NearestMarkerHeight = (float)CourseRamps[ci][TargetPath][ThisMarker].Position[1];
                             }
                         }
                     }
-                }
+                }                
+                break;
             }
-            
-            break;
-        }
-        case DROPPATH:  //If bot is following a flat path
-        {
-            if (TargetPath != -1)
+            case DROPPATH:  //If bot is following a flat path
             {
-
-                //Check if Bot has fallen - compare to last Nearest Marker height
+                //compare to last Nearest Marker height
                 //reset nearest marker 
+
+                *(uint*)(0x80700000) = (uint)ci;
+                *(uint*)(0x80700004) = (uint)TargetPath;
+                *(uint*)(0x80700008) = (uint)i;
+                *(float*)(0x8070000C) = (float)bot_y;
+                *(uint*)(0x80700010) = (uint)AIPathfinder[i].Progression;
+
                 if ((float)CourseDrops[ci][TargetPath][AIPathfinder[i].Progression].Position[1] - bot_y > 30)
                 {
                     //AI has fallen, reset paths.
@@ -492,14 +501,16 @@ void SeekerBattleBot(int i)
                             {
                                 CheckMarkerDistance = GlobalFloatA;
                                 AIPathfinder[i].NearestMarker = ThisMarker;
+                                AIPathfinder[i].NearestMarkerHeight = (float)CourseDrops[ci][TargetPath][ThisMarker].Position[1];
                             }
                         }
                     }
                 }
+                break;
             }
-            break;
         }
     }
+
 
 
     
@@ -621,6 +632,7 @@ void SeekerBattleBot(int i)
         {
             nearest_item_box[i][j] = 0.0;
         }
+        return; //Skip the rest of the code and do nothing to avoid any sort of crashes
     }
     
 
@@ -650,7 +662,10 @@ void SeekerBattleBot(int i)
                     //float diff_x = bot_x - nodePosition[0];
                     //float diff_z = bot_z - nodePosition[2];
 
-
+                    if (ramp_path_index == -1) //If no path is found in the middle of a fall
+                    {
+                        return; //end function here to avoid errors
+                    }
                     //if (diff_x*diff_x + diff_z*diff_z < RAMPDISTANCESQUARE) //If bot is at ramp, use ramp
                     if (PythagoreanTheorem(bot_x, nodePosition[0], bot_z, nodePosition[2]) < RAMPDISTANCESQUARE) //If bot is at ramp, use ramp
                     {
@@ -664,6 +679,7 @@ void SeekerBattleBot(int i)
                         AIPathfinder[i].Direction = 1;
                         AIPathfinder[i].PathType = 1;
                         AIPathfinder[i].NearestMarker = 0;
+                        AIPathfinder[i].NearestMarkerHeight = (float)CourseRamps[ci][ramp_path_index][0].Position[1];
                         AIPathfinder[i].ProgressTimer = 0;
                     }
                     else{// Else find path to nearest ramp
@@ -682,7 +698,18 @@ void SeekerBattleBot(int i)
                     //First find nearest ramp and drop
                     int ramp_path_index = FindNearestRampNode(GlobalPlayer[i].position, rampNodePosition, rival_y, CourseRamps[ci], CourseRampLengths[ci], LineCounts[ci][1]);
                     int drop_path_index = FindNearestDropNode(GlobalPlayer[i].position, dropNodePosition, rival_y, CourseDrops[ci], CourseDropLengths[ci], LineCounts[ci][2]);
-                    
+                    if (ramp_path_index == -1 && drop_path_index == -1)//If no path is found in the middle of a fall
+                    {
+                        // nearest_item_box[i][0] = 0.0; //Reset nearest item box
+                        // nearest_item_box[i][1] = 0.0;
+                        // nearest_item_box[i][2] = 0.0;
+                        // AIPathfinder[i].Target[0] = rival_x; //Try to just do normal path finding
+                        // AIPathfinder[i].Target[1] = rival_y;
+                        // AIPathfinder[i].Target[2] = rival_z;
+                        // UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), PATHDISTANCECHECK, CoursePaths[ci], CoursePathLengths[ci], LineCounts[ci][0], i, 0);
+                        // break; //Break here to avoid errors
+                        return; //End function here to avoid errors
+                    }
 
                     // float diff_x_ramps = GlobalPlayer[i].position[0] - rampNodePosition[0];
                     // float diff_z_ramps = GlobalPlayer[i].position[2] - rampNodePosition[2];
@@ -706,6 +733,7 @@ void SeekerBattleBot(int i)
                             AIPathfinder[i].Direction = -1;
                             AIPathfinder[i].PathType = 1;
                             AIPathfinder[i].NearestMarker = CourseRampLengths[ci][ramp_path_index];
+                            AIPathfinder[i].NearestMarkerHeight = (float)CourseRamps[ci][ramp_path_index][CourseRampLengths[ci][ramp_path_index]].Position[1];
                             AIPathfinder[i].ProgressTimer = 0;
                         }
                         else{// Else find path to nearest ramp
@@ -729,6 +757,7 @@ void SeekerBattleBot(int i)
                             AIPathfinder[i].Direction = 1;
                             AIPathfinder[i].PathType = 2;
                             AIPathfinder[i].NearestMarker = 0;
+                            AIPathfinder[i].NearestMarkerHeight = (float)CourseDrops[ci][drop_path_index][0].Position[1];
                             AIPathfinder[i].ProgressTimer = 0;
                         }
                         else{// Else find path to nearest drop
@@ -1141,7 +1170,7 @@ void runBots()
 //Function returns a bot rival if someone has picked up a flag, or their flag, or just runs the original find rival function if not
 int getRival(int currentPlayer) //Note current player is 1,2,3,4, NOT 0,1,2,3
 {
-    return 0;
+    // return 0; //Test always having player 1 as the rival
 
     int flag_holder;
 

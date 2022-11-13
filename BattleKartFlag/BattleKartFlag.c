@@ -1,25 +1,9 @@
 #include "../../Library/MainInclude.h"
-//#include "../Library/OKBehaviors.h"
-//#include "../Library/SubProgram.h"
-//#include "../Library/SharedFunctions.h"
-//#include "../Library/OKHeader.h"
-//#include "../Library/GameVariables/NTSC/OKassembly.h"
-//#include "../Library/GameVariables/NTSC/GameOffsets.h"
-//#include "../Library/MarioKart3D.h"
-//#include "../Library/MarioKartObjects.h"
-//#include "../Library/LibraryVariables.h"
-//#include "../Library/Struct.h"
 #include "../BattleKartVariables.h"
-//#include "../BattleKartModel/BattleKartModel.h"
 #include "../BattleKartObjects/BattleKartObjects.h"
-//#include "../MinimapSprites/ImageData.h"
-//#include "../Library/MarioKartMenu.h"
-//#include "../Library/CustomLevels.h"
-//#include "../Library/PlayerEffects.h"
-//Course markers for bot AI
-// #include "BattleKartPathData.h"
-//#include "../Library/Pathfinding.h"
-#include "../BattleKartPaths/BlockFortPaths.h"
+
+
+
 //Standard libraries
 #include <stdbool.h>
 #include <stdlib.h>
