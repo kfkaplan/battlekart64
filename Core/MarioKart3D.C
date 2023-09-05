@@ -88,25 +88,6 @@ void DisplayObject(void *Camera, void *Object)
 
 }
 
-void CollideObject(void *Car, void *Object)
-{
-	int objectID = (short)((*(long*)(*(long*)(&Object)) >> 16) & 0x0000FFFF);
-
-	objectID = objectID - 2; //alligns ID with original jump routine.
-	switch (objectID)
-	{
-		case 45:
-		{
-			//RedCoinCollide(Camera,Object);
-			break;
-		}
-		default:
-		{
-			break;
-		}
-	}
-}
-
 
 
 

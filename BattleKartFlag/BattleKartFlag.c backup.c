@@ -1288,7 +1288,7 @@ int FlagCollide(void *Car, void *Flag)
                 {
 
                     SetStarMan(carID, false);
-                    SetGhostEffect(carID, false);
+                    SetVSGhost((Player*)&GlobalPlayer[carID], (char)carID);
 
                 }
                 if (game_mode == 4) //If game mode is keep away
@@ -1432,7 +1432,7 @@ void menuStuff()
             }    
 
             //PlayerSelectMenuAfter();        
-            MapSelectMenu();
+            MapSelectMenuDefault();
 
 
             
