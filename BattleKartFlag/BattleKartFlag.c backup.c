@@ -1,320 +1,34 @@
-#include "../../Library/MainInclude.h"
+//#include "../Library/OKBehaviors.h"
+#include "../Library/SubProgram.h"
+#include "../Library/SharedFunctions.h"
+//#include "../Library/OKHeader.h"
+#include "../Library/GameVariables/NTSC/OKassembly.h"
+#include "../Library/GameVariables/NTSC/GameOffsets.h"
+#include "../Library/MarioKart3D.h"
+#include "../Library/MarioKartObjects.h"
+#include "../Library/LibraryVariables.h"
+#include "../Library/Struct.h"
 #include "../BattleKartVariables.h"
-//#include "../BattleKartObjects/BattleKartObjects.h"
-#include "../BattleKartObjects/ModelData.h"
-#include "../FirstPersonSprites/32BitFPSKart.h"
-
-
-
-//Standard libraries
+//#include "../BattleKartModel/BattleKartModel.h"
+#include "../BattleKartObjects/BattleKartObjects.h"
+//#include "../MinimapSprites/ImageData.h"
+#include "../Library/MarioKartMenu.h"
+//#include "../Library/CustomLevels.h"
+//#include "../Library/PlayerEffects.h"
 #include <stdbool.h>
-#include <stdlib.h>
-#include <math.h>
 
 // #include "../USB/usb.c"
 // #include "../USB/usb.h"
-
+// #include "../USB/debug.c"
+// #include "../USB/debug.h"
 
 const int keepAwayTimerMax = 150; //Number to set the keep away timer everytime it rests (60 = 1 sec)
 const float fractionSpeedWhenHoldingFlag = 0.8; //Fraction of top speed when holding flag
-const float fractionSpeedWhenBomb = 1.15; //Fraction of top speed when a bomb in zombombs mode
 
 //float course_height = 0.0; //Store height of course based off initialized player 1's position, used to set base and flag heights when courses are flat
 
 
-// float test_bot_sphere_x[4] = {0., 0., 0., 0.};
-// float test_bot_sphere_y[4] = {0., 0., 0., 0.};
-// float test_bot_sphere_z[4] = {0., 0., 0., 0.};
 
-// //Marker structure for Bot AI path finding
-// typedef struct Marker{
-//     short     Position[3];
-//     short    Group;
-// } Marker;
-
-void CopyBump(Camera* LocalCamera, Player LocalPlayer)
-{
-    LocalCamera->bump.flag_xy = LocalPlayer.bump.flag_xy;
-    LocalCamera->bump.flag_yz = LocalPlayer.bump.flag_yz;
-    LocalCamera->bump.flag_zx = LocalPlayer.bump.flag_zx;
-
-    LocalCamera->bump.last_xy = LocalPlayer.bump.last_xy;
-    LocalCamera->bump.last_yz = LocalPlayer.bump.last_yz;
-    LocalCamera->bump.last_zx = LocalPlayer.bump.last_zx;
-
-    LocalCamera->bump.distance_xy = LocalPlayer.bump.distance_xy;
-    LocalCamera->bump.distance_yz = LocalPlayer.bump.distance_yz;
-    LocalCamera->bump.distance_zx = LocalPlayer.bump.distance_zx;
-
-    for (int ThisVector = 0; ThisVector < 3; ThisVector++)
-    {
-        LocalCamera->bump.bump_xy[ThisVector] = LocalPlayer.bump.bump_xy[ThisVector];
-        LocalCamera->bump.bump_yz[ThisVector] = LocalPlayer.bump.bump_yz[ThisVector];
-        LocalCamera->bump.bump_zx[ThisVector] = LocalPlayer.bump.bump_zx[ThisVector];
-    }
-    LocalCamera->bump.dummy = LocalPlayer.bump.dummy;
-}
-
-
-void FirstPersonCamera()
-{
-
-
-
-
-
-
-
-    *(long long*)(0x8001A588) = 0x03E0000800000000;
-    *(long long*)(0x80019890) = 0x03E0000800000000;
-    *(long long*)(0x8001A0DC) = 0x03E0000800000000;
-    *(long long*)(0x8001E45C) = 0x03E0000800000000;
-    //func_8001E45C
-    //*(long long*)(0x8001EE98) = 0x03E0000800000000;
-    
-    
-    
-    for (int ThisPlayer = 0; ThisPlayer < player_count; ThisPlayer++)
-    {
-        if(
-            ((GlobalPlayer[ThisPlayer].weapon & HIT_BOMB) == HIT_BOMB) ||
-            ((GlobalPlayer[ThisPlayer].weapon & HIT_BOAT) == HIT_BOAT) ||
-            ((GlobalPlayer[ThisPlayer].weapon & HIT_REDSHELL) == HIT_REDSHELL) ||
-            ((GlobalPlayer[ThisPlayer].weapon & HIT_GREENSHELL) == HIT_GREENSHELL)
-        )
-        {
-            GlobalCamera[ThisPlayer]->lookat_pos[0] += 4;
-            GlobalCamera[ThisPlayer]->lookat_pos[1] -= 3;
-        }
-        else
-        {
-            float CameraVelocty[3] = {0, 0, 20};
-            MakeAlignVector(CameraVelocty, GlobalPlayer[ThisPlayer].direction[1]);
-            for (int ThisVector = 0; ThisVector < 3; ThisVector++)
-            {
-                GlobalCamera[ThisPlayer]->camera_pos[ThisVector] = GlobalPlayer[ThisPlayer].position[ThisVector] ;//+ CameraVelocty[ThisVector] / 2;               
-                GlobalCamera[ThisPlayer]->lookat_pos[ThisVector] = GlobalPlayer[ThisPlayer].position[ThisVector] + CameraVelocty[ThisVector];
-            }
-            GlobalCamera[ThisPlayer]->camera_pos[1] += 4;
-            GlobalCamera[ThisPlayer]->lookat_pos[1] += 4;
-            GlobalCamera[ThisPlayer]->chase_direction = GlobalPlayer[ThisPlayer].direction[1];
-
-            CheckBump((Bump*)(&GlobalCamera[ThisPlayer]->bump),3, GlobalCamera[ThisPlayer]->camera_pos[0], GlobalCamera[ThisPlayer]->camera_pos[1], GlobalCamera[ThisPlayer]->camera_pos[2]);
-        }
-
-        float ux=GlobalCamera[ThisPlayer]->lookat_pos[0]-GlobalCamera[ThisPlayer]->camera_pos[0];
-        float uy=GlobalCamera[ThisPlayer]->lookat_pos[1]-GlobalCamera[ThisPlayer]->camera_pos[1];
-        float uz=GlobalCamera[ThisPlayer]->lookat_pos[2]-GlobalCamera[ThisPlayer]->camera_pos[2];
-
-        GlobalCamera[ThisPlayer]->camera_direction[1]=Atan2t(ux,uz);
-        GlobalCamera[ThisPlayer]->camera_direction[0]=Atan2t(Sqrtf(ux*ux+uz*uz),uy);
-        GlobalCamera[ThisPlayer]->camera_direction[2]=0;
-
-        CopyBump(GlobalCamera[ThisPlayer], GlobalPlayer[ThisPlayer]);
-
-    }
-
-
-    // //Variables for palettes
-    // extern int theFirstPersonSprites, PipeBase, PaletteMario, PaletteLuigi, PalettePeach, PaletteToad, PaletteYoshi, PaletteDK, PaletteWario, PaletteBowser;
-    // short TireSpin[4] = {0,0,0,0};
-    // short TireType[4] = {0,0,0,0};
-    // short SteerType[4][2] = {{0,0},{0,0},{0,0},{0,0}};
-
-    // int PaletteAddress[8] = {(int)(&PaletteMario), (int)(&PaletteLuigi), (int)(&PaletteYoshi), (int)(&PaletteToad), 
-    // (int)(&PaletteDK), (int)(&PaletteWario), (int)(&PalettePeach), (int)(&PaletteBowser)};
-
-
-    // for (int ThisPlayer = 0; ThisPlayer < player_count; ThisPlayer++)
-    // {
-    //   TireSpin[ThisPlayer] += (short)(GlobalPlayer[ThisPlayer].speed);
-    //   if (TireSpin[ThisPlayer] >= 12)
-    //   {  
-    //       TireSpin[ThisPlayer] = 0;
-    //       TireType[ThisPlayer]++;
-    //       if (TireType[ThisPlayer] == 3)
-    //     {
-    //         TireType[ThisPlayer] = 0;
-    //     }
-    //   }
-    // }
-
-    // //TEST RENDERING FIRST PERSON GRAPHICS FOR P1
-
-    // //get player steer values.
-    // GlobalShortA = GlobalPlayer[0].sterrangle * 25;
-    // GlobalShortB = GlobalPlayer[0].sterrangle / -100;
-
-    // //set a "SteeerType" variable based on steer direction left/right
-    // SteerType[0][0] = 2;
-    // SteerType[0][1] = 2;
-    // if (GlobalController[0]->AnalogX < -10)
-    // {
-    //     SteerType[0][0] = 0;
-    //     SteerType[0][1] = 1;
-    // }
-    // if (GlobalController[0]->AnalogX > 10)
-    // {
-    //     SteerType[0][0] = 1;
-    //     SteerType[0][1] = 0;
-    // }
-
-
-    // //draw the tires, based on how far left/right we're steering. Multiple tire sets. 
-    // GlobalIntA = (int)(&theFirstPersonSprites) + tire_left1_Offset + (tire_left1_Size * TireType[0]) + ((tire_left1_Size * 3) * SteerType[0][0]);
-    // KWTexture2DRGBA32PT(85 + GlobalShortB,220,0,1.0,(uchar*)(GlobalIntA),(void*)(&V6432B), 64, 64, 64, 16);
-    // GlobalIntA = (int)(&theFirstPersonSprites) + tire_left1_Offset + (tire_left1_Size * TireType[0]) + ((tire_left1_Size * 3) * SteerType[0][1]);
-    // KWTexture2DRGBA32PT(235 + GlobalShortB,220,0,1.0,(uchar*)(GlobalIntA),(void*)(&V6432BMirror), 64, 64, 64, 16);
-
-
-
-    // //draw the pipekart, using the character's palette
-    // KWTexture2DCI8XLUBL(96 + GlobalShortB,210,0,1.0,255,(ushort*)(PaletteAddress[GlobalPlayer[0].kart]),(uchar*)(&PipeBase),(void*)(&V128), 128, 128, 128, 16);
-    // KWTexture2DCI8XLUBL(224 + GlobalShortB,210,0,1.0,255,(ushort*)(PaletteAddress[GlobalPlayer[0].kart]),(uchar*)(&PipeBase),(void*)(&V128Mirror), 128, 128, 128, 16);
-
-
-    // //draw the steering wheel, angled by the player steering
-    // GlobalIntA = (int)(&theFirstPersonSprites) + steeringwheel_Offset;
-    // KWTexture2DRGBA32PT(160 + GlobalShortB,180,GlobalShortA,0.6,(uchar*)(GlobalIntA),(void*)(&V12832B), 128, 128, 128, 8);
-        
-
-}
-
-
-//Returns the nearest player to current player
-int find_nearest_player(int current_player)
-{
-    int nearest_player = 0;
-    float furthest_distance = 999999999.0;
-    float distanceCheck;
-    float x = GlobalPlayer[current_player].position[0];
-    float y = GlobalPlayer[current_player].position[1];
-    float z = GlobalPlayer[current_player].position[2];
-    for (int i=0; i<player_count; i++)
-    {
-
-        if (i != current_player)
-        {
-            distanceCheck = pow(GlobalPlayer[i].position[0]-x, 2) + pow(GlobalPlayer[i].position[1]-y, 2) + pow(GlobalPlayer[i].position[2]-z, 2);
-            if (distanceCheck < furthest_distance)
-            {
-                nearest_player = i;
-                furthest_distance = distanceCheck;
-            }
-        }
-    }
-    return nearest_player;
-}
-
-void DisplayBattleKartTitle()
-{
-    PrintBigText(38,14, 0.87f,"BATTLE KART 64"); //Display title
-    PrintBigText(255,12, 0.5f,"By");
-    PrintBigText(240,25, 0.5f,"Triclon");
-
-    SpriteBtnL(18, 47, 1.0, false); //Display L, Z, and R button icons
-    SpriteBtnZ(18, 62, 1.0, false);
-    SpriteBtnR(300, 56, 1.0, false);
-
-    int y=0;
-    if (MENU_TAB == 0) //Set y position for arrow icons based on what menu I am on
-    {
-        y = MENU_Y_GAME * 12;
-    }
-    else if (MENU_TAB == 1)
-    {
-         y = MENU_Y_ITEMS * 12;
-    }
-    else if (MENU_TAB == 2)
-    {
-        y = MENU_Y_BOTS * 12;
-    }
-    else if (MENU_TAB == 3)
-    {
-        y = MENU_Y_OPTIONS * 12;
-    }
-    SpriteBtnDUp(18, y+82, 1.0, false);
-    SpriteBtnDDown(18, y+96, 1.0, false);
-    SpriteBtnDLeft(153, y+88, 1.0, false);
-    SpriteBtnDRight(305, y+88, 1.0, false);
-
-}
-
-void FlyCamInit()
-{
-    for (int Pass = 0; Pass < 20; Pass++)
-    {
-        *(uint*)(&ok_FreeCam + Pass) = 0xFF00FF00;
-    }
-}
-
-void three_d_camera_test()
-{
-    // //Copy entire camera structure from P1 to P2
-    // for (int i=0; i < 3; i++)
-    // {
-    //     g_Camera2.camera_pos[i] = g_Camera1.camera_pos[i];
-    //     g_Camera2.lookat_pos[i] = g_Camera1.lookat_pos[i];
-    //     g_Camera2.up_vector[i] = g_Camera1.up_vector[i];
-    //     g_Camera2.camera_direction[i] = g_Camera1.camera_direction[i];
-    //     g_Camera2.camera_vector[i] = g_Camera1.camera_vector[i];
-    //     g_Camera2.lookat_vector[i] = g_Camera1.lookat_vector[i];
-    //     g_Camera2.velocity[i] = g_Camera1.velocity[i];
-    // }
-    // g_Camera2.flag = g_Camera1.flag;
-    // g_Camera2.chase_direction = g_Camera1.chase_direction;
-    // g_Camera2.bump = g_Camera1.bump;
-    // g_Camera2.shake = g_Camera1.shake;
-    // g_Camera2.old_chase_direction = g_Camera1.old_chase_direction;
-    // g_Camera2.watch = g_Camera1.watch;
-    // g_Camera2.stickdeg = g_Camera1.stickdeg;
-    // g_Camera2.screen_view_angle = g_Camera1.screen_view_angle;
-    g_Camera2 = g_Camera1;
-    g_Camera1.camera_vector[0] = 0.75;
-    g_Camera1.lookat_vector[0] = 0.75;
-    g_Camera2.lookat_vector[0] = -0.75;
-    g_Camera2.camera_vector[0] = -0.75;
-    *(char*)(0x800DC533) = 0x2; //Force left right 2 player view
-}
-
-
-//Speed up a player who has turned into a bomb in zombombs
-void bombSpeedup(int player)
-{
-    GlobalPlayer[player].acc_maxcount *= fractionSpeedWhenBomb; //Speed up player who has turned into a bomb
-}
-
-//Slow down all players who are bombs in zombombs
-void bombSlowdown()
-{
-    for (int i=0; i<player_count; i++)
-    {
-        if (*(unsigned char*)(0x800F699C + (0xDD8 * i)) == 0x8) //If player is a bomb
-        {
-            GlobalPlayer[i].acc_maxcount /= fractionSpeedWhenBomb; //Slow player who has turned into a bomb back to their normal top speed
-        }
-    }
-}
-
-//void BombRolloverWrap(Player* Kart, char Kno)
-void CheckHit(int PlayerIndex, int HitType) //Hook into wrapper
-{
-
-//     #define     BombThrowRolloverHT     0
-// #define     RolloverHT                1
-// #define     WheelSpinHT                2
-// #define        BrokenHT                3
-// #define     ThunderHT                4
-// #define        SpinHT                    5
-// #define        BombRolloverHT            6
-// #define        ProWheelSpinHT            7
-
-
-    // if (game_mode == 5 && HitType == 0) //If playing Zombombs game mode
-    // {    
-    //     makePlayerBomb(PlayerIndex);
-    // }
-}
 
 
 //Function used for testing, displays player 1's position on the screen
@@ -520,34 +234,27 @@ short angleToObject(int currentPlayer, float object_x, float object_y)
 
 }
 
-
-int getBaseNumber(int currentPlayer)
+short angleToBase(int currentPlayer)
 {
+    int baseNumber;
     if (ffa_or_teams == 0) //If FFA
     {
-        return(currentPlayer); //Set base number to be the current player's base
+        baseNumber = currentPlayer; //Set base number to be the current player's base
     }
     else //else if teams
     {
         if(currentPlayer < 2) //If team 1
         {
-            return(0); //set base number to team 1's base
+            baseNumber = 0; //set base number to team 1's base
         }
         else //if team 2
         {
-            return(1); //Set base number to team 2's base
+            baseNumber = 1; //Set base number to team 2's base
         }
     }
-}
-
-short angleToBase(int currentPlayer)
-{
-    int baseNumber = getBaseNumber(currentPlayer);
 
     return(angleToObject(currentPlayer, (float)basePositions[basePositionSelection][g_courseID][baseNumber][0], (float)basePositions[basePositionSelection][g_courseID][baseNumber][2]));
 }
-
-
 
 short angleToFlag(int currentPlayer, int flagNumber)
 {
@@ -569,6 +276,81 @@ short angleToFlag(int currentPlayer, int flagNumber)
     return(angleToObject(currentPlayer, currentFlagPositionsX[flagNumber], currentFlagPositionsY[flagNumber]));
 }
 
+
+
+//Function returns a bot rival if someone has picked up a flag, or their flag, or just runs the original find rival function if not
+int getRival(int currentPlayer) //Note current player is 1,2,3,4, NOT 0,1,2,3
+{
+
+    int flag_holder;
+
+    if (game_mode==4 || (game_mode == 3 && ctf_game_mode == 0)) //If game mode is keep away or if 1 flag CTF
+    {
+        flag_holder = playerHoldingFlag[0];
+        if (ffa_or_teams == 0) //If FFA
+        {
+            if((flag_holder-1 != currentPlayer) && (flag_holder != -1))
+            {
+                return(flag_holder);
+            }
+        }
+        else //If teams
+        {
+            
+            if ((currentPlayer==0 || currentPlayer==1) && (flag_holder==2 ||flag_holder==3)) //Team 1
+            {
+                return(flag_holder);
+            }
+            else if  ((currentPlayer==2 || currentPlayer==3) && (flag_holder==0 || flag_holder==1))//Team 2
+            {
+                return(flag_holder);
+            }
+        }
+    }
+    else if (game_mode==3 && ctf_game_mode == 1) //If game mode is CTF multiflag
+    {
+        
+
+        if (ffa_or_teams == 0) //If FFA
+        {
+            flag_holder = playerHoldingFlag[currentPlayer];
+            if (flag_holder != -1)
+            {
+                return(flag_holder);
+            }
+        }
+        else //If teams
+        {
+            if (currentPlayer==0 || currentPlayer==1) //Team 1
+            {
+                flag_holder = playerHoldingFlag[0];
+                if (flag_holder != -1)
+                {
+                    return(flag_holder);
+                } 
+            }
+            else if (currentPlayer==2 || currentPlayer==3) //Team 2
+            {
+                flag_holder = playerHoldingFlag[2];
+                if (flag_holder != -1)
+                {
+                    return(flag_holder);
+                } 
+            }
+        }
+
+    }
+    //else if game mode is anything else
+    if (MakeRandomLimmit(4) == 0) //Find a new rival 25% of the time
+    {
+        return(getEnemy(currentPlayer)); //Run the old rival finding function that was written in assembly
+    }
+    else
+    {
+        return(bot_rival_p1[currentPlayer]);
+    }
+    //return(getEnemy(currentPlayer));
+}
 
 
 
@@ -614,9 +396,6 @@ void minimap_display_sprite(int input_x, int input_y, int spriteAddress)
 
 void ctf_minimap_display_flags_and_bases()
 {
-
-    
-
     //Display bases on minimap
     if (ffa_or_teams == 0) //If FFA
     {
@@ -733,259 +512,8 @@ void hijackExecuteItem(void *Car)
             executeItem(Car);
         }
     }
-    else if (game_mode == 6) //If game mode is Shell Shooter
-    {
-        int carID = (*(long*)&Car - (long)&g_PlayerStructTable) / 0xDD8;
-
-
-        if (shooter_ammo_p1[carID] > 0.0)
-        {
-            //Play sound for firing shell, here the "explosion" sound
-            playSound(0x19018010);
-
-            //Set shell angle and position
-            objectAngle[0] = 0;
-            objectAngle[1] = 0;
-            objectAngle[2] = carID; //Owner of shell is stored in angle[2]
-            objectPosition[0] = GlobalPlayer[carID].position[0]; 
-            objectPosition[1] = GlobalPlayer[carID].position[1];
-            objectPosition[2] = GlobalPlayer[carID].position[2];
-            objectVelocity[0] = 0;
-            objectVelocity[1] = 0;
-            objectVelocity[2] = 11;
-            // //take the Z offset and allign it to the player angle
-            MakeAlignVector(objectVelocity,(GlobalPlayer[carID].direction[1]));
-            // //add alligned offset to player position.
-            objectPosition[0] += objectVelocity[0]; 
-            objectPosition[1] += objectVelocity[1];
-            objectPosition[2] += objectVelocity[2];
-
-            //
-            objectVelocity[0] = 0.0;
-            objectVelocity[1] = 0.0;
-            objectVelocity[2] = 7.5;
-            MakeAlignVector(objectVelocity,(GlobalPlayer[carID].direction[1]));
-            objectVelocity[0] += GlobalPlayer[carID].velocity[0];
-            objectVelocity[2] += GlobalPlayer[carID].velocity[2];
-
-
-            //put shell ID and hitbox radius here
-            int objID = MasterCreateObject(objectPosition, objectAngle, objectVelocity, 0x07, 4.0); 
-            g_SimpleObjectArray[objID].sparam = 2;
-            //g_SimpleObjectArray[objID].angle[2] = carID; //Store owner of shell
-
-
-
-            //Decrement ammo
-            shooter_ammo_p1[carID] -= 1.0;            
-        }
-
-
-    }
     else{
         executeItem(Car);
-    }
-}
-
-
-
-
-void flash_screen_when_hit(int carID)
-{
-    if (one_player_full_screen)
-    {
-        if (carID == 0)
-        {
-            GraphPtr = DrawRectangle(GraphPtr, 0x000, 0x000, 0x140, 0x140, 0xFF, 0, 0, 0x48); //Large box for text and selection
-        }
-    }
-    else if (player_count == 2)
-    {
-        if (carID == 0)
-        {
-            GraphPtr = DrawRectangle(GraphPtr, 0x000, 0x000, 0x140, 0x78, 0xFF, 0, 0, 0x48); //Large box for text and selection
-        }
-        else //if carID == 1
-        {
-            GraphPtr = DrawRectangle(GraphPtr, 0x000, 0x78, 0x140, 0x140, 0xFF, 0, 0, 0x48); //Large box for text and selection
-        }
-    }
-    else
-    {
-
-        if (carID == 0)
-        {
-            GraphPtr = DrawRectangle(GraphPtr, 0x000, 0x000, 0xA0, 0x78, 0xFF, 0, 0, 0x48); //Large box for text and selection
-        }
-        else if (carID == 1)
-        {
-            GraphPtr = DrawRectangle(GraphPtr, 0xA0, 0x000, 0x140, 0x78, 0xFF, 0, 0, 0x48); //Large box for text and selection
-        }
-        else if (carID == 2)
-        {
-            GraphPtr = DrawRectangle(GraphPtr, 0x000, 0x78, 0xA0, 0x140, 0xFF, 0, 0, 0x48); //Large box for text and selection
-        }
-        else //if carID == 3
-        {
-            GraphPtr = DrawRectangle(GraphPtr, 0xA0, 0x78, 0x140, 0x140, 0xFF, 0, 0, 0x48); //Large box for text and selection
-        }
-    }
-}
-
-
-void display_hp_and_ammo_bars(int carID)
-{
-    if (one_player_full_screen)
-    {
-        if (carID == 0)
-        {
-            //STUFF
-        }
-    }
-    else if (player_count == 2)
-    {
-        if (carID == 0)
-        {
-            GraphPtr = DrawRectangle(GraphPtr, 0x000, 0x000, 0x140, 0x78, 0xFF, 0, 0, 0x48); //Large box for text and selection
-        }
-        else //if carID == 1
-        {
-            GraphPtr = DrawRectangle(GraphPtr, 0x000, 0x78, 0x140, 0x140, 0xFF, 0, 0, 0x48); //Large box for text and selection
-        }
-    }
-    else
-    {
-
-        if (carID == 0)
-        {
-            GraphPtr = DrawRectangle(GraphPtr, 0x000, 0x000, 0xA0, 0x78, 0xFF, 0, 0, 0x48); //Large box for text and selection
-        }
-        else if (carID == 1)
-        {
-            GraphPtr = DrawRectangle(GraphPtr, 0xA0, 0x000, 0x140, 0x78, 0xFF, 0, 0, 0x48); //Large box for text and selection
-        }
-        else if (carID == 2)
-        {
-            GraphPtr = DrawRectangle(GraphPtr, 0x000, 0x78, 0xA0, 0x140, 0xFF, 0, 0, 0x48); //Large box for text and selection
-        }
-        else //if carID == 3
-        {
-            GraphPtr = DrawRectangle(GraphPtr, 0xA0, 0x78, 0x140, 0x140, 0xFF, 0, 0, 0x48); //Large box for text and selection
-        }
-    }
-}
-
-void shell_shooter_hud_stuff()
-{
-    int scaled_health;
-    int scaled_ammo;
-    //test heart sprite
-    // int x = 10;
-    // int y = 10;
-    // //int spriteAddress = HeartSpriteROM;
-    // KWSprite(x,y,8,8,(unsigned short*)HeartSpriteROM); //Display the sprite
-    //test heart sprite
-    //GlobalAddressA = (long)(&theMinimapSprites) + FlagSpriteOffsets[0];
-    // KWSprite(10,10,128,128,(unsigned short*)BattleFlag); //Display the sprite
-
-    if (one_player_full_screen)
-    {
-        scaled_health = (int)(46.0 * (shooter_health_p1[0] / shooter_health_max));
-        scaled_ammo = (int)(46.0 * (shooter_ammo_p1[0] / shooter_ammo_max));
-        GraphPtr = DrawRectangle(GraphPtr, 0x10, 0xC8, 0x16, 0x98, 0x80, 0x80, 0x80, 0x80); //HP
-        GraphPtr = DrawRectangle(GraphPtr, 0x11, 0xC7-scaled_health, 0x15, 0xC7, 0xFF, 0x30, 0x30, 0xB0);
-        GraphPtr = DrawRectangle(GraphPtr, 0x18, 0xC8, 0x1E, 0x98, 0x80, 0x80, 0x80, 0x80); //Ammo
-        GraphPtr = DrawRectangle(GraphPtr, 0x19, 0xC7-scaled_ammo, 0x1D, 0xC7, 0x80, 0xFF, 0x80, 0xB0);
-    }
-    else if (player_count == 2)
-    {
-        //P1
-        scaled_health = (int)(46.0 * (shooter_health_p1[0] / shooter_health_max));
-        scaled_ammo = (int)(46.0 * (shooter_ammo_p1[0] / shooter_ammo_max));
-        GraphPtr = DrawRectangle(GraphPtr, 0x10, 0x50, 0x16, 0x20, 0x80, 0x80, 0x80, 0x80); //HP
-        GraphPtr = DrawRectangle(GraphPtr, 0x11, 0x4F-scaled_health, 0x15, 0x4F, 0xFF, 0x30, 0x30, 0xB0);
-        GraphPtr = DrawRectangle(GraphPtr, 0x18, 0x50, 0x1E, 0x20, 0x80, 0x80, 0x80, 0x80); //Ammo
-        GraphPtr = DrawRectangle(GraphPtr, 0x19, 0x4F-scaled_ammo, 0x1D, 0x4F, 0x80, 0xFF, 0x80, 0xB0);
-        //P2
-        scaled_health = (int)(46.0 * (shooter_health_p1[1] / shooter_health_max));
-        scaled_ammo = (int)(46.0 * (shooter_ammo_p1[1] / shooter_ammo_max));
-        GraphPtr = DrawRectangle(GraphPtr, 0x10, 0xC8, 0x16, 0x98, 0x80, 0x80, 0x80, 0x80); //HP
-        GraphPtr = DrawRectangle(GraphPtr, 0x11, 0xC7-scaled_health, 0x15, 0xC7, 0xFF, 0x30, 0x30, 0xB0);
-        GraphPtr = DrawRectangle(GraphPtr, 0x18, 0xC8, 0x1E, 0x98, 0x80, 0x80, 0x80, 0x80); //Ammo
-        GraphPtr = DrawRectangle(GraphPtr, 0x19, 0xC7-scaled_ammo, 0x1D, 0xC7, 0x80, 0xFF, 0x80, 0xB0);        
-    }
-    else{
-        //P1
-        scaled_health = (int)(46.0 * (shooter_health_p1[0] / shooter_health_max));
-        scaled_ammo = (int)(46.0 * (shooter_ammo_p1[0] / shooter_ammo_max));
-        GraphPtr = DrawRectangle(GraphPtr, 0x10, 0x50, 0x16, 0x20, 0x80, 0x80, 0x80, 0x80); //HP
-        GraphPtr = DrawRectangle(GraphPtr, 0x11, 0x4F-scaled_health, 0x15, 0x4F, 0xFF, 0x30, 0x30, 0xB0);
-        GraphPtr = DrawRectangle(GraphPtr, 0x18, 0x50, 0x1E, 0x20, 0x80, 0x80, 0x80, 0x80); //Ammo
-        GraphPtr = DrawRectangle(GraphPtr, 0x19, 0x4F-scaled_ammo, 0x1D, 0x4F, 0x80, 0xFF, 0x80, 0xB0);
-        //P2
-        scaled_health = (int)(46.0 * (shooter_health_p1[1] / shooter_health_max));
-        scaled_ammo = (int)(46.0 * (shooter_ammo_p1[1] / shooter_ammo_max));
-        GraphPtr = DrawRectangle(GraphPtr, 0xB0, 0x50, 0xB6, 0x20, 0x80, 0x80, 0x80, 0x80); //HP
-        GraphPtr = DrawRectangle(GraphPtr, 0xB1, 0x4F-scaled_health, 0xB5, 0x4F, 0xFF, 0x30, 0x30, 0xB0);
-        GraphPtr = DrawRectangle(GraphPtr, 0xB8, 0x50, 0xBE, 0x20, 0x80, 0x80, 0x80, 0x80); //Ammo
-        GraphPtr = DrawRectangle(GraphPtr, 0xB9, 0x4F-scaled_ammo, 0xBD, 0x4F, 0x80, 0xFF, 0x80, 0xB0);
-        //P3
-        scaled_health = (int)(46.0 * (shooter_health_p1[2] / shooter_health_max));
-        scaled_ammo = (int)(46.0 * (shooter_ammo_p1[2] / shooter_ammo_max));
-        GraphPtr = DrawRectangle(GraphPtr, 0x10, 0xC8, 0x16, 0x98, 0x80, 0x80, 0x80, 0x80); //HP
-        GraphPtr = DrawRectangle(GraphPtr, 0x11, 0xC7-scaled_health, 0x15, 0xC7, 0xFF, 0x30, 0x30, 0xB0);
-        GraphPtr = DrawRectangle(GraphPtr, 0x18, 0xC8, 0x1E, 0x98, 0x80, 0x80, 0x80, 0x80); //Ammo
-        GraphPtr = DrawRectangle(GraphPtr, 0x19, 0xC7-scaled_ammo, 0x1D, 0xC7, 0x80, 0xFF, 0x80, 0xB0);
-        //P4
-        if (player_count == 4)
-        {
-            scaled_health = (int)(46.0 * (shooter_health_p1[3] / shooter_health_max));
-            scaled_ammo = (int)(46.0 * (shooter_ammo_p1[3] / shooter_ammo_max));
-            GraphPtr = DrawRectangle(GraphPtr, 0xB0, 0xC8, 0xB6, 0x98, 0x80, 0x80, 0x80, 0x80); //HP
-            GraphPtr = DrawRectangle(GraphPtr, 0xB1, 0xC7-scaled_health, 0xB5, 0xC7, 0xFF, 0x30, 0x30, 0xB0);
-            GraphPtr = DrawRectangle(GraphPtr, 0xB8, 0xC8, 0xBE, 0x98, 0x80, 0x80, 0x80, 0x80); //Ammo
-            GraphPtr = DrawRectangle(GraphPtr, 0xB9, 0xC7-scaled_ammo, 0xBD, 0xC7, 0x80, 0xFF, 0x80, 0xB0);            
-        }
-
-
-        // loadFont(); //Debug text
-        // printStringNumber(0x80, 0x20, "Who hit P1 last", who_hit_p1_last[0]);
-        // printStringNumber(0x80, 0x2C, "Who hit P2 last", who_hit_p1_last[1]);
-        // printStringNumber(0x80, 0x34, "Who hit P3 last", who_hit_p1_last[2]);
-        // printStringNumber(0x80, 0x40, "Who hit P4 last", who_hit_p1_last[3]);
-        // printStringNumber(0x20, 0x20, "Health", shooter_health_p1[0]);
-        // printStringNumber(0x20, 0x2C, "ammo p1", shooter_ammo_p1[0]);
-        // printStringNumber(0x20, 0x34, "ammo p2", shooter_ammo_p1[1]);
-        // printStringNumber(0x20, 0x40, "ammo p3", shooter_ammo_p1[2]);
-        // printStringNumber(0x20, 0x4C, "ammo p4", shooter_ammo_p1[3]);
-
-        // printFloat(0x20, 0x84, shooter_health_max);
-        // printFloat(0x20, 0x90, shooter_ammo_max);
-    }
-
-    for (int i=0; i < player_count; i++) //Loop through each player
-    {
-        if (check_if_hit(i)) //Flash screen red if hit
-        {
-            flash_screen_when_hit(i);
-        }
-
-        if (GlobalPlayer[i].slip_flag & ROLLOVER) //Stop tumble if player is tumbling
-        {
-            //GlobalPlayer[i].slip_flag &= ~N_JUMP;
-            if (shooter_health_p1[i] > 1.0)  //Stop tumble if player is tumbling and their HP is > 1, otherwise let them tumble like normal
-            { 
-                GlobalPlayer[i].slip_flag &= ~ROLLOVER; 
-                who_was_hit_last = i + 1; //Since this preempts the usual hit detection, set who was hit last so that the hit is properly recorded and processed
-            }
-
-        }
-
-        // //Make HUD item boxes go live off the screen somewhere so we don't see them
-        // GlobalHud[i]->itemX = 500;
-        // GlobalHud[i]->itemY = 500;
-        // GlobalHud[i]->itemX2 = 500;
-        // GlobalHud[i]->itemY2 = 500;
     }
 }
 
@@ -1059,7 +587,6 @@ void setFlag(int flagNumber)
     *(short*)(GlobalAddressA + (0x70 * GlobalShortA) + 4) = flagNumber; //Store flag number in simple object
 
     playerHoldingFlag[flagNumber] = -1;
-
 }
 
 void setBase(int posNumber, int baseNumber)
@@ -1094,16 +621,11 @@ void selectStartingPositions()
             GraphPtr = DrawRectangle(GraphPtr, 0x10, 0xC, 0x12C, 0x40, 0, 0, 0, 0xA0); //Large box for text and selection
             GraphPtr = DrawRectangle(GraphPtr, 0x7B + selectionBoxPositionOffset, 0x21, 0x8D + selectionBoxPositionOffset, 0x2F, 0x80, 0x80, 0x40, 0xFF); //Small box only for selection
             GraphPtr = DrawRectangle(GraphPtr, 0x7C + selectionBoxPositionOffset, 0x22, 0x8C + selectionBoxPositionOffset, 0x2E, 0x00, 0x00, 0xFF, 0xFF); //Small box only for selection
-
-
             loadFont();
             printString(0xC, 0x00, "Please select starting positions");
-            printString(0x1C, 0x10, "Press  :  1  2  3  4");
-            printString(0x1C, 0x20, "Press   to begin game");
+            printString(0x1C, 0x10, "Press A:  1  2  3  4");
+            printString(0x1C, 0x20, "Press START to begin game");
 
-
-            SpriteBtnA(99, 40, 1.0, false);
-            SpriteBtnStart(99, 55, 1.0, false);
 
             //Set starting positions
             if (*(char*)0x8018EE09 < 3) //If playifng a race course
@@ -1249,35 +771,27 @@ void selectStartingPositions()
                 }
             }
 
-            // //Freeze bots so they don't wander around
-            for (int i=0; i<4; i++)
+            //Freeze bots so they don't wander around
+            if (bot_status_p1) 
             {
-                if (bot_status_p1[i] > 0)
-                {
-                    player_frozen[i] = true;
-                    GlobalPlayer[i].flag = 0xE000;
-                }
+                player_frozen[0] = true;
+                GlobalPlayer[0].flag = 0xE000;
             }
-            // if (bot_status_p1) 
-            // {
-            //     player_frozen[0] = true;
-            //     GlobalPlayer[0].flag = 0xE000;
-            // }
-            // if (bot_status_p2)
-            // {
-            //     player_frozen[1] = true;
-            //     GlobalPlayer[1].flag = 0xE000;
-            // }
-            // if (bot_status_p3)
-            // {
-            //     player_frozen[2] = true;
-            //     GlobalPlayer[2].flag = 0xE000;
-            // }
-            // if (bot_status_p4)
-            // {
-            //     player_frozen[3] = true;
-            //     GlobalPlayer[3].flag = 0xE000;
-            // }
+            if (bot_status_p2)
+            {
+                player_frozen[1] = true;
+                GlobalPlayer[1].flag = 0xE000;
+            }
+            if (bot_status_p3)
+            {
+                player_frozen[2] = true;
+                GlobalPlayer[2].flag = 0xE000;
+            }
+            if (bot_status_p4)
+            {
+                player_frozen[3] = true;
+                GlobalPlayer[3].flag = 0xE000;
+            }
 
 
             //Display "READY" when ready and start game when everyone is ready
@@ -1397,7 +911,7 @@ void initCTF()
     for (int i=0; i<4; i++)
     {
         playerHoldingFlag[i] = -1;
-        flag_count[i] = 0;
+        FlagCount[i] = 0;
         flagTimer[i] = 0;
         flagDropped[i] = false;
 
@@ -1418,7 +932,7 @@ void initKeepAway()
     for (int i=0; i<4; i++)
     {
         playerHoldingFlag[i] = -1;
-        flag_count[i] = 0;
+        FlagCount[i] = 0;
         flagTimer[i] = 0;
         flagDropped[i] = false;
 
@@ -1433,10 +947,6 @@ void initKeepAway()
     ctf_game_mode = 0;
     setFlag(0);
 
-    keepAwayBotRunAwayTimer = 0;
-    //playerHoldingFlag[0] = 0; //TESTING DISPLAYING FLAG, DELETE WHEN DONE
-
-
 }
 
 //Function to handle keep away scoring with the keep away timer
@@ -1445,7 +955,6 @@ void trackKeepAwayScoring()
     if (playerHoldingFlag[0] != -1) //If someone is holding the flag
     {
         keepAwayTimer = decrementTimerWrapper(keepAwayTimer); //Decrement keep away timer every frame
-
         if (keepAwayTimer <= 0) //If player has held flag long enough to score
         {
             incrementScore(playerHoldingFlag[0]);
@@ -1453,19 +962,18 @@ void trackKeepAwayScoring()
             keepAwayTimer = keepAwayTimerMax;
         }
     }
-
 }
 
 
 //Drop flag at location where player is hit
-void dropFlagAfterHit()
+void dropFlag()
 {
 
     for (int flagNumber=0; flagNumber < player_count; flagNumber++)
     {
         if (playerHoldingFlag[flagNumber] != -1)
         {
-            if (check_if_hit(playerHoldingFlag[flagNumber]) == 1)
+            if (checkHit(playerHoldingFlag[flagNumber]) == 1)
             {                  
                 
                 if (slow_when_holding_flag != 0)
@@ -1491,17 +999,13 @@ void dropFlagAfterHit()
     }
 }
 
-//void DrawLightBulb()
-void DrawPerScreen(Camera* LocalCamera)
+void DrawLightBulb()
 {  
-
-    
     if (game_mode ==3 || game_mode==4) //If game is ctf or keep away
     {       
         int baseTurn;
         int addTurn;
 
-       
         for (int flagNumber=0; flagNumber < player_count; flagNumber++)
         {
             if (playerHoldingFlag[flagNumber] != -1)
@@ -1533,121 +1037,39 @@ void DrawPerScreen(Camera* LocalCamera)
                 DrawGeometryScale(objectPosition,objectAngle,GlobalAddressB, 0.06);
 
 
-
-
                 //minimap_test();
                 currentFlagPositionsX[flagNumber] = objectPosition[0];
-                currentFlagPositionsHeight[flagNumber] = objectPosition[1];
                 currentFlagPositionsY[flagNumber] = objectPosition[2];
 
+                // //Prevent item usage if holding the flag (if set)
+                // if (no_items_when_holding_flag != 0)
+                // {
+                //     switch(playerHoldingFlag[flagNumber])
+                //     {
+                // //         case 1:
+                //             *(char*)(0x80165F5B) = 0;
+                //             *(char*)(0x80165F5D) = 0;
+                //             *(char*)(0x80165F8A) = 0;
+                //             *(char*)(0x8016611B) = 0;
+                //             *(char*)(0x8016611D) = 0;
+                //             *(char*)(0x8016614A) = 0;
+                //         case 2:
+                //             *(char*)(0x8016603D) = 0;
+                //             *(char*)(0x8016606A) = 0;
+                //             *(char*)(0x801661FD) = 0;
+                //             *(char*)(0x8016622A) = 0;
+                //         case 3:
+                //             *(char*)(0x801662DD) = 0;
+                //             *(char*)(0x8016630A) = 0;
+                //         case 4:
+                //             *(char*)(0x801663BD) = 0;
+                //             *(char*)(0x801663EA) = 0;
+                //     }
+                // }
             }
         }
     }
-    else if (game_mode == 2) //Display a flag on shrunk players in squish game mode
-    {
-        float player_x, player_y, player_z, distance;
 
-        int current_camera = (*(long*)&LocalCamera - (long)&g_CameraTable) / 0xB8;
-
-        for (int i=0; i<player_count; i++)
-        {
-
-                    
-
-
-
-            if ((i != current_camera) && (GlobalPlayer[i].slip_flag & THUNDER))
-            {
-
-                GlobalAddressA = (long)&g_PlayerStructTable + (i * 0xDD8);
-
-
-                // objectPosition[0] = *(float*)(GlobalAddressA + 20);
-                // objectPosition[1] = *(float*)(GlobalAddressA + 24) + 8.0;
-                // objectPosition[2] = *(float*)(GlobalAddressA + 28);
-                
-                int angle = (LocalCamera->camera_direction[1]-(DEG1 * 180));
-                float sinB = sinT(angle);
-                float cosB = cosT(angle);
-
-                inGameAffineMatrix[0][0] =  cosB;
-                inGameAffineMatrix[1][0] =  0.0f;
-                inGameAffineMatrix[2][0] =  sinB;
-                inGameAffineMatrix[0][1] =  0.0f;
-                inGameAffineMatrix[1][1] =  1.0f;
-                inGameAffineMatrix[2][1] =  0.0f;
-                inGameAffineMatrix[0][2] = -sinB;
-                inGameAffineMatrix[1][2] =  0.0f;
-                inGameAffineMatrix[2][2] =  cosB;
-                inGameAffineMatrix[0][3] =  0.0f;
-                inGameAffineMatrix[1][3] =  0.0f;
-                inGameAffineMatrix[2][3] =  0.0f;
-                inGameAffineMatrix[3][3] =  1.0f; 
-
-                // inGameAffineMatrix[3][0] = (float)objectPosition[0];
-                // inGameAffineMatrix[3][1] = (float)objectPosition[1];
-                // inGameAffineMatrix[3][2] = (float)objectPosition[2];
-                player_x = GlobalPlayer[i].position[0];
-                player_y = GlobalPlayer[i].position[1];
-                player_z = GlobalPlayer[i].position[2];
-
-                inGameAffineMatrix[3][0] = player_x;
-                inGameAffineMatrix[3][1] = player_y;
-                inGameAffineMatrix[3][2] = player_z;
-
-                distance = Sqrtf( pow(player_x - LocalCamera->camera_pos[0], 2)
-                            + pow(player_y - LocalCamera->camera_pos[1], 2)
-                            + pow(player_z - LocalCamera->camera_pos[2], 2)      );
-                
-                ScalingMatrix(inGameAffineMatrix, 0.8 + (distance/200.0));    
-                if(SetMatrix(inGameAffineMatrix,0) == 0)
-                {
-                    return;
-                }
-                gSPDisplayList(GraphPtrOffset++, PointMarker);
-
-
-            }
-
-        }
-
-    }
-
-}
-
-void DisplayFlagOnSquishedPlayers()
-{
-
-    short baseTurn;
-    short addTurn;
-    for (int i=0; i<player_count; i++)
-    {
-        // if (GlobalPlayer[i].slip_flag & THUNDER) //If player is squished
-        // {
-            // DrawGeometryScale(GlobalPlayer[i].position, GlobalPlayer[i].direction, BattleFlag, 0.1); //Drag flag on them
-        // }
-
-
-                GlobalAddressA = (long)&g_PlayerStructTable + (i * 0xDD8);
-
-
-                baseTurn = *(short*)(GlobalAddressA + 46);
-                addTurn = *(short*)(GlobalAddressA + 192);
-
-                objectPosition[0] = *(float*)(GlobalAddressA + 20);
-                objectPosition[1] = *(float*)(GlobalAddressA + 24)-3.0;
-                objectPosition[2] = *(float*)(GlobalAddressA + 28);
-
-                
-                
-                objectAngle[0] = 0;
-                objectAngle[1] = -(baseTurn + addTurn)+0x3000;
-                objectAngle[2] = 0;
-
-                DrawGeometryScale(objectPosition, objectAngle, BattleFlag, 0.06);
-
-    }
-    
 }
 
 
@@ -1777,7 +1199,7 @@ int BaseCollide(void *Car, void *Base)
         //*targetAddress = 0x353500FF;
         //deleteObjectBuffer(Flag);
         //playSound(0x49008017);
-        //flag_count++;
+        //FlagCount++;
         //playerID = (*(long*)&Car - (long)&g_PlayerStructTable) / 0xDD8;
         for (int flagNumber=0; flagNumber < 4; flagNumber++)
         {
@@ -1797,11 +1219,11 @@ int BaseCollide(void *Car, void *Base)
         }
 
     }
-    // if (flag_count == 8)
+    // if (FlagCount == 8)
     // {
     //     playerID = (*(long*)&Car - (long)&g_PlayerStructTable) / 0xDD8;
     //     SetStar(Car,playerID);
-    //     flag_count++;
+    //     FlagCount++;
     // }
 
     return(0);
@@ -1825,7 +1247,7 @@ int FlagCollide(void *Car, void *Flag)
     // }
 
 
-    if (check_if_hit(carID) == 0 && playerHoldingFlag[0] != carID && playerHoldingFlag[1] != carID && playerHoldingFlag[2] != carID && playerHoldingFlag[3] != carID)   //Only allow players who are not current "being hit" to pick up the flag
+    if (checkHit(carID) == 0 && playerHoldingFlag[0] != carID && playerHoldingFlag[1] != carID && playerHoldingFlag[2] != carID && playerHoldingFlag[3] != carID)   //Only allow players who are not current "being hit" to pick up the flag
     {
 
         bool canHitFlag=true;
@@ -1854,7 +1276,7 @@ int FlagCollide(void *Car, void *Flag)
             {                
                 deleteObjectBuffer(Flag);
                 playSound(0x49008017);
-                flag_count[flagNumber]++;
+                FlagCount[flagNumber]++;
                 playerHoldingFlag[flagNumber] = carID;
                 if (slow_when_holding_flag != 0)
                 {
@@ -1884,11 +1306,11 @@ int FlagCollide(void *Car, void *Flag)
 
             }
         }
-        // if (flag_count == 8)
+        // if (FlagCount == 8)
         // {
         //     playerID = (*(long*)&Car - (long)&g_PlayerStructTable) / 0xDD8;
         //     SetStar(Car,playerID);
-        //     flag_count++;
+        //     FlagCount++;
         // }
     }
 
@@ -1902,26 +1324,20 @@ int FlagCollide(void *Car, void *Flag)
 void menuStuff()
 {
 
-    // //Print an address for debugging
-    // loadFont();
-    // // printStringUnsignedHex( 0, 10, "", (uint)(&RAM_END) );
-    // printStringNumber( 0, 0, "Course Value", courseValue) ;
-    // printStringNumber( 0, 0x10, "courseValue", courseValue) ;
-    // printStringNumber( 0, 0x20, "HotSwapID", HotSwapID) ;
-    // printStringNumber( 0, 0x30, "SYSTEM_Region", SYSTEM_Region) ;
-    // printStringNumber( 0, 0x40, "KBGNumber", KBGNumber) ;
-    // printStringNumber( 0, 0x50, "MenuChanged", MenuChanged) ;
-    // printStringNumber( 0, 0x60, "g_gameMode", g_gameMode);
-    // printStringNumber( 0, 0x70, "menuScreenA", menuScreenA);
-
+    //Print an address for debugging
+    loadFont();
+    // printStringUnsignedHex( 0, 10, "", (uint)(&RAM_END) );
+    //printStringNumber( 0, 10, "Course Value", courseValue) ;
+    //printStringNumber( 0, 0x10, "courseValue", courseValue) ;
+    //printStringNumber( 0, 0x1C, "HotSwapID", HotSwapID) ;
 
 
  
-    // //Needed for custom courses
-    // SetCloudType((char)OverKartHeader.SkyType);
-    // SetWeatherType((char)OverKartHeader.WeatherType);
-    // SetWeather3D(OverKartHeader.SkyType == 3);
-    // SetWaterType((char)OverKartHeader.WaterType);
+    //Needed for custom courses
+    SetCloudType((char)OverKartHeader.SkyType);
+    SetWeatherType((char)OverKartHeader.WeatherType);
+    SetWeather3D(OverKartHeader.SkyType == 3);
+    SetWaterType((char)OverKartHeader.WaterType);
     
     
     
@@ -1946,14 +1362,9 @@ void menuStuff()
     }
 
 
-
     switch(KBGNumber)
     {
-        case 10:
-        {
-            MenuChanged = 10;
-            break;
-        }
+
         case 11:
         {
             scrollLock = false;
@@ -1976,8 +1387,7 @@ void menuStuff()
             MenuChanged = 12;
             HotSwapID = 0;
             break;
-        }         
-
+        }            
         case 13:
         {
             scrollLock = false;
@@ -1985,60 +1395,216 @@ void menuStuff()
             if (MenuChanged != 13)
             {
                 MenuChanged = 13;
-                MenuToggle = 0;
-                MenuIndex = 0;            
+                
+                
+                // resetMap();
+                // setAlwaysAdvance();                
                 HotSwapID = 0;
                 stockASM();
                 hsLabel = -1;
                 courseValue = -1;
-            }        
+                setPreviews();
+                previewRefresh();
+            }    
+
+            switch(g_gameMode)
+            {
+                //GRAND PRIX
+
+                case 0:
+                {
+                    if (courseValue != (g_cupSelect * 4))
+                    {
+                        FreeSpaceAddress = (int)&ok_Storage;
+                        break;
+                    }    
+                }
+                case 1:
+                case 2:
+                case 3:
+                {
+                    if (courseValue != (g_cupSelect * 4)  + g_courseSelect)
+                    {
+                        FreeSpaceAddress = (int)&ok_Storage;
+                        break;
+                    }
+                }
+            }    
+
             //PlayerSelectMenuAfter();        
             MapSelectMenu();
+
+
+            
             break;
+            
         }
-
     }
+    //     case 10:
+    //     {    
+    //         if (MenuChanged != 10)
+    //         {    
+                
+    //             MenuChanged = 10;
+                
+    //         }
+    //         break;
+    //     }
+    //     case 11:
+    //     {
+            
+    //         if (in_title_screen == 1) //Save settings to EPPROM when going from title screen with battle kart menu to main menu
+    //         {
+    //             in_title_screen = 0;
+    //             saveEEPROM((uint)&VARIABLE_RAM_BASE);
+    //         }
 
+    //         if (MenuChanged != 11)
+    //         {
+    //             MenuChanged = 11;
+    //         }
+    //         HotSwapID = 0;
+    //         break;
+    //     }
+    //     case 12:
+    //     {
+    //         scrollLock = false;            
+    //         MenuChanged = 12;
+    //         HotSwapID = 0;
+    //         break;
+    //     }            
+    //     case 13:
+    //     {
+    //         scrollLock = false;
+    //         g_startingIndicator = 0;
+    //         if (MenuChanged != 13)
+    //         {
+    //             MenuChanged = 13;                
+                
+    //             //resetMap();
+    //             //setAlwaysAdvance();                
+    //             HotSwapID = 0;
+    //             stockASM();
+    //             hsLabel = -1;
+    //             courseValue = -1;
+    //             setPreviews();
+    //             previewRefresh();
+    //         }    
 
-    if (MenuChanged == 13)
-    {
+    //         switch(g_gameMode)
+    //         {
+    //             //GRAND PRIX
+
+    //             case 0:
+    //             {
+    //                 if (courseValue != (g_cupSelect * 4))
+    //                 {
+    //                     FreeSpaceAddress = (int)&ok_Storage;
+    //                     break;
+    //                 }    
+    //             }
+    //             case 1:
+    //             case 2:
+    //             case 3:
+    //             {
+    //                 if (courseValue != (g_cupSelect * 4)  + g_courseSelect)
+    //                 {
+    //                     FreeSpaceAddress = (int)&ok_Storage;
+    //                     break;
+    //                 }
+    //             }
+    //         }    
     
-        DrawBox(60,15,200,40,0,0,0,255);
-        if (HotSwapID == 0)
-        {
-            PrintBigText(75,20, 0.80f,"Original Set");
-        }
-        else if (HotSwapID < 10)
-        {
-            PrintBigTextNumber(75,20, 0.80f,"Custom Set  ",HotSwapID);
-        }
-        else
-        {
-            PrintBigTextNumber(75,20, 0.80f,"Custom Set ",HotSwapID);
-        }
-        SpriteBtnCLeft(45,35,1.0,false);
-        SpriteBtnCRight(279,35,1.0,false);
-        
-    }
+    //         MapSelectMenu(); //This turns on/off the menu for custom courses
+
+
+            
+    //         break;
+            
+    //     }
+    //     default:
+    //     {
+    //         hsLabel = -1;
+    //         MenuChanged = -1;
+    //         break;
+            
+    //     }
+    // }
+
+
+
+    // if (HotSwapID > 0)
+    // {
+    //     if (g_gameMode != 3)
+    //     {
+    //         g_courseID = 0;
+    //     }
+    //     else
+    //     {
+    //         g_courseID = 15;
+    //     }
+    // }
+    // if (g_courseID == 0x14)
+    // {
+    //         g_player1ScreenWidth = 0x0240;
+    // }
+
+
+
+
+    // if (KBGNumber == 11)
+    // {
+    //     if (in_title_screen == 1)
+    //     {
+    //         in_title_screen = 0;
+    //         saveEEPROM((uint)&VARIABLE_RAM_BASE);
+    //     }
+    // }
+    // if (KBGNumber == 13) //Custom course select
+    // {
+    //     if (g_gameMode == 3)
+    //     {
+    //         GlobalShortA = 4;
+    //     }
+    //     else
+    //     {
+    //         GlobalShortA = 1;
+    //     }
+    //     if (menuScreenA == GlobalShortA)
+    //     {
+    //         if ((GlobalController[0]->ButtonPressed & BTN_L) == BTN_L)
+    //         {
+    //             swapHS(0);
+    //         }
+    //         else if ((GlobalController[0]->ButtonPressed & BTN_R) == BTN_R)
+    //         {
+    //             swapHS(1);
+    //         }
+    //     }
+
+
+
+    //     if (HotSwapID > 0)
+    //     {
+    //         if (g_gameMode != 3)
+    //         {
+    //             g_courseID = 0;
+    //         }
+    //         else
+    //         {
+    //             g_courseID = 15;
+    //         }
+    //     }
+
+    //     MapSelectMenu();
+    // }
+    // else
+    // {
+    //     hsLabel = -1;
+    // }
 }
 
 //
-
-//Run every frame while in game, needed for custom courses to work
-void customCourseRunEveryFrame()
-{
-
-
-    // loadFont();
-    // printStringUnsignedHex(10,10, "thing", *(uint*)(0x800F6990));
-
-
-    //Needed for custom courses
-    SetCloudType((char)OverKartHeader.SkyType);
-    SetWeatherType((char)OverKartHeader.WeatherType);
-    SetWeather3D(OverKartHeader.SkyType == 3);
-    SetWaterType((char)OverKartHeader.WaterType);
-}
 
 
 
@@ -2046,197 +1612,64 @@ void customCourseRunEveryFrame()
 void bootCustomCourseStuff()
 {
 
-    loadBigFont();
-    loadHeaderOffsets();    
-    loadHudButtons();
-    SetupFontF3D();
+    loadHeaderOffsets();
+    NopSplashCheckCode();
 
-    dataLength = 8;
-    *sourceAddress = (long)((long)(&g_SequenceTable) + (3 * 8) + 4);    
-    *targetAddress = (long)&ok_Sequence;
-    runRAM();
+    nopASM = 0;
+    HotSwapID = 0;
 
-    *sourceAddress = (long)((long)(&g_InstrumentTable) + (3 * 8) + 4);
-    *targetAddress = (long)&ok_Instrument;
-    runRAM();
-
-    *sourceAddress = (int)&g_BombTable;
-    *targetAddress = (long)&ok_Bomb;    
-    dataLength = 0xA8;
-    runRAM();
-
-    *(long*)(&ok_USAudio) = *(long*)(&g_RawAudio + 1);
-    *(long*)(&ok_USAudio + 1) = *(long*)(&g_InstrumentTable + 1);
-
-
-    *(long*)(&ok_MRSong) = *(long*)(&g_SequenceTable + (3 * 2) + 1);
-    *(long*)(&ok_MRSong + 1) = *(long*)(&g_InstrumentTable + (3 * 2) + 1);
-    
     FreeSpaceAddress = (int)&ok_Storage;
 
     copyCourseTable(1);
-    NopSplashCheckCode();
-    FlyCamInit();
-    nopASM = 0;
-    HotSwapID = 0;
-    // asm_SongA = 0x240E0001;
-    // asm_SongB = 0x240E0001;
 
 }    
 
-// //For custom coureses
-// void MapStartup(short InputID)
-// {
-//     LoadCustomHeader(courseValue + gpCourseIndex);
-//     SetCustomData();
-//     LoadMapData(InputID);
-
-// }
-// void InitialMapCode()
-// {
+//For custom coureses
+void MapStartup(short InputID)
+{
+    LoadCustomHeader(courseValue + gpCourseIndex);
+    SetCustomData();
+    LoadMapData(InputID);
+}
+void InitialMapCode()
+{
     
-//     InitialMap();
-//     if ((HotSwapID > 0) && (g_gameMode == 3))
-//     {
-//         SearchListFile(0x06000000 | OverKartHeader.SurfaceMapPosition);
-//         MakeCollision();
-//     }
-// }
+    InitialMap();
+    if ((HotSwapID > 0) && (g_gameMode == 3))
+    {
+        SearchListFile(0x06000000 | OverKartHeader.SurfaceMapPosition);
+        MakeCollision();
+    }
+}
 
-// void XLUDisplay(Screen* PlayerScreen)
-// {    
-//     if ((OverKartHeader.Version > 4) && (HotSwapID > 0))
-//     {    
-//         if (g_gameMode != 3)
-//         {
-//             DisplayGroupmap(GetRealAddress(SegmentAddress(6,OverKartHeader.XLUSectionViewPosition)), PlayerScreen);
-//         }
-//         else
-//         {
-//             *(long*)*graphPointer = (long)(0x06000000);
-//             *graphPointer = *graphPointer + 4;
-//             *(long*)*graphPointer = (long)(SegmentAddress(6,OverKartHeader.XLUSectionViewPosition));
-//             *graphPointer = *graphPointer + 4;
-//         }
-//     }
-// }
+void XLUDisplay(Screen* PlayerScreen)
+{    
+    if ((OverKartHeader.Version > 4) && (HotSwapID > 0))
+    {    
+        if (g_gameMode != 3)
+        {
+            DisplayGroupmap(GetRealAddress(SegmentAddress(6,OverKartHeader.XLUSectionViewPosition)), PlayerScreen);
+        }
+        else
+        {
+            *(long*)*graphPointer = (long)(0x06000000);
+            *graphPointer = *graphPointer + 4;
+            *(long*)*graphPointer = (long)(SegmentAddress(6,OverKartHeader.XLUSectionViewPosition));
+            *graphPointer = *graphPointer + 4;
+        }
+    }
+}
 
 
 //For Zombombs
 
-// void infectPlayersHitByBombs()
-// {
-//     for (int i=0; i<player_count; i++)
-//     {
-//         if (checkHitBomb(i))
-//         {
-//             killPlayer(i); //If ap layer is hit by a bomb, kill them and turn them into a bomb as well
-//         }
-//     }
-// }
-
-//
-
-
-void DisplayObject(void *Camera, Object *Object)
+void infectPlayersHitByBombs()
 {
-    objectIndex = (short)((*(long*)(*(long*)(&Object)) >> 16) & 0x0000FFFF);
-
-
-
-    switch (objectIndex)
+    for (int i=0; i<player_count; i++)
     {
-        case 50:
+        if (checkHitBomb(i))
         {
-            DisplayFlag(Camera, Object);
-            break;
-        }
-        case 51:
-        {   
-            DisplayBase(Camera, Object);
-            break;
+            killPlayer(i); //If ap layer is hit by a bomb, kill them and turn them into a bomb as well
         }
     }
 }
-
-
-int CollideObject(Player* car, Object* Object)
-{
-    objectIndex = (short)((*(long*)(*(long*)(&Object)) >> 16) & 0x0000FFFF);
-    switch (objectIndex)
-    {
-        case 50:
-        {
-            return FlagCollide(car, Object);
-            break;
-        }
-        case 51:
-        {   
-            return BaseCollide(car, Object);
-            break;
-        }   
-        // case 10:
-        //     // loadFont();
-        //     // printStringUnsignedHex(0x00, 0x10, "Camera", *(unsigned int*)Camera);
-        //     // printStringUnsignedHex(0x00, 0x20, "Object", *(unsigned int*)Object);
-        //     return 0;
-        //     break;
-        // case 47:
-        // {
-        //     return RedCoinCollide(Camera,Object);
-
-        //     break;
-        // }
-        // case 48:
-        // case 49:
-        // {
-        //     return GoldCoinCollide(Camera,Object);
-
-        //     break;
-        // }
-        default:
-        {
-            return 0;
-            break;
-        }
-    }
-    return 0;
-}
-
-void allRun()
-{
-    //nothing goes here
-}
-
-
-
-uint BKCheckAddress = 0x80600000;
-void MakeBKTest(uint A, uint B)
-{
-    *(uint*)(BKCheckAddress) = A;
-    BKCheckAddress+=4;
-    *(uint*)(BKCheckAddress) = B;
-    BKCheckAddress+=4;
-}
-
-void setBKCheckAddress()
-{
-    BKCheckAddress = 0x80600000;
-}
-
-// void MakeBKTest(uint A, uint B)
-// {
-//     *(uint*)0x80600000 = A;
-//     *(uint*)0x80600004 = B;
-// }
-
-// //Check why collision sphere is crashing by saving the first two arguments to ram
-// void bug_check(uint thing1, uint thing2)
-// {
-//     *(uint*)0x80600000 = thing1;
-//     *(uint*)0x80600004 = thing2;
-//     loadFont();
-//     printStringUnsignedHex(0x00, 0x10, "Thing 1", thing1);
-//     printStringUnsignedHex(0x00, 0x20, "Thing 2", thing2);
-//     //*(uint*)0x82000000 = 1; //Force a crash
-// }

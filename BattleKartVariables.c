@@ -7,11 +7,15 @@ int flagTimer[] = {0,0,0,0};
 char lastButtonPressed[] = {0x00, 0x00, 0x00, 0x00};
 //Store current flag positions (x,y) for showing on minimap
 float currentFlagPositionsX[] = {-1,-1,-1,-1};
+float currentFlagPositionsHeight[] = {-1,-1,-1,-1};
 float currentFlagPositionsY[] = {-1,-1,-1,-1};
 
 bool flagDropped[] = {false, false, false, false};
 int basePositionSelection = 0; //Base position locations, 0, 1, or 2 (3 possible choices)
 int keepAwayTimer = 0;
+int keepAwayBotRunAwayTimer = 0;
+int keepAwayBotRunAwayNode = 0;
+
 
 
 
@@ -231,23 +235,32 @@ int basePositions[4][20][4][3] =
 
 
 
-const long BattleFlag = 0x08001350;
-const long BowserFlag = 0x080026D0;
-const long DKFlag = 0x08003A50;
-const long LuigiFlag = 0x08004DD0;
-const long MarioFlag = 0x08006150;
-const long PeachFlag = 0x080074D0;
-const long ToadFlag = 0x08008850;
-const long WarioFlag =  0x08009BD0;
-const long YoshiFlag = 0x0800AF50;
-const long ToadMushroom = 0x0800C7C0;
-const long LuigiMushroom = 0x0800E030;
-const long BowserMushroom = 0x0800F8A0;
-const long PeachMushroom = 0x08011110;
-const long RedMushroom = 0x08012980;
-const long YoshiMushroom = 0x080141F0;
-const long WarioMushroom = 0x08015A60;
-const long DKMushroom = 0x080172D0;
+const int BlueCoin= 0x080014E0;
+const int GoldCoin= 0x08002840;
+const int N64Coin= 0x08003788;
+const int RedCoin= 0x08004AE0;
+const int RedFlag= 0x08005DA8;
+const int BlueFlag= 0x08007068;
+const int BowserFlag= 0x08008328;
+const int DKFlag= 0x080095E8;
+const int LuigiFlag= 0x0800A8A8;
+const int MarioFlag= 0x0800BB68;
+const int PeachFlag= 0x0800CE28;
+const int BattleFlag= 0x0800E0E8;
+const int ToadFlag= 0x0800F3A8;
+const int WarioFlag= 0x08010668;
+const int YoshiFlag= 0x08011928;
+const int BowserMushroom= 0x08012FC0;
+const int DKMushroom= 0x08014660;
+const int LuigiMushroom= 0x08015D00;
+const int MarioMushroom= 0x080173A0;
+const int PeachMushroom= 0x08018A40;
+const int RedMushroom= 0x0801A0E0;
+const int ToadMushroom= 0x0801B780;
+const int WarioMushroom= 0x0801CE20;
+const int YoshiMushroom= 0x0801E4C0;
+const int PointMarker= 0x0801E5E0;
+const int SoccerBall= 0x0801F680;
 
 
 

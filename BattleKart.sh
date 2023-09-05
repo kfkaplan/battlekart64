@@ -6,7 +6,7 @@ cd /Users/kfkaplan/Dropbox/battlekart64
 /Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "BattleKartPaths/DoubleDeckerPaths.c" -o "BattleKartPaths/DoubleDeckerPaths.o"
 /Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "BattleKartPaths/SkyscraperPaths.c" -o "BattleKartPaths/SkyscraperPaths.o"
 /Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "BattleKartPaths/BigDonutPaths.c" -o "BattleKartPaths/BigDonutPaths.o"
-/Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "Library/Player/Pathfinding.c" -s -o "Library/Player/Pathfinding.s"  -fverbose-asm #output assembly
+/Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "Library/Player/Pathfinding.c" -S -o "Library/Player/Pathfinding.s"  -fverbose-asm #output assembly
 /Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "Library/Player/Pathfinding.c" -o "Library/Player/Pathfinding.o"
 #Files from Library
 /Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "library/LibraryVariables.c" -o "library/LibraryVariables.o"
@@ -36,7 +36,7 @@ cd /Users/kfkaplan/Dropbox/battlekart64
 
 #Battlekart related c files
 /Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "BattleKartFlag/BattleKartFlag.c" -S -o "BattleKartFlag/BattleKartFlag.s"  -fverbose-asm #output assembly 
-/Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "BattleKartFlag/BattleKartFlag.c" -o "BattleKartFlag/BattleKartFlag.o" 
+/Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -lm -c "BattleKartFlag/BattleKartFlag.c" -o "BattleKartFlag/BattleKartFlag.o" 
 /Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0  -c "BattleBots/BattleBotAI.c" -S -o "BattleBots/BattleBotAI.s"  -fverbose-asm #output assembly
 /Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "BattleBots/BattleBotAI.c"  -o "BattleBots/BattleBotAI.o"
 /Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "BattleKartVariables.c" -o "BattleKartVariables.o" 
