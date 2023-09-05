@@ -1746,7 +1746,7 @@ void DisplayBase(void *Camera, void *Object)
 }
 
 
-int BaseCollide(void *Car, void *Base)
+void BaseCollide(void *Car, void *Base)
 {
     int carID = (*(long*)&Car - (long)&g_PlayerStructTable) / 0xDD8;
 
@@ -1804,11 +1804,10 @@ int BaseCollide(void *Car, void *Base)
     //     flag_count++;
     // }
 
-    return(0);
 }
 
 
-int FlagCollide(void *Car, void *Flag)
+void FlagCollide(void *Car, void *Flag)
 {
     int flagNumber;
     //GlobalAddressA = *(long*)(&Flag);
@@ -1866,7 +1865,7 @@ int FlagCollide(void *Car, void *Flag)
                 {
 
                     SetStarMan(carID, false);
-                    SetGhostEffect(carID, false);
+                    SetVSGhost((Player*)&GlobalPlayer[carID], (char)carID);
 
                 }
                 if (game_mode == 4) //If game mode is keep away
@@ -1892,7 +1891,6 @@ int FlagCollide(void *Car, void *Flag)
         // }
     }
 
-    return(0);
 }
 
 
@@ -1993,7 +1991,7 @@ void menuStuff()
                 courseValue = -1;
             }        
             //PlayerSelectMenuAfter();        
-            MapSelectMenu();
+            MapSelectMenuDefault();
             break;
         }
 
@@ -2051,26 +2049,27 @@ void bootCustomCourseStuff()
     loadHudButtons();
     SetupFontF3D();
 
-    dataLength = 8;
-    *sourceAddress = (long)((long)(&g_SequenceTable) + (3 * 8) + 4);    
-    *targetAddress = (long)&ok_Sequence;
-    runRAM();
+	dataLength = 8;
+	*sourceAddress = (int)&g_MUSSequenceTable.pointer[3].address;
+	*targetAddress = (int)&ok_Sequence;
+	runRAM();
 
-    *sourceAddress = (long)((long)(&g_InstrumentTable) + (3 * 8) + 4);
-    *targetAddress = (long)&ok_Instrument;
-    runRAM();
+	*sourceAddress = (int)&g_MUSInstrumentTable.pointer[3];
+	*targetAddress = (int)&ok_Instrument;
+	runRAM();
 
     *sourceAddress = (int)&g_BombTable;
     *targetAddress = (long)&ok_Bomb;    
     dataLength = 0xA8;
     runRAM();
 
-    *(long*)(&ok_USAudio) = *(long*)(&g_RawAudio + 1);
-    *(long*)(&ok_USAudio + 1) = *(long*)(&g_InstrumentTable + 1);
+    
+	*(long*)(&ok_USAudio) = g_MUSRawAudioTable.pointer[0].address;
+	*(long*)(&ok_USAudio + 1) = g_MUSInstrumentTable.pointer[0].address;
 
 
-    *(long*)(&ok_MRSong) = *(long*)(&g_SequenceTable + (3 * 2) + 1);
-    *(long*)(&ok_MRSong + 1) = *(long*)(&g_InstrumentTable + (3 * 2) + 1);
+	*(long*)(&ok_MRSong) = g_MUSSequenceTable.pointer[3].address;
+	*(long*)(&ok_MRSong + 1) = g_MUSSequenceTable.pointer[3].length;
     
     FreeSpaceAddress = (int)&ok_Storage;
 
@@ -2160,7 +2159,7 @@ void DisplayObject(void *Camera, Object *Object)
 }
 
 
-int CollideObject(Player* car, Object* Object)
+void CollideObject(Player* car, Object* Object)
 {
     objectIndex = (short)((*(long*)(*(long*)(&Object)) >> 16) & 0x0000FFFF);
     switch (objectIndex)
@@ -2196,11 +2195,11 @@ int CollideObject(Player* car, Object* Object)
         // }
         default:
         {
-            return 0;
+            return;
             break;
         }
     }
-    return 0;
+    return;
 }
 
 void allRun()

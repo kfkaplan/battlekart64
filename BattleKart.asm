@@ -3,7 +3,7 @@
 
 //LibraryBUILD3 needs to be start of file
 //.align 0x10
-.include "../Library/LibraryBUILD3.asm"
+.include "../Library/LibraryBUILD1.asm"
 
 
 
@@ -64,7 +64,7 @@
 //.definelabel PAYLOAD_RAM, 		0x80600000
 .definelabel PAYLOAD_ROM, 		0x00D00000
 .definelabel PAYLOAD_RAM, 		0x80400000//(overwrite code for GP mode cpus)
-.definelabel DMA_FUNC,    		0x80001158
+
 .definelabel DMA_MAX_LENGTH, 	org(end_label) - PAYLOAD_RAM
 .definelabel VARIABLE_RAM_SIZE, 0x2000 ////Place in ram to store all the battle kart variables (note: 0x2000 bytes large)
 .definelabel VARIABLE_RAM_BASE,  org(end_label) - VARIABLE_RAM_SIZE // 
@@ -85,9 +85,7 @@
 .definelabel FUNCTION_MEMCOPY, 0x800D7FE0 //Like DMA but copy from ram -> ram, a0=output, a1=input, a2=length
 //.definelabel executeItem, 0x802B2FA0  //Funciton that uses item, called as executeItem(car)
 .definelabel makeBorder, 0x802A4300 //Function that draws borders between the player screens
-.definelabel checkTriangleZX, 0x802AAE4C//Detect nearby walls
-.definelabel CheckTriangleXY, 0x802AB288//Detect nearby walls
-.definelabel CheckTriangleYZ, 0x802AB6C4//Detect nearby walls
+
 .definelabel check_bump, 0x802ADDC8 //detect nearby walls
 .definelabel checkTriangleZXV, 0x802AAE4C//Detect nearby walls
 .definelabel CheckTriangleXYV, 0x802AB288//Detect nearby walls
@@ -7818,7 +7816,7 @@ set4:
 set4end:
 
 .align 0x10
-.include "../Library/LibraryBUILD.asm"
+.include "../Library/LibraryBUILD2.asm"
 .align 0x10
 
 .fill VARIABLE_RAM_SIZE //Create space for battle kart 64 variables
@@ -7832,19 +7830,15 @@ end_label:
 
 //Texturex and stuff for previews and crash screens, outside of ram
 .align 0x10
-previewN:
-.import "../Library/data/preview_n.mio0.bin"       ;;  c10
-.align 0x10
-previewU:
-.import "../Library/data/preview_U.mio0.bin"       ;;  c64
+
 RAMCheck:
      .import "Data/BKRAMCheck.bin"
      .align 0x10
 RAMCheckEnd:
 
-//LibraryBUILD2 needs to be EOF
+//LibraryBUILD3 needs to be EOF
 .align 0x10
-.include "../Library/LibraryBUILD2.asm"
+.include "../Library/LibraryBUILD3.asm"
 .align 0x10
 .include "../Library/LibraryBUILD4.asm"
 .align 0x10
