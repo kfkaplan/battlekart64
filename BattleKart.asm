@@ -6262,6 +6262,7 @@ titleMenu:
 
 	LI a0, 1 //Set in title screen flag
 	SB a0, in_title_screen
+	//
 
 	//set boot flag
 	LB a0, boot_flag
@@ -7244,6 +7245,9 @@ PrintMenuFunction:
 	JAL menuStuff
 	NOP
 
+	//Set gBackgroundFlag to 1
+	LI a0, 1
+	SH a0, gBackgroundFlag
 
 	//Enable mirror mode
 	LI a0, 0xFF00
