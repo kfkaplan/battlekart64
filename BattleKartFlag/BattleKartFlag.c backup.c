@@ -1627,9 +1627,21 @@ void bootCustomCourseStuff()
 //For custom coureses
 void MapStartup(short InputID)
 {
-    LoadCustomHeader(courseValue + gpCourseIndex);
-    SetCustomData();
-    LoadMapData(InputID);
+    squid games check to make sure it doesn't fucking compile.
+    
+    FreeMemoryPointer = 0x80600000;
+	LastMemoryPointer = 0x80800000;
+	FreeSpaceAddress = (int)&ok_Storage;
+	LoadCustomHeader(courseValue + gpCourseIndex);
+	SetCustomData();
+
+	LoadMapData(InputID);
+
+	if (HotSwapID > 0)
+	{
+		loadTextureScrollTranslucent();
+		runKillDisplayObjects();
+	}
 }
 void InitialMapCode()
 {

@@ -66,8 +66,8 @@
 .definelabel PAYLOAD_RAM, 		0x80400000//(overwrite code for GP mode cpus)
 
 .definelabel DMA_MAX_LENGTH, 	org(end_label) - PAYLOAD_RAM
-.definelabel VARIABLE_RAM_SIZE, 0x2000 ////Place in ram to store all the battle kart variables (note: 0x2000 bytes large)
-.definelabel VARIABLE_RAM_BASE,  org(end_label) - VARIABLE_RAM_SIZE // 
+.definelabel VARIABLE_RAM_SIZE, 0x10000 ////Place in ram to store all the battle kart variables (note: 0x2000 bytes large)
+.definelabel VARIABLE_RAM_BASE,  org(VAR_RAM_START)
 //.definelabel VARIABLE_RAM_BASE,  nicefont + 0x5000// 
 .definelabel ROM_TO_RAM, 0x7ffff400
 .definelabel RAM_TO_ROM, -0x7ffff400
@@ -253,23 +253,6 @@
 //NOTE EVERYTHING ABOVE HERE IS SAVED TO THE EPPROM, EVERYTHING BELOW IS NOT, SAVE IS FIRST 512 OR 0x200 BYTES
 .definelabel bot_respawn_datastructure, VARIABLE_RAM_BASE+0x200 //3 x 4 bytes each = 12 bytes - Previous positions stored to teleport bots that fall off the map, a 3 element array 
 
-
-// //Disable game's usual saving and loading so I can use DeadHamster's custom code
-.org 0x800B45E0 + RAM_TO_ROM
-	JR RA
-	NOP
-.org 0x800B4670 + RAM_TO_ROM
-	JR RA
-	NOP
-.org 0x800B559C + RAM_TO_ROM
-	JR RA
-	NOP
-.org 0x800B5948 + RAM_TO_ROM
-	JR RA
-	NOP
-.org 0x800B4A10 + RAM_TO_ROM
-	JR RA
-	NOP
 
 /* Hooks */
 
@@ -6287,17 +6270,17 @@ titleMenu:
 
 		JAL setDefaults //Set defaults as the first thing that happens
 		NOP
-
-		LI a0, VARIABLE_RAM_BASE
+				
+		
 		JAL loadEEPROM //Load stored variables from save file
-		NOP
+		LI a0, VARIABLE_RAM_BASE
 		LW a0, save_flag //Load save_flag and compare to the save_key
 		LI a1, save_key
 		BEQ a0, a1, @@run_if_no_good_save
 			NOP
 			JAL setDefaults //Set default values for battle kart variables
 			NOP
-			@@run_if_no_good_save:
+		@@run_if_no_good_save:
 
 		JAL bootCustomCourseStuff
 		NOP
@@ -7025,7 +7008,7 @@ runAtCourseInitialization:
 					LI a1, 1
 					BNE a0, a1, @@branch_hp_equals_1 //If HP == 1
 						LUI a0, 0x8007 //Set max ballon count to one
-						SH zero, 0xB86E (a0)
+						SH zero, 0xB86E (a0)	
 						@@branch_hp_equals_1:
 					//HP = 2
 					LHU a0, max_hp //Load max HP
@@ -7815,12 +7798,19 @@ set4:
 .align 0x10
 set4end:
 
-.align 0x10
-.include "../Library/LibraryBUILD2.asm"
-.align 0x10
 
+.align 0x2000
+
+
+VAR_RAM_START:
 .fill VARIABLE_RAM_SIZE //Create space for battle kart 64 variables
 
+.align 0x10
+
+
+
+.align 0x10
+.include "../Library/LibraryBUILD2.asm"
 end_label:
 
 
