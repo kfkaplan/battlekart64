@@ -6272,8 +6272,9 @@ titleMenu:
 		NOP
 				
 		
-		JAL loadEEPROM //Load stored variables from save file
-		LI a0, VARIABLE_RAM_BASE
+		LUI a0, hi(VARIABLE_RAM_BASE)
+        JAL loadEEPROM //Load stored variables from save file
+        ADDIU a0, a0, lo(VARIABLE_RAM_BASE)
 		LW a0, save_flag //Load save_flag and compare to the save_key
 		LI a1, save_key
 		BEQ a0, a1, @@run_if_no_good_save

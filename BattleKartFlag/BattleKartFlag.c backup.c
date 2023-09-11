@@ -1627,7 +1627,7 @@ void bootCustomCourseStuff()
 //For custom coureses
 void MapStartup(short InputID)
 {
-    squid games check to make sure it doesn't fucking compile.
+    
     
     FreeMemoryPointer = 0x80600000;
 	LastMemoryPointer = 0x80800000;
