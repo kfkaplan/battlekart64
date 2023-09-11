@@ -2164,6 +2164,11 @@ void CollideObject(Player* car, Object* Object)
     objectIndex = (short)((*(long*)(*(long*)(&Object)) >> 16) & 0x0000FFFF);
     switch (objectIndex)
     {
+        case 12:
+        {
+            ItemboxCollideCheck(car, Object);
+            break;
+        }
         case 50:
         {
             return FlagCollide(car, Object);

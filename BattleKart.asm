@@ -23,7 +23,7 @@
 .definelabel BaseModel, 0x08002BC0
 
 
-.definelabel save_key, 0xAB230674 //Value (2 bytes) to check for if save exists or not, update every new version
+.definelabel save_key, 0xCC230674 //Value (2 bytes) to check for if save exists or not, update every new version
 
 // //Bug check for collisionSphere
 // .org 0x10A40C
