@@ -23,7 +23,7 @@
 .definelabel BaseModel, 0x08002BC0
 
 
-.definelabel save_key, 0x01230674 //Value (2 bytes) to check for if save exists or not, update every new version
+.definelabel save_key, 0xAB230674 //Value (2 bytes) to check for if save exists or not, update every new version
 
 // //Bug check for collisionSphere
 // .org 0x10A40C
@@ -6272,9 +6272,11 @@ titleMenu:
 		JAL setDefaults //Set defaults as the first thing that happens
 		NOP
 				
-		
+		LUI a0, hi(VARIABLE_RAM_BASE)
 		JAL loadEEPROM //Load stored variables from save file
-		LI a0, VARIABLE_RAM_BASE
+		ADDIU a0, a0, lo(VARIABLE_RAM_BASE)
+
+
 		LW a0, save_flag //Load save_flag and compare to the save_key
 		LI a1, save_key
 		BEQ a0, a1, @@run_if_no_good_save
@@ -7803,7 +7805,7 @@ set4:
 set4end:
 
 
-.align 0x2000
+.align 0x40
 
 
 VAR_RAM_START:
