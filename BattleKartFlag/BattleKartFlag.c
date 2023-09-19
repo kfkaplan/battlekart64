@@ -1604,7 +1604,7 @@ void DrawPerScreen(Camera* LocalCamera)
                 {
                     return;
                 }
-                gSPDisplayList(GraphPtrOffset++, PointMarker);
+                gSPDisplayList(GraphPtrOffset++, TargetMarker);
 
 
             }
