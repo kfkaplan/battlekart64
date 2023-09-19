@@ -10,7 +10,7 @@
 .definelabel RAM_END, org(end_label) //For ../Library/OKHeader.asm
 
 
-.definelabel ok_ModelDataRawSize,     0
+.definelabel ok_ModelDataRawSize, filesize("BattleKartObjects/ModelData.raw")
 //.align 0x10
 .include "../Library/GameVariables/NTSC/GameOffsets.asm"
 .include "../Library/GameVariables/NTSC/StatsOffsets.asm"
@@ -23,7 +23,7 @@
 .definelabel BaseModel, 0x08002BC0
 
 
-.definelabel save_key, 0x01230674 //Value (2 bytes) to check for if save exists or not, update every new version
+.definelabel save_key, 0x01234561 //Value (2 bytes) to check for if save exists or not, update every new version
 
 // //Bug check for collisionSphere
 // .org 0x10A40C
@@ -66,7 +66,7 @@
 .definelabel PAYLOAD_RAM, 		0x80400000//(overwrite code for GP mode cpus)
 
 .definelabel DMA_MAX_LENGTH, 	org(end_label) - PAYLOAD_RAM
-.definelabel VARIABLE_RAM_SIZE, 0x10000 ////Place in ram to store all the battle kart variables (note: 0x2000 bytes large)
+.definelabel VARIABLE_RAM_SIZE, 0x1000 ////Place in ram to store all the battle kart variables (note: 0x2000 bytes large)
 .definelabel VARIABLE_RAM_BASE,  org(VAR_RAM_START)
 //.definelabel VARIABLE_RAM_BASE,  nicefont + 0x5000// 
 .definelabel ROM_TO_RAM, 0x7ffff400
@@ -7800,13 +7800,13 @@ set4:
 set4end:
 
 
-.align 0x2000
+.align 0x10000
 
 
 VAR_RAM_START:
 .fill VARIABLE_RAM_SIZE //Create space for battle kart 64 variables
 
-.align 0x10
+.align 0x40
 
 
 
