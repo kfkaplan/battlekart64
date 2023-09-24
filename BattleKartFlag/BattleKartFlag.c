@@ -1540,6 +1540,53 @@ void DrawPerScreen(Camera* LocalCamera)
                 currentFlagPositionsHeight[flagNumber] = objectPosition[1];
                 currentFlagPositionsY[flagNumber] = objectPosition[2];
 
+
+                float player_x, player_y, player_z, distance;
+
+                int current_camera = (*(long*)&LocalCamera - (long)&g_CameraTable) / 0xB8;
+
+                if ((playerHoldingFlag[flagNumber] != current_camera))
+                {
+
+                    
+                    int angle = (LocalCamera->camera_direction[1]-(DEG1 * 180));
+                    float sinB = sinT(angle);
+                    float cosB = cosT(angle);
+
+                    inGameAffineMatrix[0][0] =  cosB;
+                    inGameAffineMatrix[1][0] =  0.0f;
+                    inGameAffineMatrix[2][0] =  sinB;
+                    inGameAffineMatrix[0][1] =  0.0f;
+                    inGameAffineMatrix[1][1] =  1.0f;
+                    inGameAffineMatrix[2][1] =  0.0f;
+                    inGameAffineMatrix[0][2] = -sinB;
+                    inGameAffineMatrix[1][2] =  0.0f;
+                    inGameAffineMatrix[2][2] =  cosB;
+                    inGameAffineMatrix[0][3] =  0.0f;
+                    inGameAffineMatrix[1][3] =  0.0f;
+                    inGameAffineMatrix[2][3] =  0.0f;
+                    inGameAffineMatrix[3][3] =  1.0f; 
+
+                    player_x = GlobalPlayer[playerHoldingFlag[flagNumber]].position[0];
+                    player_y = GlobalPlayer[playerHoldingFlag[flagNumber]].position[1];
+                    player_z = GlobalPlayer[playerHoldingFlag[flagNumber]].position[2];
+
+                    distance = Sqrtf( pow(player_x - LocalCamera->camera_pos[0], 2)
+                               + pow(player_y - LocalCamera->camera_pos[1], 2)
+                               + pow(player_z - LocalCamera->camera_pos[2], 2)      );
+
+                    inGameAffineMatrix[3][0] = player_x;// + offsetPosition[0];
+                    inGameAffineMatrix[3][1] = player_y + distance*5e-2;// + offsetPosition[1];
+                    inGameAffineMatrix[3][2] = player_z;// + offsetPosition[2];                
+                    
+                    ScalingMatrix(inGameAffineMatrix, distance*1.7e-3);    
+                    if(SetMatrix(inGameAffineMatrix,0) == 0)
+                    {
+                        return;
+                    }
+                    gSPDisplayList(GraphPtrOffset++, TargetMarker);
+                }
+
             }
         }
     }
@@ -1551,20 +1598,10 @@ void DrawPerScreen(Camera* LocalCamera)
 
         for (int i=0; i<player_count; i++)
         {
-
-                    
-
-
-
             if ((i != current_camera) && (GlobalPlayer[i].slip_flag & THUNDER))
             {
 
-                GlobalAddressA = (long)&g_PlayerStructTable + (i * 0xDD8);
-
-
-                // objectPosition[0] = *(float*)(GlobalAddressA + 20);
-                // objectPosition[1] = *(float*)(GlobalAddressA + 24) + 8.0;
-                // objectPosition[2] = *(float*)(GlobalAddressA + 28);
+                //GlobalAddressA = (long)&g_PlayerStructTable + (i * 0xDD8);
                 
                 int angle = (LocalCamera->camera_direction[1]-(DEG1 * 180));
                 float sinB = sinT(angle);
@@ -1584,31 +1621,25 @@ void DrawPerScreen(Camera* LocalCamera)
                 inGameAffineMatrix[2][3] =  0.0f;
                 inGameAffineMatrix[3][3] =  1.0f; 
 
-                // inGameAffineMatrix[3][0] = (float)objectPosition[0];
-                // inGameAffineMatrix[3][1] = (float)objectPosition[1];
-                // inGameAffineMatrix[3][2] = (float)objectPosition[2];
                 player_x = GlobalPlayer[i].position[0];
                 player_y = GlobalPlayer[i].position[1];
                 player_z = GlobalPlayer[i].position[2];
 
-                inGameAffineMatrix[3][0] = player_x;
-                inGameAffineMatrix[3][1] = player_y;
-                inGameAffineMatrix[3][2] = player_z;
-
                 distance = Sqrtf( pow(player_x - LocalCamera->camera_pos[0], 2)
-                            + pow(player_y - LocalCamera->camera_pos[1], 2)
-                            + pow(player_z - LocalCamera->camera_pos[2], 2)      );
+                           + pow(player_y - LocalCamera->camera_pos[1], 2)
+                           + pow(player_z - LocalCamera->camera_pos[2], 2)      );
+
+                inGameAffineMatrix[3][0] = player_x;// + offsetPosition[0];
+                inGameAffineMatrix[3][1] = player_y + distance*5e-2;// + offsetPosition[1];
+                inGameAffineMatrix[3][2] = player_z;// + offsetPosition[2];                
                 
-                ScalingMatrix(inGameAffineMatrix, 0.8 + (distance/200.0));    
+                ScalingMatrix(inGameAffineMatrix, distance*1.7e-3);    
                 if(SetMatrix(inGameAffineMatrix,0) == 0)
                 {
                     return;
                 }
                 gSPDisplayList(GraphPtrOffset++, TargetMarker);
-
-
             }
-
         }
 
     }
@@ -2030,7 +2061,6 @@ void customCourseRunEveryFrame()
     // loadFont();
     // printStringUnsignedHex(10,10, "thing", *(uint*)(0x800F6990));
 
-
     //Needed for custom courses
     SetCloudType((char)OverKartHeader.SkyType);
     SetWeatherType((char)OverKartHeader.WeatherType);
@@ -2045,6 +2075,8 @@ void bootCustomCourseStuff()
 {
 
     loadBigFont();
+
+    
     loadHeaderOffsets();    
     loadHudButtons();
     SetupFontF3D();
@@ -2078,6 +2110,7 @@ void bootCustomCourseStuff()
     FlyCamInit();
     nopASM = 0;
     HotSwapID = 0;
+
     // asm_SongA = 0x240E0001;
     // asm_SongB = 0x240E0001;
 

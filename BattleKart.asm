@@ -66,7 +66,7 @@
 .definelabel PAYLOAD_RAM, 		0x80400000//(overwrite code for GP mode cpus)
 
 .definelabel DMA_MAX_LENGTH, 	org(end_label) - PAYLOAD_RAM
-.definelabel VARIABLE_RAM_SIZE, 0x1000 ////Place in ram to store all the battle kart variables (note: 0x2000 bytes large)
+.definelabel VARIABLE_RAM_SIZE, 0x800 ////Place in ram to store all the battle kart variables (note: 0x2000 bytes large)
 .definelabel VARIABLE_RAM_BASE,  org(VAR_RAM_START)
 //.definelabel VARIABLE_RAM_BASE,  nicefont + 0x5000// 
 .definelabel ROM_TO_RAM, 0x7ffff400
@@ -6267,6 +6267,9 @@ titleMenu:
 	LB a0, boot_flag
 	BNE a0, zero, @@run_boot_flag
 		NOP
+
+		LI a0, 1 //Set background to be on in game
+		SB a0, gBackgroundFlag
 
 		JAL setDefaults //Set defaults as the first thing that happens
 		NOP
