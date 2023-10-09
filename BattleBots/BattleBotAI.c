@@ -115,10 +115,10 @@ void ProSteeringPlus(int i, Marker* PathArray[], Marker* RampArray[], Marker* Dr
             break;
     }
 
+
     GlobalShortA = (short)(MakeDirection(GlobalPlayer[i].position[0],GlobalPlayer[i].position[2], objectPosition[0], objectPosition[2]) * -1);
     GlobalShortA -= GlobalPlayer[i].direction[1];
     GlobalUInt64 = GlobalShortA * GlobalShortA;
-
 
     bot_buttons[i] = BTN_A;
     bot_pressed[i] = 0;
@@ -219,6 +219,16 @@ void ProSteeringPlus(int i, Marker* PathArray[], Marker* RampArray[], Marker* Dr
         bot_x_stick[i] = 0x00;
 
     }
+
+
+
+    // if (pow(GlobalPlayer[i].position[0] - objectPosition[0], 2) + pow(GlobalPlayer[i].position[2] - objectPosition[1], 2)  < 25)
+    // {
+    //     bot_buttons[i] = 0;
+    //     bot_pressed[i] = 0;        
+    // }
+    
+
 }
 
 
@@ -684,15 +694,15 @@ void SeekerBattleBot(int i)
 
     
 
-    // if (i == 1)
-    // {
+    if (i == 1)
+    {
         
-    //     loadFont();
+        loadFont();
     //     //printString(0, 120, "P2 target");
 
-    //     printStringNumber(140, 10, "P1 x", GlobalPlayer[0].position[0]);
-    //     printStringNumber(140, 20, "P1 y", GlobalPlayer[0].position[1]);
-    //     printStringNumber(140, 30, "P1 z", GlobalPlayer[0].position[2]);
+        printStringNumber(140, 10, "P1 x", GlobalPlayer[0].position[0]);
+        printStringNumber(140, 20, "P1 y", GlobalPlayer[0].position[1]);
+        printStringNumber(140, 30, "P1 z", GlobalPlayer[0].position[2]);
 
     //     printStringNumber(0, 120, "Distance", AIPathfinder[i].Distance);
     //     printStringNumber(0, 130, "Target[0]", AIPathfinder[i].Target[0]);
@@ -720,7 +730,7 @@ void SeekerBattleBot(int i)
 
     //     printStringHex(140, 210, "The fuck?", *(unsigned int*)(0x8028EFF0));
     //     *(unsigned int*)(0x8028EFF0) = 0x00000000;
-    // }
+    }
 
 
 
@@ -1362,7 +1372,7 @@ void runBots()
 //Function returns a bot rival if someone has picked up a flag, or their flag, or just runs the original find rival function if not
 int getRival(int currentPlayer) //Note current player is 1,2,3,4, NOT 0,1,2,3
 {
-    //return 0; //Test always having player 1 as the rival
+    return 0; //Test always having player 1 as the rival
 
     int flag_holder;
 
