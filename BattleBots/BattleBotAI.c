@@ -127,6 +127,8 @@ void ProSteeringPlus(int i, Marker* PathArray[], Marker* RampArray[], Marker* Dr
     {   
         
         bot_buttons[i] |= BTN_B;  //continue braking
+        // bot_pressed[i] = BTN_R | BTN_B;   //tap brake and jump
+        // bot_buttons[i] |= BTN_B;
         if (GlobalShortA > 0)
         {   
             if (bot_x_stick > 0)
@@ -175,7 +177,7 @@ void ProSteeringPlus(int i, Marker* PathArray[], Marker* RampArray[], Marker* Dr
     else if (GlobalUInt64 > MIDTURN)
     {
 
-        bot_buttons[i] |= BTN_B; //Slow down bot for testing path finding
+        // bot_buttons[i] |= BTN_B; //Slow down bot for testing path finding
         if (GlobalShortA > 0)
         {   
             bot_x_stick[i] = 55;
@@ -187,6 +189,7 @@ void ProSteeringPlus(int i, Marker* PathArray[], Marker* RampArray[], Marker* Dr
     }
     else if (GlobalUInt64 > SHORTTURN)
     {
+
 
         //bot_buttons[i] |= BTN_B; //Slow down bot for testing path finding
 
@@ -218,6 +221,15 @@ void ProSteeringPlus(int i, Marker* PathArray[], Marker* RampArray[], Marker* Dr
 
         bot_x_stick[i] = 0x00;
 
+    }
+
+    if (GlobalShortA > 0)
+    {
+        GlobalPlayer[i].direction[1] += 800 * getTempo();
+    }
+    else
+    {
+        GlobalPlayer[i].direction[1] -= 800 * getTempo();
     }
 
 
@@ -694,15 +706,15 @@ void SeekerBattleBot(int i)
 
     
 
-    if (i == 1)
-    {
+    // if (i == 1)
+    // {
         
-        loadFont();
+    //     loadFont();
     //     //printString(0, 120, "P2 target");
 
-        printStringNumber(140, 10, "P1 x", GlobalPlayer[0].position[0]);
-        printStringNumber(140, 20, "P1 y", GlobalPlayer[0].position[1]);
-        printStringNumber(140, 30, "P1 z", GlobalPlayer[0].position[2]);
+        // printStringNumber(140, 10, "P1 x", GlobalPlayer[0].position[0]);
+        // printStringNumber(140, 20, "P1 y", GlobalPlayer[0].position[1]);
+        // printStringNumber(140, 30, "P1 z", GlobalPlayer[0].position[2]);
 
     //     printStringNumber(0, 120, "Distance", AIPathfinder[i].Distance);
     //     printStringNumber(0, 130, "Target[0]", AIPathfinder[i].Target[0]);
@@ -730,7 +742,7 @@ void SeekerBattleBot(int i)
 
     //     printStringHex(140, 210, "The fuck?", *(unsigned int*)(0x8028EFF0));
     //     *(unsigned int*)(0x8028EFF0) = 0x00000000;
-    }
+    // }
 
 
 
@@ -743,7 +755,9 @@ void SeekerBattleBot(int i)
 
         //Check if at current target marker
 
-        GlobalFloatA = 3200.0;
+        
+        //GlobalFloatA = 3200.0;
+        
         // if (AIPathfinder[i].Direction > 0)
         // {
         //     if (AIPathfinder[i].Progression > 3)
@@ -782,6 +796,16 @@ void SeekerBattleBot(int i)
                 GlobalIntA = CourseDropLengths[ci][TargetPath];
                 break;
         }
+
+        if (Progression == 0 || Progression == GlobalIntA-1) //If first or last node
+        {
+            GlobalFloatA = 2000.0;  //Square of radius to get within node to go to next node
+        }
+        else //If an inbetween node
+        {
+            GlobalFloatA = 800.0;  //Square of radius to get within node to go to next node
+        }
+        
 
         if (pow(bot_x-objectPosition[0], 2) + pow(bot_y-objectPosition[1], 2) + pow(bot_z-objectPosition[2], 2) < GlobalFloatA)//If near the next path marker, advance to the next path marker
         {
