@@ -68,42 +68,11 @@ void DrawPaths(long RSPInput)
 
 void DisplayObject(void *Car, Object *InputObject)
 {
-	int objectID = (short)((*(long*)(*(long*)(&Object)) >> 16) & 0x0000FFFF);
-
-	objectID = objectID - 2;//alligns ID with original jump routine.
-	switch (objectID)
+	switch (InputObject->category)
 	{
 		case 45:
 		{
 			//DisplayRedCoin(Camera,Object);
-			break;
-		}
-		case 48:
-		{
-			GlobalAddressB = (long)GoldCoin;
-			UpdateObjectGravity(InputObject);
-			UpdateObjectVelocity(InputObject);
-			
-			UpdateObjectFrictionScale(InputObject,0.5);
-			UpdateObjectBump(InputObject);
-			
-			if(InputObject->bump.distance_zx < 0)
-			{
-				InputObject->velocity[1] = 0;
-			}
-			
-			objectPosition[0] = InputObject->position[0];
-			objectPosition[1] = InputObject->position[1];
-			objectPosition[2] = InputObject->position[2];
-
-			
-			InputObject->angle[1] += DEG1 * 3;
-			objectAngle[0] = InputObject->angle[0];
-			objectAngle[1] = InputObject->angle[1];
-			objectAngle[2] = InputObject->angle[2];
-
-
-			DrawGeometryScale(objectPosition,objectAngle,GlobalAddressB, 0.05);
 			break;
 		}
 		default:

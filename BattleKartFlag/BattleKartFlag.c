@@ -214,6 +214,9 @@ void DropCoins(int PlayerIndex)
     objectPosition[0] = GlobalPlayer[PlayerIndex].position[0]; 
     objectPosition[1] = GlobalPlayer[PlayerIndex].position[1];
     objectPosition[2] = GlobalPlayer[PlayerIndex].position[2];
+    objectAngle[0] = 0;
+    objectAngle[1] = 0;
+    objectAngle[2] = 0;
 
     for (int ThisCoin = 0; ThisCoin < 10; ThisCoin++)
     {
@@ -2233,12 +2236,38 @@ void bootCustomCourseStuff()
 
 void DisplayObject(void *Camera, Object *Object)
 {
-    objectIndex = (short)((*(long*)(*(long*)(&Object)) >> 16) & 0x0000FFFF);
 
-
-
-    switch (objectIndex)
+    switch (Object->category)
     {
+        
+		case 48:
+		{
+			GlobalAddressB = (long)RedCoin;
+			UpdateObjectGravity(Object);
+			UpdateObjectVelocity(Object);
+			
+			UpdateObjectFrictionScale(Object,0.5);
+			UpdateObjectBump(Object);
+			
+			if(Object->bump.distance_zx < 0)
+			{
+				Object->velocity[1] = 0;
+			}
+			
+			objectPosition[0] = Object->position[0];
+			objectPosition[1] = Object->position[1];
+			objectPosition[2] = Object->position[2];
+
+			
+			Object->angle[1] += DEG1 * 3;
+			objectAngle[0] = Object->angle[0];
+			objectAngle[1] = Object->angle[1];
+			objectAngle[2] = Object->angle[2];
+
+
+			DrawGeometryScale(objectPosition,objectAngle,GlobalAddressB, 0.05f);
+			break;
+		}
         case 50:
         {
             DisplayFlag(Camera, Object);
