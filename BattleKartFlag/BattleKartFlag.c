@@ -206,6 +206,25 @@ int find_nearest_player(int current_player)
     return nearest_player;
 }
 
+void DropCoins(int PlayerIndex)
+{
+    //IFrames[PlayerIndex] = 90;
+    //Hey do you want iframes eventually? 
+
+    objectPosition[0] = GlobalPlayer[PlayerIndex].position[0]; 
+    objectPosition[1] = GlobalPlayer[PlayerIndex].position[1];
+    objectPosition[2] = GlobalPlayer[PlayerIndex].position[2];
+
+    for (int ThisCoin = 0; ThisCoin < 10; ThisCoin++)
+    {
+        objectVelocity[0] = -3 + (MakeRandomLimmit(6));
+        objectVelocity[1] = 12;
+        objectVelocity[2] = -4 + (MakeRandomLimmit(8));
+        MakeAlignVector(objectVelocity,(GlobalPlayer[PlayerIndex].direction[1]));
+        MasterCreateObject(objectPosition, objectAngle, objectVelocity, 48, 3.0);
+    }
+}
+
 void DisplayBattleSantaTitle()
 {
     PrintBigText(38,14, 1.15f,"BATTLE SANTA 64"); //Display title
@@ -342,20 +361,20 @@ void bombSlowdown()
 void CheckHit(int PlayerIndex, int HitType) //Hook into wrapper
 {
 
-//     #define     BombThrowRolloverHT     0
-// #define     RolloverHT                1
-// #define     WheelSpinHT                2
-// #define        BrokenHT                3
-// #define     ThunderHT                4
-// #define        SpinHT                    5
-// #define        BombRolloverHT            6
-// #define        ProWheelSpinHT            7
+    // #define     BombThrowRolloverHT     0
+    // #define     RolloverHT                1
+    // #define     WheelSpinHT                2
+    // #define        BrokenHT                3
+    // #define     ThunderHT                4
+    // #define        SpinHT                    5
+    // #define        BombRolloverHT            6
+    // #define        ProWheelSpinHT            7
 
-
-    // if (game_mode == 5 && HitType == 0) //If playing Zombombs game mode
-    // {    
-    //     makePlayerBomb(PlayerIndex);
-    // }
+    
+    if (game_mode == 7) 
+    {    
+        DropCoins(PlayerIndex);
+    }
 }
 
 

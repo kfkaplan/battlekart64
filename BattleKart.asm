@@ -2878,6 +2878,33 @@ all_players_bombs:
 	JR RA
 	AND v0, a0, a2 //v0 = (a0 and a2)
 
+
+//Run the presents game mode
+runGameModePresents:
+	//store registers
+	ADDI sp, sp, -0x30
+	SW ra, 0x20 (sp)
+
+	//Run hit detection to find who as hit last and process 
+	JAL hitDetection
+	NOP
+
+	//If respawn is on, respawn players that are hit
+	LBU v0, status_respawn
+	BEQ v0, zero, @@branch_respawn_on //#If respawn is set to on
+		LBU a0, who_was_hit_last //Load whoever might have been hit
+		BEQ a0, zero, @@branch_respawn_on //If a player was hit, respawn them
+			NOP
+			SB zero, who_was_hit_last
+			JAL processRespawn
+			ADDI a0, a0, -1
+		@@branch_respawn_on:
+
+	//Jump back
+	LW ra, 0x20 (sp)
+	JR ra
+	ADDI sp, sp, 0x30
+
 //This function handles everything for game mode shell shooter
 runGameModeShellShooter:
 	//store registers
@@ -3916,13 +3943,22 @@ inRace:
 		@@branch_game_mode_zombombs:
 	//shell shooter mode
 	BNE a0, a1, @@branch_game_mode_shell_shooter
-		NOP
+	LI a1, 7
 		JAL runGameModeShellShooter
 		NOP
 		BEQ zero, zero, @@branch_finished_running_game_mode
 		NOP
 		@@branch_game_mode_shell_shooter:
+	BNE a0, a1, @@branch_game_mode_presents
+		NOP
+		JAL runGameModePresents
+		NOP
+		BEQ zero, zero, @@branch_finished_running_game_mode
+		NOP
+		@@branch_game_mode_presents:
 	@@branch_finished_running_game_mode:
+
+
 	// //Test mode
 	// LW a1, 0x28 (sp)
 	// LI a1, 3
@@ -6294,8 +6330,8 @@ menuPlaySound:
 			SB a0, bot_status_p3 //Set P3 to Wario
 			LI a0, 8
 			SB a0, bot_status_p4 //Set P4 to Bowser
-			LI a0, 0
-			SB a0, game_mode //Set game mode
+			LI a0, 7
+			SB a0, game_mode //Set game mode to "Presents"
 			LI a0, 1
 			SB a0, bot_ai_type //Set bot AI type to 'seeker'
 			LI 	a0, 1
