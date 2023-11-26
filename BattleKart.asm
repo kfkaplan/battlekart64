@@ -2895,10 +2895,18 @@ runGameModePresents:
 		LBU a0, who_was_hit_last //Load whoever might have been hit
 		BEQ a0, zero, @@branch_respawn_on //If a player was hit, respawn them
 			NOP
-			SB zero, who_was_hit_last
+			//SB zero, who_was_hit_last
 			JAL processRespawn
 			ADDI a0, a0, -1
 		@@branch_respawn_on:
+
+	LBU a0, who_was_hit_last //Load whoever might have been hit
+	BEQ a0, zero, @@branch_someone_was_hit
+		ADDI a0, a0, -1 //Subtract one to change who was hit to player index
+		JAL DropCoins //Drop coins
+		NOP
+		SB zero, who_was_hit_last //Blank who was hit last
+		@@branch_someone_was_hit:
 
 	//Jump back
 	LW ra, 0x20 (sp)
@@ -6315,8 +6323,13 @@ menuPlaySound:
 			SB a0, gBackgroundFlag
 			JAL setDefaults //Set defaults as the first thing that happens
 			NOP
+
 			JAL bootCustomCourseStuff
 			NOP
+			//Load flag and base models for capture the flag into segment 8
+			LI a1, theModels
+			JAL SetSegment
+			LI a0, 8
 			//Disable  flag, "press start" and the Mario Raceway time on title screen and zero out timer for demo
 			lui a0, 0x8019
 			SW zero, 0xDA30 (a0) //g_mflagID

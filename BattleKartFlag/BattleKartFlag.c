@@ -357,25 +357,25 @@ void bombSlowdown()
     }
 }
 
-//void BombRolloverWrap(Player* Kart, char Kno)
-void CheckHit(int PlayerIndex, int HitType) //Hook into wrapper
-{
+// //void BombRolloverWrap(Player* Kart, char Kno)
+// void CheckHit(int PlayerIndex, int HitType) //Hook into wrapper
+// {
 
-    // #define     BombThrowRolloverHT     0
-    // #define     RolloverHT                1
-    // #define     WheelSpinHT                2
-    // #define        BrokenHT                3
-    // #define     ThunderHT                4
-    // #define        SpinHT                    5
-    // #define        BombRolloverHT            6
-    // #define        ProWheelSpinHT            7
+//     // #define     BombThrowRolloverHT     0
+//     // #define     RolloverHT                1
+//     // #define     WheelSpinHT                2
+//     // #define        BrokenHT                3
+//     // #define     ThunderHT                4
+//     // #define        SpinHT                    5
+//     // #define        BombRolloverHT            6
+//     // #define        ProWheelSpinHT            7
 
     
-    if (game_mode == 7) 
-    {    
-        DropCoins(PlayerIndex);
-    }
-}
+//     // if (game_mode == 7) 
+//     // {    
+//     //     DropCoins(PlayerIndex);
+//     // }
+// }
 
 
 //Function used for testing, displays player 1's position on the screen
