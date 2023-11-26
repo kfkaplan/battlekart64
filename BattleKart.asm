@@ -1,5 +1,14 @@
 .n64
-.open "../Mario Kart 64.z64", "BattleKart64.z64", 0 //Path to the MK64 rom and output name of battle kart rom
+
+.definelabel BattleSanta, 0 //Sets if Battlekart will be BattleSanta or regular BattleKart, commented=OFF, uncommented=ON
+
+.ifdef BattleSanta
+	.open "marioissanta.z64", "BattleKart64.z64", 0 //Path to MK64 rom with mario sprite replaced with santa sprite
+	.definelabel save_key, 0x98989898 //Value (2 bytes) to check for if save exists or not, update every new version
+.else
+	.open "../Mario Kart 64.z64", "BattleKart64.z64", 0 //Path to the MK64 rom and output name of battle kart rom
+	.definelabel save_key, 0x01234561 //Value (2 bytes) to check for if save exists or not, update every new version
+.endif
 
 //LibraryBUILD3 needs to be start of file
 //.align 0x10
@@ -23,7 +32,6 @@
 .definelabel BaseModel, 0x08002BC0
 
 
-.definelabel save_key, 0x01234561 //Value (2 bytes) to check for if save exists or not, update every new version
 
 // //Bug check for collisionSphere
 // .org 0x10A40C
@@ -146,7 +154,7 @@
 .definelabel MENU_Y_OPTIONS, VARIABLE_RAM_BASE+0x11
 .definelabel MENU_Y_PROGRESS, VARIABLE_RAM_BASE+0x12
 .definelabel MENU_X_PROGRESS, VARIABLE_RAM_BASE+0x13
-.definelabel bot_status_p1, VARIABLE_RAM_BASE+0x14 //Bot status (0=OFF, 1=Mario, 2=Luigi, 3= Yoshi, 4=Toad, 5=DK, 6=Wario, 7=Peach, 8=Bowser)
+.definelabel bot_status_p1, VARIABLE_RAM_BASE+0x14 //Bot status (0=OFF, 1=Mario, 2=Luigi, 3= Peach, 4=Toad, 5=Yoshi, 6=DK, 7=Wario, 8=Bowser)
 .definelabel bot_status_p2, VARIABLE_RAM_BASE+0x15
 .definelabel bot_status_p3, VARIABLE_RAM_BASE+0x16
 .definelabel bot_status_p4, VARIABLE_RAM_BASE+0x17
@@ -6254,629 +6262,678 @@ menuPlaySound:
 	ADDI sp, sp, 0x0024
 
 
-// titleScreen:
-titleMenu:
-	ADDI sp, sp, -0x48 
-	SW ra, 0x0038 (sp)
+.ifdef BattleSanta
+	titleMenu: //This is the title menu for Battle Santa
+		ADDI sp, sp, -0x48 
+		SW ra, 0x0038 (sp)
 
+		//Set up normal defaults
+		LI a0, 1 //Set in title screen flag
+		SB a0, in_title_screen	
 
-	LI a0, 1 //Set in title screen flag
-	SB a0, in_title_screen
+		//set boot flag
+		LB a0, boot_flag
+		BNE a0, zero, @@run_boot_flag
 
-	//set boot flag
-	LB a0, boot_flag
-	BNE a0, zero, @@run_boot_flag
-		NOP
-
-		LI a0, 1 //Set background to be on in game
-		SB a0, gBackgroundFlag
-
-		JAL setDefaults //Set defaults as the first thing that happens
-		NOP
-				
-		
-		LUI a0, hi(VARIABLE_RAM_BASE)
-        JAL loadEEPROM //Load stored variables from save file
-        ADDIU a0, a0, lo(VARIABLE_RAM_BASE)
-		LW a0, save_flag //Load save_flag and compare to the save_key
-		LI a1, save_key
-		BEQ a0, a1, @@run_if_no_good_save
+			LI a0, 1 //Set background to be on in game
+			SB a0, gBackgroundFlag
+			JAL setDefaults //Set defaults as the first thing that happens
 			NOP
-			JAL setDefaults //Set default values for battle kart variables
+			JAL bootCustomCourseStuff
 			NOP
-		@@run_if_no_good_save:
+			//Disable  flag, "press start" and the Mario Raceway time on title screen and zero out timer for demo
+			lui a0, 0x8019
+			SW zero, 0xDA30 (a0) //g_mflagID
+			SW zero, 0xDA58 (a0) //g_mpressstartID
+			SW zero, 0xDA80 (a0) //g_mracewayTime
+			SW zero, 0xEE00 (a0) //Stop title demo counter at 8018EE00 from counting anything
+			//Set up battle santa defaults
+			LI a0, 6
+			SB a0, bot_status_p2 //set P2 to DK
+			LI a0, 7
+			SB a0, bot_status_p3 //Set P3 to Wario
+			LI a0, 8
+			SB a0, bot_status_p4 //Set P4 to Bowser
+			LI a0, 0
+			SB a0, game_mode //Set game mode
+			LI a0, 1
+			SB a0, bot_ai_type //Set bot AI type to 'seeker'
+			LI 	a0, 1
+			SB a0, one_player_full_screen //Use 1p full screen mode
+			LI a0, 1 //Set boot flag at end here
+			SB a0, boot_flag
+			@@run_boot_flag:
 
-		JAL bootCustomCourseStuff
+		JAL DisplayBattleSantaTitle
 		NOP
 
-		//Load flag and base models for capture the flag into segment 8
-		LI a1, theModels
-		JAL SetSegment
-		LI a0, 8
-
-		LI a0, 1 //Set boot flag at end here
-		SB a0, boot_flag
-
-		@@run_boot_flag:
-	// //Force crash screen to always display
-	// LI a0, 0x08001192
-	// LUI a1, hi(0x800045F0)
-	// SW a0, lo(0x800045F0) (a1)
-	//Force starting lap to be 1, this forces the balloon with the blue shell to display in Luigi's raceway
-	SH zero, 0x8000F94A
+		LW ra, 0x0038 (sp)
+		JR ra  //Jump back
+		ADDI sp, sp, 0x48 
 
 
-	//Disable  flag, "press start" and the Mario Raceway time on title screen and zero out timer for demo
-	lui a0, 0x8019
-	SW zero, 0xDA30 (a0) //g_mflagID
-	SW zero, 0xDA58 (a0) //g_mpressstartID
-	SW zero, 0xDA80 (a0) //g_mracewayTime
-	SW zero, 0xEE00 (a0) //Stop title demo counter at 8018EE00 from counting anything
+.else
+	titleMenu: //Standard Battle Kart Title Menu
+		ADDI sp, sp, -0x48 
+		SW ra, 0x0038 (sp)
 
 
-	//Display a semi-transparent background for the menu
-	LW a0, 0x80150298 //Load dlistBuffer from to 0x80150298 to $a0
-	ORI a1, zero, 0x10 //x1
-	ORI a2, zero, 0xC //y1
-	ORI a3, zero, 0x12E //x2
-	ORI t6, zero, 0xDC //y2
-	SW t6, 0x0010 (sp) //(argument passing starts at offset of 0x10 in stack)
-	SW zero, 0x0014 (sp) //u32 r
-	SW zero, 0x0018 (sp) //u32 g
-	SW zero, 0x001C (sp) //u32 b
-	ORI t6, zero, 0xC8 //transparency
-	SW $t6, 0x0020 (sp)
-	JAL 0x80098DF8 //Call drawBox function 0x80098DF8
-	NOP
-	SW v0, 0x80150298 //Store dlistBuffer back to 0x80150298
+		LI a0, 1 //Set in title screen flag
+		SB a0, in_title_screen
 
-	//Display menu border left
-	LW a0, 0x80150298 //Load dlistBuffer from to 0x80150298 to $a0
-	ORI a1, zero, 0x10 //x1
-	ORI a2, zero, 0xC //y1
-	ORI a3, zero, 0x12 //x2
-	ORI t6, zero, 0xDC //y2
-	SW t6, 0x0010 (sp) //(argument passing starts at offset of 0x10 in stack)
-	ORI t6, zero, 0x80
-	SW t6, 0x0014 (sp) //u32 r
-	SW t6, 0x0018 (sp) //u32 g
-	SW t6, 0x001C (sp) //u32 b
-	ORI t6, zero, 0xFF //transparency
-	SW $t6, 0x0020 (sp)
-	JAL 0x80098DF8 //Call drawBox function 0x80098DF8
-	NOP
-	SW v0, 0x80150298 //Store dlistBuffer back to 0x80150298
-
-	//Display menu border right
-	LW a0, 0x80150298 //Load dlistBuffer from to 0x80150298 to $a0
-	ORI a1, zero, 0x12E //x1
-	ORI a2, zero, 0xC //y1
-	ORI a3, zero, 0x130 //x2
-	ORI t6, zero, 0xDC //y2
-	SW t6, 0x0010 (sp) //(argument passing starts at offset of 0x10 in stack)
-	ORI t6, zero, 0x80
-	SW t6, 0x0014 (sp) //u32 r
-	SW t6, 0x0018 (sp) //u32 g
-	SW t6, 0x001C (sp) //u32 b
-	ORI t6, zero, 0xFF //transparency
-	SW $t6, 0x0020 (sp)
-	JAL 0x80098DF8 //Call drawBox function 0x80098DF8
-	NOP
-	SW v0, 0x80150298 //Store dlistBuffer back to 0x80150298
-
-	//Display menu border bottom
-	LW a0, 0x80150298 //Load dlistBuffer from to 0x80150298 to $a0
-	ORI a1, zero, 0x10 //x1
-	ORI a2, zero, 0xDA //y1
-	ORI a3, zero, 0x12E //x2
-	ORI t6, zero, 0xDC //y2
-	SW t6, 0x0010 (sp) //(argument passing starts at offset of 0x10 in stack)
-	ORI t6, zero, 0x80
-	SW t6, 0x0014 (sp) //u32 r
-	SW t6, 0x0018 (sp) //u32 g
-	SW t6, 0x001C (sp) //u32 b
-	ORI t6, zero, 0xFF //transparency
-	SW $t6, 0x0020 (sp)
-	JAL 0x80098DF8 //Call drawBox function 0x80098DF8
-	NOP
-	SW v0, 0x80150298 //Store dlistBuffer back to 0x80150298
-
-	//Display menu border top
-	LW a0, 0x80150298 //Load dlistBuffer from to 0x80150298 to $a0
-	ORI a1, zero, 0x10 //x1
-	ORI a2, zero, 0xC //y1
-	ORI a3, zero, 0x12E //x2
-	ORI t6, zero, 0xE //y2
-	SW t6, 0x0010 (sp) //(argument passing starts at offset of 0x10 in stack)
-	ORI t6, zero, 0x80
-	SW t6, 0x0014 (sp) //u32 r
-	SW t6, 0x0018 (sp) //u32 g
-	SW t6, 0x001C (sp) //u32 b
-	ORI t6, zero, 0xFF //transparency
-	SW $t6, 0x0020 (sp)
-	JAL 0x80098DF8 //Call drawBox function 0x80098DF8
-	NOP
-	SW v0, 0x80150298 //Store dlistBuffer back to 0x80150298
-
-	//Display menu seperator between battle kart and credit title and tabs
-	LW a0, 0x80150298 //Load dlistBuffer from to 0x80150298 to $a0
-	ORI a1, zero, 0x10 //x1
-	ORI a2, zero, 0x2A //y1
-	ORI a3, zero, 0x12E //x2
-	ORI t6, zero, 0x2C //y2
-	SW t6, 0x0010 (sp) //(argument passing starts at offset of 0x10 in stack)
-	ORI t6, zero, 0x80
-	SW t6, 0x0014 (sp) //u32 r
-	SW t6, 0x0018 (sp) //u32 g
-	SW t6, 0x001C (sp) //u32 b
-	ORI t6, zero, 0xFF //transparency
-	SW $t6, 0x0020 (sp)
-	JAL 0x80098DF8 //Call drawBox function 0x80098DF8
-	NOP
-	SW v0, 0x80150298 //Store dlistBuffer back to 0x80150298
-
-	//Display menu seperator between tabs and rest of menu
-	LW a0, 0x80150298 //Load dlistBuffer from to 0x80150298 to $a0
-	ORI a1, zero, 0x10 //x1
-	ORI a2, zero, 0x40 //y1
-	ORI a3, zero, 0x12E //x2
-	ORI t6, zero, 0x42 //y2
-	SW t6, 0x0010 (sp) //(argument passing starts at offset of 0x10 in stack)
-	ORI t6, zero, 0x80
-	SW t6, 0x0014 (sp) //u32 r
-	SW t6, 0x0018 (sp) //u32 g
-	SW t6, 0x001C (sp) //u32 b
-	ORI t6, zero, 0xFF //transparency
-	SW $t6, 0x0020 (sp)
-	JAL 0x80098DF8 //Call drawBox function 0x80098DF8
-	NOP
-	SW v0, 0x80150298 //Store dlistBuffer back to 0x80150298
-
-
-
-	//Display tab border
-	LBU a3, MENU_TAB //Load current page
-	BNE a3, zero, @@branch_menu_tab_items //If page == 0, set x position to t7
-		LI a1, 0x1
-		LI t7, 0x22
-	@@branch_menu_tab_items:
-	BNE a3, a1, @@branch_menu_tab_game //If page == 1, set x position to t7
-		LI a1, 0x2
-		LI t7, 0x5E
-	@@branch_menu_tab_game:
-	BNE a3, a1, @@branch_menu_tab_bots //If page == 2, set x position to t7
-		LI a1, 0x3
-		LI t7, 0x9A
-	@@branch_menu_tab_bots:
-	BNE a3, a1, @@branch_menu_tab_options//If page == 3, set x position to t7
-		NOP
-		LI t7, 0xD6
-	@@branch_menu_tab_options:
-	SW t7, 0x0040 (sp) //Store result in stack so it can be accessed even after running jal 0x80098DF8
-
-
-
-	//Display tab background
-	lw a0, 0x80150298 //Load dlistBuffer from to 0x80150298 to $a0
-	ADDI a1, t7, 0x00 //x1
-	LI a2, 0x30 //y1
-	ADDI a3, t7, 0x3E //x2
-	LI t6, 0x40 //y2
-	SW t6, 0x0010 (sp) //(argument passing starts at offset of 0x10 in stack)
-	LI t6, 0x50
-	SW t6, 0x0014 (sp) //u32 r
-	SW t6, 0x0018 (sp) //u32 g
-	SW t6, 0x001C (sp) //u32 b
-	JAL 0x80098DF8 //Call drawBox function 0x80098DF8
-	NOP
-	SW v0, 0x80150298 //Store dlistBuffer back to 0x80150298
-
-	//Display left side of tab
-	LW t7, 0x0040 (sp) //Load stored x position of tab that was stored in the stack
-	lw a0, 0x80150298 //Load dlistBuffer from to 0x80150298 to $a0
-	ADDI a1, t7, 0x00 //x1
-	LI a2, 0x32 //y1
-	ADDI a3, t7, 0x02 //x2
-	LI t6, 0x40 //y2
-	SW t6, 0x0010 (sp) //(argument passing starts at offset of 0x10 in stack)
-	LI t6, 0x80
-	SW t6, 0x0014 (sp) //u32 r
-	SW t6, 0x0018 (sp) //u32 g
-	SW t6, 0x001C (sp) //u32 b
-	JAL 0x80098DF8 //Call drawBox function 0x80098DF8
-	NOP
-	SW v0, 0x80150298 //Store dlistBuffer back to 0x80150298
-
-	//Display right side of tab
-	LW t7, 0x0040 (sp) //Load stored x position of tab that was stored in the stack
-	lw a0, 0x80150298 //Load dlistBuffer from to 0x80150298 to $a0
-	ADDI a1, t7, 0x3C //x1
-	LI a2, 0x32 //y1
-	ADDI a3, t7, 0x3E //x2
-	LI t6, 0x40 //y2
-	SW t6, 0x0010 (sp) //(argument passing starts at offset of 0x10 in stack)
-	LI t6, 0x80
-	SW t6, 0x0014 (sp) //u32 r
-	SW t6, 0x0018 (sp) //u32 g
-	SW t6, 0x001C (sp) //u32 b
-	JAL 0x80098DF8 //Call drawBox function 0x80098DF8
-	NOP
-	SW v0, 0x80150298 //Store dlistBuffer back to 0x80150298
-
-
-	//Display top of tab
-	LW t7, 0x0040 (sp) //Load stored x position of tab that was stored in the stack
-	lw a0, 0x80150298 //Load dlistBuffer from to 0x80150298 to $a0
-	ADDI a1, t7, 0x00 //x1
-	LI a2, 0x30 //y1
-	ADDI a3, t7, 0x3E //x2
-	LI t6, 0x32 //y2
-	SW t6, 0x0010 (sp) //(argument passing starts at offset of 0x10 in stack)
-	LI t6, 0x80
-	SW t6, 0x0014 (sp) //u32 r
-	SW t6, 0x0018 (sp) //u32 g
-	SW t6, 0x001C (sp) //u32 b
-	JAL 0x80098DF8 //Call drawBox function 0x80098DF8
-	NOP
-	SW v0, 0x80150298 //Store dlistBuffer back to 0x80150298
-
-
-	//Display currently selected item as a long skinny rectangle
-	LBU a1, MENU_TAB
-	LI a3, MENU_Y_GAME //Load current menu selection and set the Y position based on that, $A1 is the y position
-	ADDU a3, a3, a1
-	LBU a1, 0x0000 (a3)
-	LI a2, 12 //multiply a1 by 12
-	MULT a1, a2
-	MFLO a1
-	ADDI a2, a1, 0x51 //a1 is the y positiion
-	LW a0, 0x80150298 //Load dlistBuffer from to 0x80150298 to $a0
-	//LI a1, 0x34 //x1
-	//LI a3, 0x106 //x2
-	LI a1, 0x12 //x1
-	LI a3, 0x12E //x2
-	ADDI t6, a2, 0xE //y2
-	SW t6, 0x0010 (sp) //(argument passing starts at offset of 0x10 in stack)
-	SW zero, 0x0014 (sp) //u32 r
-	SW zero, 0x0018 (sp) //u32 g
-	li t6, 0xFF
-	SW t6, 0x001C (sp) //transparency
-	JAL 0x80098DF8 //Call drawBox function 0x80098DF8
-	NOP
-	SW v0, 0x80150298 //Store dlistBuffer back to 0x80150298
-
-
-
-
-	//Use Z and R buttons to move through menu pages
-	LHU a0, BUTTON_ACTIVATOR_1_P1 //Load P1 buttons pressed
-	LBU a3, MENU_TAB //Load current menu tab
-	LBU a1, MENU_TAB_PROGRESS //Load current menu tab movement in progress byte
-	BNE a1, zero, @@BRANCH_MENU_TAB_MOVE_SKIP
-		ANDI a2, a0, 0x2020
-		BEQ a2, zero, @@BRANCH_MENU_TAB_MOVE_LEFT //If Z or L is pressed, move menu page left
+		//set boot flag
+		LB a0, boot_flag
+		BNE a0, zero, @@run_boot_flag
 			NOP
-			JAL menuPlaySound //Play menu sound
-			ADDI a3, a3, -1
-			LI a1, 1 //Menu selection in progress byte set
-		@@BRANCH_MENU_TAB_MOVE_LEFT:
-		ANDI a2, a0, 0x0010
-		BEQ a2, zero, @@BRANCH_MENU_TAB_MOVE_RIGHT //If R button is pressed, move menu tab right
+
+			LI a0, 1 //Set background to be on in game
+			SB a0, gBackgroundFlag
+
+			JAL setDefaults //Set defaults as the first thing that happens
 			NOP
-			JAL menuPlaySound //Play menu sound
-			ADDI a3, a3, 1
-			LI a1, 1 //Menu selection in progress byte set
-		@@BRANCH_MENU_TAB_MOVE_RIGHT:
-	@@BRANCH_MENU_TAB_MOVE_SKIP:
-	BNE a0, zero, @@BRANCH_MENU_TAB_PROGRESS_BYTE_RESET //Reset menu page move in progress byte if no buttons are pressed
+					
+			
+			LUI a0, hi(VARIABLE_RAM_BASE)
+	        JAL loadEEPROM //Load stored variables from save file
+	        ADDIU a0, a0, lo(VARIABLE_RAM_BASE)
+			LW a0, save_flag //Load save_flag and compare to the save_key
+			LI a1, save_key
+			BEQ a0, a1, @@run_if_no_good_save
+				NOP
+				JAL setDefaults //Set default values for battle kart variables
+				NOP
+			@@run_if_no_good_save:
+
+			JAL bootCustomCourseStuff
+			NOP
+
+			//Load flag and base models for capture the flag into segment 8
+			LI a1, theModels
+			JAL SetSegment
+			LI a0, 8
+
+			LI a0, 1 //Set boot flag at end here
+			SB a0, boot_flag
+
+			@@run_boot_flag:
+		// //Force crash screen to always display
+		// LI a0, 0x08001192
+		// LUI a1, hi(0x800045F0)
+		// SW a0, lo(0x800045F0) (a1)
+		//Force starting lap to be 1, this forces the balloon with the blue shell to display in Luigi's raceway
+		SH zero, 0x8000F94A
+
+
+		//Disable  flag, "press start" and the Mario Raceway time on title screen and zero out timer for demo
+		lui a0, 0x8019
+		SW zero, 0xDA30 (a0) //g_mflagID
+		SW zero, 0xDA58 (a0) //g_mpressstartID
+		SW zero, 0xDA80 (a0) //g_mracewayTime
+		SW zero, 0xEE00 (a0) //Stop title demo counter at 8018EE00 from counting anything
+
+
+		//Display a semi-transparent background for the menu
+		LW a0, 0x80150298 //Load dlistBuffer from to 0x80150298 to $a0
+		ORI a1, zero, 0x10 //x1
+		ORI a2, zero, 0xC //y1
+		ORI a3, zero, 0x12E //x2
+		ORI t6, zero, 0xDC //y2
+		SW t6, 0x0010 (sp) //(argument passing starts at offset of 0x10 in stack)
+		SW zero, 0x0014 (sp) //u32 r
+		SW zero, 0x0018 (sp) //u32 g
+		SW zero, 0x001C (sp) //u32 b
+		ORI t6, zero, 0xC8 //transparency
+		SW $t6, 0x0020 (sp)
+		JAL 0x80098DF8 //Call drawBox function 0x80098DF8
 		NOP
-		LI a1, 0 //Menu tab movement byte in progress reset to zero
-	@@BRANCH_MENU_TAB_PROGRESS_BYTE_RESET:
-	BNE a3, -1,  @@BRANCH_MENU_TAB_TOO_LOW //if menu page is too low, reset to max
+		SW v0, 0x80150298 //Store dlistBuffer back to 0x80150298
+
+		//Display menu border left
+		LW a0, 0x80150298 //Load dlistBuffer from to 0x80150298 to $a0
+		ORI a1, zero, 0x10 //x1
+		ORI a2, zero, 0xC //y1
+		ORI a3, zero, 0x12 //x2
+		ORI t6, zero, 0xDC //y2
+		SW t6, 0x0010 (sp) //(argument passing starts at offset of 0x10 in stack)
+		ORI t6, zero, 0x80
+		SW t6, 0x0014 (sp) //u32 r
+		SW t6, 0x0018 (sp) //u32 g
+		SW t6, 0x001C (sp) //u32 b
+		ORI t6, zero, 0xFF //transparency
+		SW $t6, 0x0020 (sp)
+		JAL 0x80098DF8 //Call drawBox function 0x80098DF8
 		NOP
-		LI a3, 3
-	@@BRANCH_MENU_TAB_TOO_LOW:
-	BNE a3, 4,  @@BRANCH_MENU_TAB_TOO_HIGH //if menu page is too high, reset to min
+		SW v0, 0x80150298 //Store dlistBuffer back to 0x80150298
+
+		//Display menu border right
+		LW a0, 0x80150298 //Load dlistBuffer from to 0x80150298 to $a0
+		ORI a1, zero, 0x12E //x1
+		ORI a2, zero, 0xC //y1
+		ORI a3, zero, 0x130 //x2
+		ORI t6, zero, 0xDC //y2
+		SW t6, 0x0010 (sp) //(argument passing starts at offset of 0x10 in stack)
+		ORI t6, zero, 0x80
+		SW t6, 0x0014 (sp) //u32 r
+		SW t6, 0x0018 (sp) //u32 g
+		SW t6, 0x001C (sp) //u32 b
+		ORI t6, zero, 0xFF //transparency
+		SW $t6, 0x0020 (sp)
+		JAL 0x80098DF8 //Call drawBox function 0x80098DF8
 		NOP
-		LI a3, 0
-	@@BRANCH_MENU_TAB_TOO_HIGH:
-	SB a3, MENU_TAB //Store menu selection in progress and menu selection bytes back to ram
-	SB a1, MENU_TAB_PROGRESS
+		SW v0, 0x80150298 //Store dlistBuffer back to 0x80150298
+
+		//Display menu border bottom
+		LW a0, 0x80150298 //Load dlistBuffer from to 0x80150298 to $a0
+		ORI a1, zero, 0x10 //x1
+		ORI a2, zero, 0xDA //y1
+		ORI a3, zero, 0x12E //x2
+		ORI t6, zero, 0xDC //y2
+		SW t6, 0x0010 (sp) //(argument passing starts at offset of 0x10 in stack)
+		ORI t6, zero, 0x80
+		SW t6, 0x0014 (sp) //u32 r
+		SW t6, 0x0018 (sp) //u32 g
+		SW t6, 0x001C (sp) //u32 b
+		ORI t6, zero, 0xFF //transparency
+		SW $t6, 0x0020 (sp)
+		JAL 0x80098DF8 //Call drawBox function 0x80098DF8
+		NOP
+		SW v0, 0x80150298 //Store dlistBuffer back to 0x80150298
+
+		//Display menu border top
+		LW a0, 0x80150298 //Load dlistBuffer from to 0x80150298 to $a0
+		ORI a1, zero, 0x10 //x1
+		ORI a2, zero, 0xC //y1
+		ORI a3, zero, 0x12E //x2
+		ORI t6, zero, 0xE //y2
+		SW t6, 0x0010 (sp) //(argument passing starts at offset of 0x10 in stack)
+		ORI t6, zero, 0x80
+		SW t6, 0x0014 (sp) //u32 r
+		SW t6, 0x0018 (sp) //u32 g
+		SW t6, 0x001C (sp) //u32 b
+		ORI t6, zero, 0xFF //transparency
+		SW $t6, 0x0020 (sp)
+		JAL 0x80098DF8 //Call drawBox function 0x80098DF8
+		NOP
+		SW v0, 0x80150298 //Store dlistBuffer back to 0x80150298
+
+		//Display menu seperator between battle kart and credit title and tabs
+		LW a0, 0x80150298 //Load dlistBuffer from to 0x80150298 to $a0
+		ORI a1, zero, 0x10 //x1
+		ORI a2, zero, 0x2A //y1
+		ORI a3, zero, 0x12E //x2
+		ORI t6, zero, 0x2C //y2
+		SW t6, 0x0010 (sp) //(argument passing starts at offset of 0x10 in stack)
+		ORI t6, zero, 0x80
+		SW t6, 0x0014 (sp) //u32 r
+		SW t6, 0x0018 (sp) //u32 g
+		SW t6, 0x001C (sp) //u32 b
+		ORI t6, zero, 0xFF //transparency
+		SW $t6, 0x0020 (sp)
+		JAL 0x80098DF8 //Call drawBox function 0x80098DF8
+		NOP
+		SW v0, 0x80150298 //Store dlistBuffer back to 0x80150298
+
+		//Display menu seperator between tabs and rest of menu
+		LW a0, 0x80150298 //Load dlistBuffer from to 0x80150298 to $a0
+		ORI a1, zero, 0x10 //x1
+		ORI a2, zero, 0x40 //y1
+		ORI a3, zero, 0x12E //x2
+		ORI t6, zero, 0x42 //y2
+		SW t6, 0x0010 (sp) //(argument passing starts at offset of 0x10 in stack)
+		ORI t6, zero, 0x80
+		SW t6, 0x0014 (sp) //u32 r
+		SW t6, 0x0018 (sp) //u32 g
+		SW t6, 0x001C (sp) //u32 b
+		ORI t6, zero, 0xFF //transparency
+		SW $t6, 0x0020 (sp)
+		JAL 0x80098DF8 //Call drawBox function 0x80098DF8
+		NOP
+		SW v0, 0x80150298 //Store dlistBuffer back to 0x80150298
 
 
 
-	//Move menu selection y-axis or option based on P1 C-stick y-axis (Using c-stick activator #2 D014F0F3 00??)
-	lbu a1, MENU_Y_PROGRESS //Load value of menu y movmement in progress byte
-	lbu a3, MENU_TAB //Load current menu page
-	li a0, MENU_Y_GAME
-	ADDU a3, a0, a3
-	LB a3, 0x0000 (a3) //Load current menu selection, which will vary based on page
-	LBU a0, CSTICK_ACTIVATOR_Y_P1 //Load value of P1's joystick y-axis into a0
-	SRL a0, a0, 6 //Divide joystick value by 32
-	lbu v0, BUTTON_ACTIVATOR_1_P1 //Add d-pad support, load button activator
-	li v1, 0x08
-	BNE v0, v1, @@BRANCH_MENU_DUP_PRESSED //If D-up is held, set joystick value to what it would be if it was up
-		NOP
-		li a0, 1
-	@@BRANCH_MENU_DUP_PRESSED:
-	li v1, 0x04
-	BNE v0, v1, @@BRANCH_MENU_DDOWN_PRESSED //If D-up is held, set joystick value to what it would be if it was up
-		NOP
-		li a0, 2
-	@@BRANCH_MENU_DDOWN_PRESSED:
-	BNE a1, zero, @@BRANCH_MENU_Y_SELECTION_SKIP_IF_SELECTION_IN_PROGRESS //If menu selection in progress, skip moving the menu selection since it is already in the process of moving
-		li a2, 0x1
-		BNE a0, a2, @@BRANCH_MENU_Y_MOVE_UP //If c-stick is up and the value is high enough, move menu selection up
+		//Display tab border
+		LBU a3, MENU_TAB //Load current page
+		BNE a3, zero, @@branch_menu_tab_items //If page == 0, set x position to t7
+			LI a1, 0x1
+			LI t7, 0x22
+		@@branch_menu_tab_items:
+		BNE a3, a1, @@branch_menu_tab_game //If page == 1, set x position to t7
+			LI a1, 0x2
+			LI t7, 0x5E
+		@@branch_menu_tab_game:
+		BNE a3, a1, @@branch_menu_tab_bots //If page == 2, set x position to t7
+			LI a1, 0x3
+			LI t7, 0x9A
+		@@branch_menu_tab_bots:
+		BNE a3, a1, @@branch_menu_tab_options//If page == 3, set x position to t7
 			NOP
-			JAL menuPlaySound//play menu sound
-			ADDI a3, a3, -1 //move up
-			li a1, 1 //Menu selection in progress byte set
-		@@BRANCH_MENU_Y_MOVE_UP:
-		li a2, 0x2
-		BNE a0, a2, @@BRANCH_MENU_Y_MOVE_DOWN //If c-stick is down and the value is high enough, move menu selection down
-			NOP
-			JAL menuPlaySound//play menu sound
-			ADDI a3, a3, 1 //move down
-			li a1, 1 //Menu selection in progress byte set
-		@@BRANCH_MENU_Y_MOVE_DOWN:
-	@@BRANCH_MENU_Y_SELECTION_SKIP_IF_SELECTION_IN_PROGRESS:
-	BEQ a0, zero, @@BRANCH_MENU_Y_IN_PROGRESS_JOYSTICK_DOWN //Reset menu selection in progress byte if joystick is not moved far enough (up or down a little)
-		li a2, 3
-		BNE a0, a2, @@BRANCH_MENU_Y_IN_PROGRESS_JOYSTICK_UP
-		NOP
-		@@BRANCH_MENU_Y_IN_PROGRESS_JOYSTICK_DOWN:
-		li a1, 0
-	@@BRANCH_MENU_Y_IN_PROGRESS_JOYSTICK_UP:
-	li a2, -1 //if menu selection is too low, reset to min
-	BNE a3, a2, @@BRANCH_MENU_Y_TOO_LOW
-		NOP
-		li a3, 0
-	@@BRANCH_MENU_Y_TOO_LOW:
-	lbu a2, MENU_Y_MAX //if menu selection is too high, reset to max, grab max menu scroll distance
-	BNE a3, a2, @@BRANCH_MENU_Y_TOO_HIGH
-		ADDI a2, a2, -1
-		ADD a3, a2, zero //Subtract 1 and put value back to max possible scroll down distance
-	@@BRANCH_MENU_Y_TOO_HIGH:
-	lbu a2, MENU_TAB //Load current menu page
-	li a0, MENU_Y_GAME
-	ADDU a2, a0, a2 //Load current menu selection, which will vary based on page
-	SB a1, MENU_Y_PROGRESS //Store value of menu y movmement in progress byte
-	SB a3, (0x0000) (a2) //Store value of y position in menu for current menu page
+			LI t7, 0xD6
+		@@branch_menu_tab_options:
+		SW t7, 0x0040 (sp) //Store result in stack so it can be accessed even after running jal 0x80098DF8
 
 
 
-	//Move menu selection x-axis or option based on P1 C-stick x-axis (Using c-stick activator #2 D014F0F2 00??)
-	LBU a1, MENU_X_PROGRESS //Load value of menu x movmement in progress byte
-	LBU a0, CSTICK_ACTIVATOR_X_P1 //Load value of P1's joystick x-axis into $A0
-	SRL a0, a0, 6 //Divide joystick value by 32
-	//Add d-pad support
-	lbu v0, BUTTON_ACTIVATOR_1_P1 //Load button activator
-	li v1, 2
-	BNE v0, v1, @@BRANCH_MENU_DLEFT_PRESSED //If D-up is held, set joystick value to what it would be if it was up
+		//Display tab background
+		lw a0, 0x80150298 //Load dlistBuffer from to 0x80150298 to $a0
+		ADDI a1, t7, 0x00 //x1
+		LI a2, 0x30 //y1
+		ADDI a3, t7, 0x3E //x2
+		LI t6, 0x40 //y2
+		SW t6, 0x0010 (sp) //(argument passing starts at offset of 0x10 in stack)
+		LI t6, 0x50
+		SW t6, 0x0014 (sp) //u32 r
+		SW t6, 0x0018 (sp) //u32 g
+		SW t6, 0x001C (sp) //u32 b
+		JAL 0x80098DF8 //Call drawBox function 0x80098DF8
 		NOP
-		li a0, 2
-	@@BRANCH_MENU_DLEFT_PRESSED:
-	LI v1, 1
-	BNE v0, v1, @@BRANCH_MENU_DRIGHT_PRESSED //If D-up is held, set joystick value to what it would be if it was up
+		SW v0, 0x80150298 //Store dlistBuffer back to 0x80150298
+
+		//Display left side of tab
+		LW t7, 0x0040 (sp) //Load stored x position of tab that was stored in the stack
+		lw a0, 0x80150298 //Load dlistBuffer from to 0x80150298 to $a0
+		ADDI a1, t7, 0x00 //x1
+		LI a2, 0x32 //y1
+		ADDI a3, t7, 0x02 //x2
+		LI t6, 0x40 //y2
+		SW t6, 0x0010 (sp) //(argument passing starts at offset of 0x10 in stack)
+		LI t6, 0x80
+		SW t6, 0x0014 (sp) //u32 r
+		SW t6, 0x0018 (sp) //u32 g
+		SW t6, 0x001C (sp) //u32 b
+		JAL 0x80098DF8 //Call drawBox function 0x80098DF8
 		NOP
-		li a0, 1
-	@@BRANCH_MENU_DRIGHT_PRESSED:
-	LI a2, 4
-	BEQ a1, a2, @@BRANCH_MENU_X_SELECTION_SKIP_IF_SELECTION_IN_PROGRESS //If menu selection in progress, skip moving the menu selection since it is already in the process of moving
-		LI a2, 1
-		BNE a0, a2, @@BRANCH_MENU_X_SELECTION_CSTICK_LEFT //If c-stick is left and the value is high enough, move menu selection left
-			NOP
-			JAL menuPlaySound//play menu sound
-			li a1, 1 
-		@@BRANCH_MENU_X_SELECTION_CSTICK_LEFT:
-		LI a2, 2
-		BNE a0, a2, @@BRANCH_MENU_X_SELECTION_CSTICK_RIGHT //If c-stick is right and the value is high enough, move menu selection right
-			NOP
-			JAL menuPlaySound//play menu sound
-			li a1, 2
-		@@BRANCH_MENU_X_SELECTION_CSTICK_RIGHT:
-	@@BRANCH_MENU_X_SELECTION_SKIP_IF_SELECTION_IN_PROGRESS:
-	BEQ a0, zero, @@BRANCH_MENU_X_SELECTION_RESET_IN_PROGRESS_BYTE //Rest menu selection in progress byte if joystick is not moved far enough
-	li a2, 3
-	BEQ a0, a2, @@BRANCH_MENU_X_SELECTION_RESET_IN_PROGRESS_BYTE
+		SW v0, 0x80150298 //Store dlistBuffer back to 0x80150298
+
+		//Display right side of tab
+		LW t7, 0x0040 (sp) //Load stored x position of tab that was stored in the stack
+		lw a0, 0x80150298 //Load dlistBuffer from to 0x80150298 to $a0
+		ADDI a1, t7, 0x3C //x1
+		LI a2, 0x32 //y1
+		ADDI a3, t7, 0x3E //x2
+		LI t6, 0x40 //y2
+		SW t6, 0x0010 (sp) //(argument passing starts at offset of 0x10 in stack)
+		LI t6, 0x80
+		SW t6, 0x0014 (sp) //u32 r
+		SW t6, 0x0018 (sp) //u32 g
+		SW t6, 0x001C (sp) //u32 b
+		JAL 0x80098DF8 //Call drawBox function 0x80098DF8
 		NOP
-		BEQ zero, zero, @@BRANCH_MENU_X_SELECTION_RESET_EXIT
+		SW v0, 0x80150298 //Store dlistBuffer back to 0x80150298
+
+
+		//Display top of tab
+		LW t7, 0x0040 (sp) //Load stored x position of tab that was stored in the stack
+		lw a0, 0x80150298 //Load dlistBuffer from to 0x80150298 to $a0
+		ADDI a1, t7, 0x00 //x1
+		LI a2, 0x30 //y1
+		ADDI a3, t7, 0x3E //x2
+		LI t6, 0x32 //y2
+		SW t6, 0x0010 (sp) //(argument passing starts at offset of 0x10 in stack)
+		LI t6, 0x80
+		SW t6, 0x0014 (sp) //u32 r
+		SW t6, 0x0018 (sp) //u32 g
+		SW t6, 0x001C (sp) //u32 b
+		JAL 0x80098DF8 //Call drawBox function 0x80098DF8
+		NOP
+		SW v0, 0x80150298 //Store dlistBuffer back to 0x80150298
+
+
+		//Display currently selected item as a long skinny rectangle
+		LBU a1, MENU_TAB
+		LI a3, MENU_Y_GAME //Load current menu selection and set the Y position based on that, $A1 is the y position
+		ADDU a3, a3, a1
+		LBU a1, 0x0000 (a3)
+		LI a2, 12 //multiply a1 by 12
+		MULT a1, a2
+		MFLO a1
+		ADDI a2, a1, 0x51 //a1 is the y positiion
+		LW a0, 0x80150298 //Load dlistBuffer from to 0x80150298 to $a0
+		//LI a1, 0x34 //x1
+		//LI a3, 0x106 //x2
+		LI a1, 0x12 //x1
+		LI a3, 0x12E //x2
+		ADDI t6, a2, 0xE //y2
+		SW t6, 0x0010 (sp) //(argument passing starts at offset of 0x10 in stack)
+		SW zero, 0x0014 (sp) //u32 r
+		SW zero, 0x0018 (sp) //u32 g
+		li t6, 0xFF
+		SW t6, 0x001C (sp) //transparency
+		JAL 0x80098DF8 //Call drawBox function 0x80098DF8
+		NOP
+		SW v0, 0x80150298 //Store dlistBuffer back to 0x80150298
+
+
+
+
+		//Use Z and R buttons to move through menu pages
+		LHU a0, BUTTON_ACTIVATOR_1_P1 //Load P1 buttons pressed
+		LBU a3, MENU_TAB //Load current menu tab
+		LBU a1, MENU_TAB_PROGRESS //Load current menu tab movement in progress byte
+		BNE a1, zero, @@BRANCH_MENU_TAB_MOVE_SKIP
+			ANDI a2, a0, 0x2020
+			BEQ a2, zero, @@BRANCH_MENU_TAB_MOVE_LEFT //If Z or L is pressed, move menu page left
+				NOP
+				JAL menuPlaySound //Play menu sound
+				ADDI a3, a3, -1
+				LI a1, 1 //Menu selection in progress byte set
+			@@BRANCH_MENU_TAB_MOVE_LEFT:
+			ANDI a2, a0, 0x0010
+			BEQ a2, zero, @@BRANCH_MENU_TAB_MOVE_RIGHT //If R button is pressed, move menu tab right
+				NOP
+				JAL menuPlaySound //Play menu sound
+				ADDI a3, a3, 1
+				LI a1, 1 //Menu selection in progress byte set
+			@@BRANCH_MENU_TAB_MOVE_RIGHT:
+		@@BRANCH_MENU_TAB_MOVE_SKIP:
+		BNE a0, zero, @@BRANCH_MENU_TAB_PROGRESS_BYTE_RESET //Reset menu page move in progress byte if no buttons are pressed
 			NOP
-			@@BRANCH_MENU_X_SELECTION_RESET_IN_PROGRESS_BYTE:
+			LI a1, 0 //Menu tab movement byte in progress reset to zero
+		@@BRANCH_MENU_TAB_PROGRESS_BYTE_RESET:
+		BNE a3, -1,  @@BRANCH_MENU_TAB_TOO_LOW //if menu page is too low, reset to max
+			NOP
+			LI a3, 3
+		@@BRANCH_MENU_TAB_TOO_LOW:
+		BNE a3, 4,  @@BRANCH_MENU_TAB_TOO_HIGH //if menu page is too high, reset to min
+			NOP
+			LI a3, 0
+		@@BRANCH_MENU_TAB_TOO_HIGH:
+		SB a3, MENU_TAB //Store menu selection in progress and menu selection bytes back to ram
+		SB a1, MENU_TAB_PROGRESS
+
+
+
+		//Move menu selection y-axis or option based on P1 C-stick y-axis (Using c-stick activator #2 D014F0F3 00??)
+		lbu a1, MENU_Y_PROGRESS //Load value of menu y movmement in progress byte
+		lbu a3, MENU_TAB //Load current menu page
+		li a0, MENU_Y_GAME
+		ADDU a3, a0, a3
+		LB a3, 0x0000 (a3) //Load current menu selection, which will vary based on page
+		LBU a0, CSTICK_ACTIVATOR_Y_P1 //Load value of P1's joystick y-axis into a0
+		SRL a0, a0, 6 //Divide joystick value by 32
+		lbu v0, BUTTON_ACTIVATOR_1_P1 //Add d-pad support, load button activator
+		li v1, 0x08
+		BNE v0, v1, @@BRANCH_MENU_DUP_PRESSED //If D-up is held, set joystick value to what it would be if it was up
+			NOP
+			li a0, 1
+		@@BRANCH_MENU_DUP_PRESSED:
+		li v1, 0x04
+		BNE v0, v1, @@BRANCH_MENU_DDOWN_PRESSED //If D-up is held, set joystick value to what it would be if it was up
+			NOP
+			li a0, 2
+		@@BRANCH_MENU_DDOWN_PRESSED:
+		BNE a1, zero, @@BRANCH_MENU_Y_SELECTION_SKIP_IF_SELECTION_IN_PROGRESS //If menu selection in progress, skip moving the menu selection since it is already in the process of moving
+			li a2, 0x1
+			BNE a0, a2, @@BRANCH_MENU_Y_MOVE_UP //If c-stick is up and the value is high enough, move menu selection up
+				NOP
+				JAL menuPlaySound//play menu sound
+				ADDI a3, a3, -1 //move up
+				li a1, 1 //Menu selection in progress byte set
+			@@BRANCH_MENU_Y_MOVE_UP:
+			li a2, 0x2
+			BNE a0, a2, @@BRANCH_MENU_Y_MOVE_DOWN //If c-stick is down and the value is high enough, move menu selection down
+				NOP
+				JAL menuPlaySound//play menu sound
+				ADDI a3, a3, 1 //move down
+				li a1, 1 //Menu selection in progress byte set
+			@@BRANCH_MENU_Y_MOVE_DOWN:
+		@@BRANCH_MENU_Y_SELECTION_SKIP_IF_SELECTION_IN_PROGRESS:
+		BEQ a0, zero, @@BRANCH_MENU_Y_IN_PROGRESS_JOYSTICK_DOWN //Reset menu selection in progress byte if joystick is not moved far enough (up or down a little)
+			li a2, 3
+			BNE a0, a2, @@BRANCH_MENU_Y_IN_PROGRESS_JOYSTICK_UP
+			NOP
+			@@BRANCH_MENU_Y_IN_PROGRESS_JOYSTICK_DOWN:
 			li a1, 0
-		@@BRANCH_MENU_X_SELECTION_RESET_EXIT:
+		@@BRANCH_MENU_Y_IN_PROGRESS_JOYSTICK_UP:
+		li a2, -1 //if menu selection is too low, reset to min
+		BNE a3, a2, @@BRANCH_MENU_Y_TOO_LOW
+			NOP
+			li a3, 0
+		@@BRANCH_MENU_Y_TOO_LOW:
+		lbu a2, MENU_Y_MAX //if menu selection is too high, reset to max, grab max menu scroll distance
+		BNE a3, a2, @@BRANCH_MENU_Y_TOO_HIGH
+			ADDI a2, a2, -1
+			ADD a3, a2, zero //Subtract 1 and put value back to max possible scroll down distance
+		@@BRANCH_MENU_Y_TOO_HIGH:
+		lbu a2, MENU_TAB //Load current menu page
+		li a0, MENU_Y_GAME
+		ADDU a2, a0, a2 //Load current menu selection, which will vary based on page
+		SB a1, MENU_Y_PROGRESS //Store value of menu y movmement in progress byte
+		SB a3, (0x0000) (a2) //Store value of y position in menu for current menu page
 
-	//Menu toggling only for page 1 GAME
-	LBU a2, MENU_TAB //Load current menu tab page
-	BNE a2, zero, @@BRANCH_MENU_GAME_PAGE_TOGGLE
+
+
+		//Move menu selection x-axis or option based on P1 C-stick x-axis (Using c-stick activator #2 D014F0F2 00??)
+		LBU a1, MENU_X_PROGRESS //Load value of menu x movmement in progress byte
+		LBU a0, CSTICK_ACTIVATOR_X_P1 //Load value of P1's joystick x-axis into $A0
+		SRL a0, a0, 6 //Divide joystick value by 32
+		//Add d-pad support
+		lbu v0, BUTTON_ACTIVATOR_1_P1 //Load button activator
+		li v1, 2
+		BNE v0, v1, @@BRANCH_MENU_DLEFT_PRESSED //If D-up is held, set joystick value to what it would be if it was up
+			NOP
+			li a0, 2
+		@@BRANCH_MENU_DLEFT_PRESSED:
+		LI v1, 1
+		BNE v0, v1, @@BRANCH_MENU_DRIGHT_PRESSED //If D-up is held, set joystick value to what it would be if it was up
+			NOP
+			li a0, 1
+		@@BRANCH_MENU_DRIGHT_PRESSED:
+		LI a2, 4
+		BEQ a1, a2, @@BRANCH_MENU_X_SELECTION_SKIP_IF_SELECTION_IN_PROGRESS //If menu selection in progress, skip moving the menu selection since it is already in the process of moving
+			LI a2, 1
+			BNE a0, a2, @@BRANCH_MENU_X_SELECTION_CSTICK_LEFT //If c-stick is left and the value is high enough, move menu selection left
+				NOP
+				JAL menuPlaySound//play menu sound
+				li a1, 1 
+			@@BRANCH_MENU_X_SELECTION_CSTICK_LEFT:
+			LI a2, 2
+			BNE a0, a2, @@BRANCH_MENU_X_SELECTION_CSTICK_RIGHT //If c-stick is right and the value is high enough, move menu selection right
+				NOP
+				JAL menuPlaySound//play menu sound
+				li a1, 2
+			@@BRANCH_MENU_X_SELECTION_CSTICK_RIGHT:
+		@@BRANCH_MENU_X_SELECTION_SKIP_IF_SELECTION_IN_PROGRESS:
+		BEQ a0, zero, @@BRANCH_MENU_X_SELECTION_RESET_IN_PROGRESS_BYTE //Rest menu selection in progress byte if joystick is not moved far enough
+		li a2, 3
+		BEQ a0, a2, @@BRANCH_MENU_X_SELECTION_RESET_IN_PROGRESS_BYTE
+			NOP
+			BEQ zero, zero, @@BRANCH_MENU_X_SELECTION_RESET_EXIT
+				NOP
+				@@BRANCH_MENU_X_SELECTION_RESET_IN_PROGRESS_BYTE:
+				li a1, 0
+			@@BRANCH_MENU_X_SELECTION_RESET_EXIT:
+
+		//Menu toggling only for page 1 GAME
+		LBU a2, MENU_TAB //Load current menu tab page
+		BNE a2, zero, @@BRANCH_MENU_GAME_PAGE_TOGGLE
+			NOP
+			JAL menuToggleGame
+			NOP
+		@@BRANCH_MENU_GAME_PAGE_TOGGLE:
+
+
+		//Menu toggling only for page 2 ITEMS
+		LBU a2, MENU_TAB //Load current menu tab page
+		LI a0, 1
+		BNE a2, a0, @@BRANCH_MENU_ITEMS_PAGE_TOGGLE
+			NOP
+			JAL menuToggleItems
+			NOP
+		@@BRANCH_MENU_ITEMS_PAGE_TOGGLE:
+
+		//Menu toggling only for page BOTS
+		LBU a2, MENU_TAB //Load current menu tab page
+		LI a0, 2
+		BNE a2, a0, @@BRANCH_MENU_BOTS_PAGE_TOGGLE
+			NOP
+			JAL menuToggleBots
+			NOP
+		@@BRANCH_MENU_BOTS_PAGE_TOGGLE:
+
+		//Menu toggling for page OPTIONS
+		LBU a2, MENU_TAB //Load current menu tab page
+		LI a0, 3
+		BNE a2, a0, @@BRANCH_MENU_OPTIONS_PAGE_TOGGLE
+			NOP
+			JAL menuToggleOptions
+			NOP
+		@@BRANCH_MENU_OPTIONS_PAGE_TOGGLE:
+
+
+		//Store menu selection in progress byte back to ram
+		SB a1, MENU_X_PROGRESS
+
+		JAL DisplayBattleKartTitle
 		NOP
-		JAL menuToggleGame
+
+
+		//Load font
+		JAL 0x80057710
 		NOP
-	@@BRANCH_MENU_GAME_PAGE_TOGGLE:
 
 
-	//Menu toggling only for page 2 ITEMS
-	LBU a2, MENU_TAB //Load current menu tab page
-	LI a0, 1
-	BNE a2, a0, @@BRANCH_MENU_ITEMS_PAGE_TOGGLE
-		NOP
-		JAL menuToggleItems
-		NOP
-	@@BRANCH_MENU_ITEMS_PAGE_TOGGLE:
+		// LB a0, text_flicker_flag
+		// ADDI a0, a0, 1
+		// SLTI a1, a0, 30
+		// BNE a1, zero, @@reset_text_flicker_flag
+		// 	NOP
+		// 	LI a0, 0 
+		// 	@@reset_text_flicker_flag:
+		// SB a0, text_flicker_flag
+		// SLTI a1, a0, 15
+		// BEQ a1, zero, @@text_flicker_a
+		// 	//Set font color (divide RGB values by 8)
+		// 	LI a0, 31 //R
+		// 	LI a1, 20 //G
+		// 	LI a2, 8 //B
+		// 	LI a3, 21 //R shadow
+		// 	LI t0, 8 //G shadow
+		// 	LI t1, 0 //B shadow
+		// 	SW t0, 0x10 (sp)	
+		// 	JAL SetFontColor
+		// 	SW t1, 0x14 (sp)
+		// 	SB zero, text_flicker_flag
+		// 	BEQ zero, zero, @@text_flicker_done
+		// 	NOP
+		// 	@@text_flicker_a:
 
-	//Menu toggling only for page BOTS
-	LBU a2, MENU_TAB //Load current menu tab page
-	LI a0, 2
-	BNE a2, a0, @@BRANCH_MENU_BOTS_PAGE_TOGGLE
-		NOP
-		JAL menuToggleBots
-		NOP
-	@@BRANCH_MENU_BOTS_PAGE_TOGGLE:
-
-	//Menu toggling for page OPTIONS
-	LBU a2, MENU_TAB //Load current menu tab page
-	LI a0, 3
-	BNE a2, a0, @@BRANCH_MENU_OPTIONS_PAGE_TOGGLE
-		NOP
-		JAL menuToggleOptions
-		NOP
-	@@BRANCH_MENU_OPTIONS_PAGE_TOGGLE:
-
-
-	//Store menu selection in progress byte back to ram
-	SB a1, MENU_X_PROGRESS
-
-	JAL DisplayBattleKartTitle
-	NOP
-
-
-	//Load font
-	JAL 0x80057710
-	NOP
-
-
-	// LB a0, text_flicker_flag
-	// ADDI a0, a0, 1
-	// SLTI a1, a0, 30
-	// BNE a1, zero, @@reset_text_flicker_flag
-	// 	NOP
-	// 	LI a0, 0 
-	// 	@@reset_text_flicker_flag:
-	// SB a0, text_flicker_flag
-	// SLTI a1, a0, 15
-	// BEQ a1, zero, @@text_flicker_a
-	// 	//Set font color (divide RGB values by 8)
-	// 	LI a0, 31 //R
-	// 	LI a1, 20 //G
-	// 	LI a2, 8 //B
-	// 	LI a3, 21 //R shadow
-	// 	LI t0, 8 //G shadow
-	// 	LI t1, 0 //B shadow
-	// 	SW t0, 0x10 (sp)	
-	// 	JAL SetFontColor
-	// 	SW t1, 0x14 (sp)
-	// 	SB zero, text_flicker_flag
-	// 	BEQ zero, zero, @@text_flicker_done
-	// 	NOP
-	// 	@@text_flicker_a:
-
-	// //Set font color (divide RGB values by 8)
-	// LB a0, text_flicker_flag
-	// SLTI a1, a0, 15
-	// BNE a1, zero, @@text_flicker_b
-	// 	LI a0, 28 //R
-	// 	LI a1, 28 //G
-	// 	LI a2, 28 //B
-	// 	LI a3, 10 //R shadow
-	// 	LI t0, 10 //G shadow
-	// 	LI t1, 19 //B shadow
-	// 	SW t0, 0x10 (sp)	
-	// 	JAL SetFontColor
-	// 	SW t1, 0x14 (sp)
-	// 	LI a0, 1
-	// 	SB a0, text_flicker_flag
-	// 	@@text_flicker_b:
+		// //Set font color (divide RGB values by 8)
+		// LB a0, text_flicker_flag
+		// SLTI a1, a0, 15
+		// BNE a1, zero, @@text_flicker_b
+		// 	LI a0, 28 //R
+		// 	LI a1, 28 //G
+		// 	LI a2, 28 //B
+		// 	LI a3, 10 //R shadow
+		// 	LI t0, 10 //G shadow
+		// 	LI t1, 19 //B shadow
+		// 	SW t0, 0x10 (sp)	
+		// 	JAL SetFontColor
+		// 	SW t1, 0x14 (sp)
+		// 	LI a0, 1
+		// 	SB a0, text_flicker_flag
+		// 	@@text_flicker_b:
 
 
-	// @@text_flicker_done:
+		// @@text_flicker_done:
 
 
-	//Display page corrisponding to whatever tab is selected
-	LBU t0, MENU_TAB
-	BNE t0, zero, @@BRANCH_SHOW_MENU_PAGE_GAME 	//Tab 0 == page for Game
-		NOP
-		JAL menuDispPageGame
-		NOP
-	@@BRANCH_SHOW_MENU_PAGE_GAME: 
-	BNE t0, 1, @@BRANCH_SHOW_MENU_PAGE_ITEMS //Tab 1 == page for Items
-		NOP
-		JAL menuDispPageItems
-		NOP
-	@@BRANCH_SHOW_MENU_PAGE_ITEMS:
-	BNE t0, 2, @@BRANCH_SHOW_MENU_PAGE_BOTS //Tab 2 == page for Bots
-		NOP
-		JAL menuDispPageBots
-		NOP
-	@@BRANCH_SHOW_MENU_PAGE_BOTS:
-	BNE t0, 3, @@BRANCH_SHOW_MENU_PAGE_OPTIONS //Tab 3 == page for Options
-		NOP
-		JAL menuDispPageOptions
-		NOP
-	@@BRANCH_SHOW_MENU_PAGE_OPTIONS:
+		//Display page corrisponding to whatever tab is selected
+		LBU t0, MENU_TAB
+		BNE t0, zero, @@BRANCH_SHOW_MENU_PAGE_GAME 	//Tab 0 == page for Game
+			NOP
+			JAL menuDispPageGame
+			NOP
+		@@BRANCH_SHOW_MENU_PAGE_GAME: 
+		BNE t0, 1, @@BRANCH_SHOW_MENU_PAGE_ITEMS //Tab 1 == page for Items
+			NOP
+			JAL menuDispPageItems
+			NOP
+		@@BRANCH_SHOW_MENU_PAGE_ITEMS:
+		BNE t0, 2, @@BRANCH_SHOW_MENU_PAGE_BOTS //Tab 2 == page for Bots
+			NOP
+			JAL menuDispPageBots
+			NOP
+		@@BRANCH_SHOW_MENU_PAGE_BOTS:
+		BNE t0, 3, @@BRANCH_SHOW_MENU_PAGE_OPTIONS //Tab 3 == page for Options
+			NOP
+			JAL menuDispPageOptions
+			NOP
+		@@BRANCH_SHOW_MENU_PAGE_OPTIONS:
 
 
 
 
 
-	// //Display title "BATTLE KART 64"
-	// LI a0, 0x54 //a0 is the X pos
-	// LI a2, text_title_1 //text pointer
-	// JAL FUNCTION_DISPLAY_TEXT //Print text
-	// LI a1, 0x00 //a1 is the y pos
+		// //Display title "BATTLE KART 64"
+		// LI a0, 0x54 //a0 is the X pos
+		// LI a2, text_title_1 //text pointer
+		// JAL FUNCTION_DISPLAY_TEXT //Print text
+		// LI a1, 0x00 //a1 is the y pos
 
-	// //Display title "VX.X BY TRICLON"
-	// LI a0, 0x48 //a0 is the X pos
-	// LI a2, text_title_2 //text pointer
-	// JAL FUNCTION_DISPLAY_TEXT //Print text
-	// LI a1, 0x0C //a1 is the y pos
+		// //Display title "VX.X BY TRICLON"
+		// LI a0, 0x48 //a0 is the X pos
+		// LI a2, text_title_2 //text pointer
+		// JAL FUNCTION_DISPLAY_TEXT //Print text
+		// LI a1, 0x0C //a1 is the y pos
 
-	//Display "Z", "L", and "R for menu pages
-	//Z
-	// LI a0, -0x6 //a0 is the X pos
-	// LI a2, text_Z //text pointer
-	// JAL FUNCTION_DISPLAY_TEXT //Print text
-	// LI a1, 0x25 //a1 is the y pos
-	//L
-	// LI a0, -0x6 //a0 is the X pos
-	// LI a2, text_L //text pointer
-	// JAL FUNCTION_DISPLAY_TEXT //Print text
-	// LI a1, 0x19 //a1 is the y pos
-	//R
-	// LI a0, 0x116 //a0 is the X pos
-	// LI a2, text_R //text pointer
-	// JAL FUNCTION_DISPLAY_TEXT //Print text
-	// LI a1, 0x20 //a1 is the y pos
+		//Display "Z", "L", and "R for menu pages
+		//Z
+		// LI a0, -0x6 //a0 is the X pos
+		// LI a2, text_Z //text pointer
+		// JAL FUNCTION_DISPLAY_TEXT //Print text
+		// LI a1, 0x25 //a1 is the y pos
+		//L
+		// LI a0, -0x6 //a0 is the X pos
+		// LI a2, text_L //text pointer
+		// JAL FUNCTION_DISPLAY_TEXT //Print text
+		// LI a1, 0x19 //a1 is the y pos
+		//R
+		// LI a0, 0x116 //a0 is the X pos
+		// LI a2, text_R //text pointer
+		// JAL FUNCTION_DISPLAY_TEXT //Print text
+		// LI a1, 0x20 //a1 is the y pos
 
-	//Display text for page tab names
-	//Items
-	LI a0, 0x54 //a0 is the X pos
-	LI a2, text_page_tab_items //text pointer
-	JAL FUNCTION_DISPLAY_TEXT //Print text
-	LI a1, 0x21 //a1 is the y pos
-	//Game
-	LI a0, 0x1E //a0 is the X pos
-	LI a2, text_page_tab_game //text pointer
-	JAL FUNCTION_DISPLAY_TEXT //Print text
-	LI a1, 0x21 //a1 is the y pos
-	//Bots
-	LI a0, 0x97 //a0 is the X pos
-	LI a2, text_page_tab_bots //text pointer
-	JAL FUNCTION_DISPLAY_TEXT //Print text
-	LI a1, 0x21 //a1 is the y pos
-	//options
-	LI a0, 0xC6 //a0 is the X pos
-	LI a2, text_page_tab_options //text pointer
-	JAL FUNCTION_DISPLAY_TEXT //Print text
-	LI a1, 0x21 //a1 is the y pos
+		//Display text for page tab names
+		//Items
+		LI a0, 0x54 //a0 is the X pos
+		LI a2, text_page_tab_items //text pointer
+		JAL FUNCTION_DISPLAY_TEXT //Print text
+		LI a1, 0x21 //a1 is the y pos
+		//Game
+		LI a0, 0x1E //a0 is the X pos
+		LI a2, text_page_tab_game //text pointer
+		JAL FUNCTION_DISPLAY_TEXT //Print text
+		LI a1, 0x21 //a1 is the y pos
+		//Bots
+		LI a0, 0x97 //a0 is the X pos
+		LI a2, text_page_tab_bots //text pointer
+		JAL FUNCTION_DISPLAY_TEXT //Print text
+		LI a1, 0x21 //a1 is the y pos
+		//options
+		LI a0, 0xC6 //a0 is the X pos
+		LI a2, text_page_tab_options //text pointer
+		JAL FUNCTION_DISPLAY_TEXT //Print text
+		LI a1, 0x21 //a1 is the y pos
 
-	// //If max HP is zero, set to 1
-	// LHU a0, max_hp
-	// BNE a0, zero, @@branch_hp_is_zero
-	// 	LI a1, 9999
-	// 	SH a1, max_hp
-	// 	@@branch_hp_is_zero:
-
-
-	// not s1, zero //Set boot flag
-	// sb s1, boot_flag
+		// //If max HP is zero, set to 1
+		// LHU a0, max_hp
+		// BNE a0, zero, @@branch_hp_is_zero
+		// 	LI a1, 9999
+		// 	SH a1, max_hp
+		// 	@@branch_hp_is_zero:
 
 
+		// not s1, zero //Set boot flag
+		// sb s1, boot_flag
 
 
 
-	LW ra, 0x0038 (sp)
-	JR ra  //Jump back
-	ADDI sp, sp, 0x48 
+		LW ra, 0x0038 (sp)
+		JR ra  //Jump back
+		ADDI sp, sp, 0x48 
+.endif
 
 
 

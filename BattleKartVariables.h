@@ -1,3 +1,5 @@
+#define BattleSanta //Uncomment to turn battle kart into battle santa
+
 extern int playerHoldingFlag[];
 extern int flag_count[];
 extern int flagTimer[];
@@ -14,6 +16,7 @@ extern int multiFlagPositions[4][20][4][3];
 extern int basePositions[4][20][4][3];
 extern char game_mode; // game mode, 3=CTF
 extern char player_count; //Byte storing number of players (1=1P, 2=2P, 3=3P, 4=4P)
+extern char player_count_2;
 extern char ffa_or_teams; //1 byte, free for all = 0, teams = 1
 extern char ctf_game_mode; //1 byte, CTF game mode, 0=1 flag, 1=multiflag
 extern char no_items_when_holding_flag; //1 byte, 0=can have item when holding flag, 1=can't have item when holding flag

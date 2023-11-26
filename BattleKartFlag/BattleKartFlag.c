@@ -206,11 +206,53 @@ int find_nearest_player(int current_player)
     return nearest_player;
 }
 
+void DisplayBattleSantaTitle()
+{
+    PrintBigText(38,14, 1.15f,"BATTLE SANTA 64"); //Display title
+    PrintBigText(60,50, 0.5f,"By");
+    PrintBigText(50,65, 0.5f,"Triclon and DeadHamster");    
+
+
+    //Automatically load Double Deck from title screen
+    if ( (GlobalController[0]->ButtonPressed & BTN_A) || (GlobalController[0]->ButtonPressed & BTN_START) )
+    {
+        
+        //StartGame
+        KBGNumber = 0xFF;
+
+        g_ScreenSplitA = 4;
+        g_ScreenSplitB = 3;
+        g_cupSelect = 0;
+        g_courseSelect = 0;
+        g_courseID = 0x11;
+        *(char*)(0x8018EDF1) = 0;
+        //g_raceClass = Difficulty;
+        g_playerCount = 4;
+        g_gameMode = 3;
+        g_menuMultiplayerSelection = 4;
+        GlobalPlayer[0].kart = 0;
+        GlobalPlayer[0].kart = 4; //Set to DK
+        GlobalPlayer[0].kart = 5; //Set to wario
+        GlobalPlayer[0].kart = 7; //Set to bowser
+        
+        //courseValue = MapToggle;
+        
+
+        g_NewSequenceMode = 4;
+
+        
+    }
+
+}
+
+
 void DisplayBattleKartTitle()
 {
+
     PrintBigText(38,14, 0.87f,"BATTLE KART 64"); //Display title
     PrintBigText(255,12, 0.5f,"By");
     PrintBigText(240,25, 0.5f,"Triclon");
+
 
     SpriteBtnL(18, 47, 1.0, false); //Display L, Z, and R button icons
     SpriteBtnZ(18, 62, 1.0, false);
