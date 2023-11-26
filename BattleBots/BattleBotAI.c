@@ -13,6 +13,8 @@
 
 
 
+#define TURNASSIST //Toggle turn assist for bots to help debug pathfinding
+
 
 extern int getRival();
 
@@ -61,6 +63,10 @@ void ResetPathfinderBots() //Runs at beginning of game
         {
             nearest_item_box[i][j] = 0.0;
         }
+        if (bot_status_p1[i] > 0) //If player is a bot
+        {
+            GlobalPlayer[i].acc_maxcount *= 1.1; //Speed up bot to make them faster
+        }
     } 
 }
 
@@ -96,22 +102,26 @@ void ProSteeringPlus(int i, Marker* PathArray[], Marker* RampArray[], Marker* Dr
 
     short TargetPath = AIPathfinder[i].TargetPath;
     short Progression = AIPathfinder[i].Progression; //(int)AIPathfinder[i].Progression;
+    short PathGroup = 0;
     switch (AIPathfinder[i].PathType) //Get position of current marker to drive towards
     {
         case FLATPATH: //flat paths
             objectPosition[0] = (float)PathArray[TargetPath][Progression].Position[0];
             objectPosition[1] = (float)PathArray[TargetPath][Progression].Position[1];
             objectPosition[2] = (float)PathArray[TargetPath][Progression].Position[2]; 
+            PathGroup = PathArray[TargetPath][Progression].Group;
             break;
         case RAMPPATH: //ramps
             objectPosition[0] = (float)RampArray[TargetPath][Progression].Position[0];
             objectPosition[1] = (float)RampArray[TargetPath][Progression].Position[1];
             objectPosition[2] = (float)RampArray[TargetPath][Progression].Position[2]; 
+            PathGroup = RampArray[TargetPath][Progression].Group;
             break;
         case DROPPATH: //drops 
             objectPosition[0] = (float)DropArray[TargetPath][Progression].Position[0];
             objectPosition[1] = (float)DropArray[TargetPath][Progression].Position[1];
             objectPosition[2] = (float)DropArray[TargetPath][Progression].Position[2]; 
+            PathGroup = DropArray[TargetPath][Progression].Group;
             break;
     }
 
@@ -123,7 +133,8 @@ void ProSteeringPlus(int i, Marker* PathArray[], Marker* RampArray[], Marker* Dr
     bot_buttons[i] = BTN_A;
     bot_pressed[i] = 0;
     
-    if (GlobalUInt64 > STOPTURN)
+    //if ((GlobalUInt64 > STOPTURN) || AIPathfinder[i].SlowDown)
+    if ((GlobalUInt64 > STOPTURN) | (PathGroup == 99) | (AIPathfinder[i].SlowDown))
     {   
         
         bot_buttons[i] |= BTN_B;  //continue braking
@@ -148,7 +159,7 @@ void ProSteeringPlus(int i, Marker* PathArray[], Marker* RampArray[], Marker* Dr
             bot_x_stick[i] = -127;  
         }
     }                        
-    else if (GlobalUInt64 > DRIFTTURN)
+    else if ((GlobalUInt64 > DRIFTTURN) )
     {
         
         bot_pressed[i] = BTN_R | BTN_B;   //tap brake and jump
@@ -223,14 +234,16 @@ void ProSteeringPlus(int i, Marker* PathArray[], Marker* RampArray[], Marker* Dr
 
     }
 
+    #ifdef TURNASSIST 
     if (GlobalShortA > 0)
     {
-        GlobalPlayer[i].direction[1] += 800 * getTempo();
+        GlobalPlayer[i].direction[1] += 400 * getTempo();
     }
     else
     {
-        GlobalPlayer[i].direction[1] -= 800 * getTempo();
+        GlobalPlayer[i].direction[1] -= 400 * getTempo();
     }
+    #endif
 
 
 
@@ -286,10 +299,20 @@ void StandardBattleBot(int i)
                 case 1:
                     bot_buttons[i] = BTN_A + BTN_B;
                     bot_x_stick[i] = 0x50;
+
+                    #ifdef TURNASSIST //Toggle turn assist for bots to help debug pathfinding
+                    GlobalPlayer[i].direction[1] += 400 * getTempo();
+                    #endif
+
                     break;
                 case -1:
                     bot_buttons[i] = BTN_A + BTN_B;
                     bot_x_stick[i] = -0x50;
+
+                    #ifdef TURNASSIST //Toggle turn assist for bots to help debug pathfinding
+                    GlobalPlayer[i].direction[1] -= 400 * getTempo();
+                    #endif
+
                     break;
             }
             // break;
@@ -799,11 +822,11 @@ void SeekerBattleBot(int i)
 
         if (Progression == 0 || Progression == GlobalIntA-1) //If first or last node
         {
-            GlobalFloatA = 2000.0;  //Square of radius to get within node to go to next node
+            GlobalFloatA = 3000.0;  //Square of radius to get within node to go to next node
         }
         else //If an inbetween node
         {
-            GlobalFloatA = 800.0;  //Square of radius to get within node to go to next node
+            GlobalFloatA = 2000.0;  //Square of radius to get within node to go to next node
         }
         
 
