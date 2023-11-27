@@ -1,6 +1,7 @@
 #include "../../Library/MainInclude.h"
 #include "../BattleKartVariables.h"
 #include "../BattleKartObjects/BattleKartObjects.h"
+#include "../BattleKartModel/Presents.h"
 //Standard libraries
 #include <stdbool.h>
 #include <stdlib.h>

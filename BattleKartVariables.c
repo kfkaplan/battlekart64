@@ -234,7 +234,7 @@ int basePositions[4][20][4][3] =
 	};
 
 
-
+//regular models
 const int BlueCoin= 0x080014E0;
 const int GoldCoin= 0x08002840;
 const int N64Coin= 0x08003788;
@@ -261,6 +261,21 @@ const int WarioMushroom= 0x0801CE20;
 const int YoshiMushroom= 0x0801E4C0;
 const int TargetMarker= 0x0801E710;
 const int SoccerBall= 0x0801F7B0;
+
+
+//christmas hack models
+
+const int PresentBlue= 0x08001530;
+const int PresentGreen= 0x08002A00;
+const int House_part0= 0x080056F8;
+const int PresentOrange= 0x08006BF0;
+const int PresentPink= 0x080080C0;
+const int PresentPurple= 0x08009590;
+const int PresentRed= 0x0800AA60;
+const int PresentYellow= 0x0800BF30;
+const int PresentModels[7] = {PresentBlue, PresentGreen, PresentOrange, PresentPink, PresentPurple, PresentRed, PresentYellow};
+const int HouseTextures[4] = {0x08004A30, 0x08004AA8, 0x08004B20, 0x08004B98};
+const int HouseModels[4] = {0x080055D0, 0x080055E8, 0x08005618, 0x080056C8};
 
 
 

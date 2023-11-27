@@ -66,26 +66,6 @@ void DrawPaths(long RSPInput)
 
 }
 
-void DisplayObject(void *Car, Object *InputObject)
-{
-	switch (InputObject->category)
-	{
-		case 45:
-		{
-			//DisplayRedCoin(Camera,Object);
-			break;
-		}
-		default:
-		{
-			break;
-		}
-	}
-
-
-
-}
-
-
 
 
 

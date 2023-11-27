@@ -11,6 +11,7 @@
 #include "../BattleKartVariables.h"
 //#include "../BattleKartModel/BattleKartModel.h"
 #include "../BattleKartObjects/BattleKartObjects.h"
+#include "../BattleKartModel/Presents.h"
 //#include "../MinimapSprites/ImageData.h"
 #include "../Library/MarioKartMenu.h"
 //#include "../Library/CustomLevels.h"

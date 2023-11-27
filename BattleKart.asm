@@ -15,7 +15,6 @@
 .include "../Library/LibraryBUILD1.asm"
 
 
-
 .definelabel RAM_END, org(end_label) //For ../Library/OKHeader.asm
 
 
@@ -7280,7 +7279,7 @@ gameCode:
 .align 0x10
 theModels:
 	// .import "BattleKartObjects/BattleKartObjects.raw" //OLD
-	.import "BattleKartObjects/ModelData.raw"
+	.import "BattleKartModel/Presents.raw"
 
 //Include binary file for flag and base minimap sprites for CTF mode
 .align 0x10

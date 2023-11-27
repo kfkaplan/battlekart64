@@ -2,6 +2,7 @@
 #include "../BattleKartVariables.h"
 //#include "../BattleKartObjects/BattleKartObjects.h"
 #include "../BattleKartObjects/ModelData.h"
+#include "../BattleKartModel/Presents.h"
 #include "../FirstPersonSprites/32BitFPSKart.h"
 
 
@@ -13,6 +14,43 @@
 
 // #include "../USB/usb.c"
 // #include "../USB/usb.h"
+
+
+
+#define MaxBKObjectives 30
+Object BKObjectiveArray[MaxBKObjectives]; //internal array for Objective Items separate from Shells/Itemboxes
+
+#define BK_PRESENT 1
+
+
+static void MakeBKObjectiveData(Object *obj, Vector pos, SVector angle, Vector velo, short category)
+{
+	CopyVector(obj->position,pos);
+	CopySVector(obj->angle,angle);
+	CopyVector(obj->velocity,velo);
+ 	obj->category=category;
+ 	obj->flag=EXISTOBJ;		 //EXIST
+	obj->counter=0;
+	obj->sparam=0;
+	obj->fparam=0;
+	obj->radius=0;
+    InitialBump((Bump*)&obj->bump);
+}
+
+
+static int AddBKObjective(Vector localPosition, SVector localRotation, Vector localVelocity, short localID, float radius)
+{
+    for(int i = 0; i < MaxBKObjectives; i++)
+	{
+	    if(BKObjectiveArray[i].flag == 0)
+        {
+            MakeBKObjectiveData((Object*)&BKObjectiveArray[i],localPosition,localRotation,localVelocity,localID);
+            BKObjectiveArray[i].radius = radius;
+            return(i);
+        }
+	}
+    return -1;
+}
 
 
 const int keepAwayTimerMax = 150; //Number to set the keep away timer everytime it rests (60 = 1 sec)
@@ -206,6 +244,10 @@ int find_nearest_player(int current_player)
     return nearest_player;
 }
 
+
+
+
+
 void DropCoins(int PlayerIndex)
 {
     //IFrames[PlayerIndex] = 90;
@@ -218,14 +260,12 @@ void DropCoins(int PlayerIndex)
     objectAngle[1] = 0;
     objectAngle[2] = 0;
 
-    for (int ThisCoin = 0; ThisCoin < 10; ThisCoin++)
-    {
-        objectVelocity[0] = -3 + (MakeRandomLimmit(6));
-        objectVelocity[1] = 12;
-        objectVelocity[2] = -4 + (MakeRandomLimmit(8));
-        MakeAlignVector(objectVelocity,(GlobalPlayer[PlayerIndex].direction[1]));
-        MasterCreateObject(objectPosition, objectAngle, objectVelocity, 48, 3.0);
-    }
+    objectVelocity[0] = -3 + (MakeRandomLimmit(6));
+    objectVelocity[1] = 4;
+    objectVelocity[2] = -4 + (MakeRandomLimmit(8));
+    MakeAlignVector(objectVelocity,(GlobalPlayer[PlayerIndex].direction[1]));
+    AddBKObjective(objectPosition, objectAngle, objectVelocity, BK_PRESENT, 3.0);
+    
 }
 
 void DisplayBattleSantaTitle()
@@ -1555,11 +1595,62 @@ void dropFlagAfterHit()
     }
 }
 
+
+
+void DisplayBKObjectives()
+{
+    //This function will loop through all BKObjectives and if an object exists it will be drawn
+    //This function needs to be called from DrawPerScreen so that the perspective has been set.
+    
+    for (int ThisObjective = 0; ThisObjective < MaxBKObjectives; ThisObjective++)
+    {
+        if (BKObjectiveArray[ThisObjective].flag != 0)
+        {
+            switch(BKObjectiveArray[ThisObjective].category)
+            {
+                
+                case BK_PRESENT:
+                {
+                    GlobalAddressB = (long)PresentBlue;
+                    UpdateObjectGravity((Object*)&BKObjectiveArray[ThisObjective]);
+                    UpdateObjectVelocity((Object*)&BKObjectiveArray[ThisObjective]);
+                    
+                    UpdateObjectFrictionScale((Object*)&BKObjectiveArray[ThisObjective],0.5);
+                    UpdateObjectBump((Object*)&BKObjectiveArray[ThisObjective]);
+                    
+                    if(BKObjectiveArray[ThisObjective].bump.distance_zx < 0)
+                    {
+                        BKObjectiveArray[ThisObjective].velocity[1] = 0;
+                    }
+                    
+                    objectPosition[0] = BKObjectiveArray[ThisObjective].position[0];
+                    objectPosition[1] = BKObjectiveArray[ThisObjective].position[1];
+                    objectPosition[2] = BKObjectiveArray[ThisObjective].position[2];
+
+                    
+                    BKObjectiveArray[ThisObjective].angle[1] += DEG1 * 3;
+                    objectAngle[0] = BKObjectiveArray[ThisObjective].angle[0];
+                    objectAngle[1] = BKObjectiveArray[ThisObjective].angle[1];
+                    objectAngle[2] = BKObjectiveArray[ThisObjective].angle[2];
+
+
+                    DrawGeometryScale(objectPosition,objectAngle,GlobalAddressB, 0.025f);
+                    break;
+                }
+            }
+        }
+    }
+
+
+}
+
 //void DrawLightBulb()
 void DrawPerScreen(Camera* LocalCamera)
 {  
+    //This function will draw the array of BKObjective Objects. 
+    DisplayBKObjectives();
 
-    
+
     if (game_mode ==3 || game_mode==4) //If game is ctf or keep away
     {       
         int baseTurn;
@@ -2233,7 +2324,6 @@ void bootCustomCourseStuff()
 
 //
 
-
 void DisplayObject(void *Camera, Object *Object)
 {
 
@@ -2242,7 +2332,7 @@ void DisplayObject(void *Camera, Object *Object)
         
 		case 48:
 		{
-			GlobalAddressB = (long)RedCoin;
+			GlobalAddressB = (long)PresentBlue;
 			UpdateObjectGravity(Object);
 			UpdateObjectVelocity(Object);
 			
@@ -2266,8 +2356,8 @@ void DisplayObject(void *Camera, Object *Object)
 
 
 			DrawGeometryScale(objectPosition,objectAngle,GlobalAddressB, 0.05f);
-			break;
 		}
+			break;
         case 50:
         {
             DisplayFlag(Camera, Object);
