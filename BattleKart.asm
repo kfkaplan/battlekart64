@@ -2900,12 +2900,22 @@ runGameModePresents:
 		@@branch_respawn_on:
 
 	LBU a0, who_was_hit_last //Load whoever might have been hit
-	BEQ a0, zero, @@branch_someone_was_hit
+	BEQ a0, zero, @@branch_someone_was_hit //Branch if no one was hit
+	lI a1, 1
+	BEQ a0, a1, @@branch_someone_was_hit //Branch if self was hit (only P2, P3, P4 drop presents)
 		ADDI a0, a0, -1 //Subtract one to change who was hit to player index
 		JAL DropCoins //Drop coins
 		NOP
 		SB zero, who_was_hit_last //Blank who was hit last
 		@@branch_someone_was_hit:
+
+
+	JAL checkPesentCollision //Check if you collide with a present
+	NOP
+	JAL displayNumberOfPresents //Display the score
+	NOP
+	JAL displayTimer //Display timer(if in a time match)
+	NOP
 
 	//Jump back
 	LW ra, 0x20 (sp)
@@ -6348,6 +6358,9 @@ menuPlaySound:
 			SB a0, bot_ai_type //Set bot AI type to 'seeker'
 			LI 	a0, 1
 			SB a0, one_player_full_screen //Use 1p full screen mode
+			//SH zero, p1_score //Set p1 score to zero
+			LI a0, 1
+			SB a0, score_mode //Set score mode to timer
 			LI a0, 1 //Set boot flag at end here
 			SB a0, boot_flag
 			@@run_boot_flag:

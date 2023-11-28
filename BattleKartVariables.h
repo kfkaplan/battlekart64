@@ -1,5 +1,6 @@
 #define BattleSanta //Uncomment to turn battle kart into battle santa
 
+extern short p1_score[];
 extern int playerHoldingFlag[];
 extern int flag_count[];
 extern int flagTimer[];

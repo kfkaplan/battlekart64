@@ -52,6 +52,44 @@ static int AddBKObjective(Vector localPosition, SVector localRotation, Vector lo
     return -1;
 }
 
+//Check collisions for BK Objectives.  Returns -1 if no collisions found, or the index of the BKObjective object in BKObjectiveArray if a collision is found 
+int checkBKObjectiveCollision(Vector localPosition)
+{
+    for(int i = 0; i < MaxBKObjectives; i++)
+    {
+        if(BKObjectiveArray[i].flag != 0)
+        {
+            float distance = pow(BKObjectiveArray[i].position[0] - localPosition[0], 2) + 
+                                pow(BKObjectiveArray[i].position[1] - localPosition[1], 2) +
+                                pow(BKObjectiveArray[i].position[2] - localPosition[2], 2);
+            if (distance <= pow(BKObjectiveArray[i].radius + GlobalPlayer[0].radius, 2))
+            {
+                return i;
+            }
+        }
+    } 
+    return -1;
+}
+
+
+//Check collisions with presents for Battle Santa
+void checkPesentCollision()
+{
+    int i = checkBKObjectiveCollision(GlobalPlayer[0].position); //Check if P1 collides with a present
+    if (i != -1) //If player does collide
+    {
+        playSound(0x49008016); //sound "menu ok"
+        BKObjectiveArray[i].flag = 0; //Delete present
+        incrementScore(0); //Increment P1's score
+    }
+}
+
+
+void displayNumberOfPresents()
+{
+    loadFont();
+    printStringNumber(0xF0, 0x0, "", p1_score[0]);
+}
 
 const int keepAwayTimerMax = 150; //Number to set the keep away timer everytime it rests (60 = 1 sec)
 const float fractionSpeedWhenHoldingFlag = 0.8; //Fraction of top speed when holding flag
