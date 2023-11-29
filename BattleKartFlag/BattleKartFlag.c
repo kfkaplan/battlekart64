@@ -330,10 +330,7 @@ void DisplayBattleSantaTitle()
         g_playerCount = 4;
         g_gameMode = 3;
         g_menuMultiplayerSelection = 4;
-        GlobalPlayer[0].kart = 0;
-        GlobalPlayer[0].kart = 4; //Set to DK
-        GlobalPlayer[0].kart = 5; //Set to wario
-        GlobalPlayer[0].kart = 7; //Set to bowser
+
         
         //courseValue = MapToggle;
         
@@ -345,6 +342,13 @@ void DisplayBattleSantaTitle()
 
 }
 
+// void setBattleSantaCharacters()
+// {
+//     GlobalPlayer[0].kart = 0;
+//     GlobalPlayer[1].kart = 4; //Set to DK
+//     GlobalPlayer[2].kart = 5; //Set to wario
+//     GlobalPlayer[3].kart = 7; //Set to bowser
+// }
 
 void DisplayBattleKartTitle()
 {

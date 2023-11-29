@@ -4497,6 +4497,9 @@ menuDisplayModeZombombs:
 	LI a1, 3
 	SB a1, MENU_Y_MAX
 
+
+	//Set score mode to 
+
 	LW ra, 0x0020 (sp)
 	JR ra
 	ADDI sp, sp, 0x0024
@@ -6346,12 +6349,22 @@ menuPlaySound:
 			SW zero, 0xDA80 (a0) //g_mracewayTime
 			SW zero, 0xEE00 (a0) //Stop title demo counter at 8018EE00 from counting anything
 			//Set up battle santa defaults
+
+			LI a0, 4
+			SB a0, 0x800e86a9
 			LI a0, 6
 			SB a0, bot_status_p2 //set P2 to DK
+
+			LI a0, 5
+			SB a0, 0x800e86aA
 			LI a0, 7
 			SB a0, bot_status_p3 //Set P3 to Wario
+
+			LI a0, 7
+			SB a0, 0x800e86aB
 			LI a0, 8
 			SB a0, bot_status_p4 //Set P4 to Bowser
+
 			LI a0, 7
 			SB a0, game_mode //Set game mode to "Presents"
 			LI a0, 1
@@ -7063,6 +7076,15 @@ runAtCourseInitialization:
 	SW ra, 0x20 (sp)
 
 
+
+
+	//Set zombombs score mode to be timed, if zombombs is loaded
+	LI a0, game_mode
+	LI a1, 5
+	BEQ a0, a1, @@branch_set_zombombs_sccore_mode
+		LI a1, 1
+		SB a1, score_mode
+		@@branch_set_zombombs_sccore_mode:
 
 
 	//Set course start flag to zero so that we know the course is in the middle of loading
