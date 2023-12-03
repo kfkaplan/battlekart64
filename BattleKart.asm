@@ -157,7 +157,10 @@
 .definelabel bot_status_p2, VARIABLE_RAM_BASE+0x15
 .definelabel bot_status_p3, VARIABLE_RAM_BASE+0x16
 .definelabel bot_status_p4, VARIABLE_RAM_BASE+0x17
-
+// .definelabel bot_run_away_flag_p1, VARIABLE_RAM_BASE+0x18 //1 byte, Bot run away flag (0=OFF (default) bots will attack rivals, 1=ON bots will run away from rivals)
+// .definelabel bot_run_away_flag_p2, VARIABLE_RAM_BASE+0x19
+// .definelabel bot_run_away_flag_p3, VARIABLE_RAM_BASE+0x1A
+// .definelabel bot_run_away_flag_p4, VARIABLE_RAM_BASE+0x1B
 .definelabel bot_steering_p1, VARIABLE_RAM_BASE+0x1C //Bot steering state (0 = go straight, 1 = turn left, 2 = turn right)
 .definelabel bot_steering_p2, VARIABLE_RAM_BASE+0x1D
 .definelabel bot_steering_p3, VARIABLE_RAM_BASE+0x1E
@@ -6349,27 +6352,28 @@ menuPlaySound:
 			SW zero, 0xDA80 (a0) //g_mracewayTime
 			SW zero, 0xEE00 (a0) //Stop title demo counter at 8018EE00 from counting anything
 			//Set up battle santa defaults
-
 			LI a0, 4
 			SB a0, 0x800e86a9
 			LI a0, 6
 			SB a0, bot_status_p2 //set P2 to DK
-
 			LI a0, 5
 			SB a0, 0x800e86aA
 			LI a0, 7
 			SB a0, bot_status_p3 //Set P3 to Wario
-
 			LI a0, 7
 			SB a0, 0x800e86aB
 			LI a0, 8
 			SB a0, bot_status_p4 //Set P4 to Bowser
-
 			LI a0, 7
 			SB a0, game_mode //Set game mode to "Presents"
 			LI a0, 1
 			SB a0, bot_ai_type //Set bot AI type to 'seeker'
-			LI 	a0, 1
+			// LI 	a0, 1
+			// NOR a0, zero, zero //Set to be on
+			// SB a0, bot_run_away_flag_p1
+			// SB a0, bot_run_away_flag_p2
+			// SB a0, bot_run_away_flag_p3
+			// SB a0, bot_run_away_flag_p4 //Set bot run away flags to be true
 			SB a0, one_player_full_screen //Use 1p full screen mode
 			//SH zero, p1_score //Set p1 score to zero
 			LI a0, 1

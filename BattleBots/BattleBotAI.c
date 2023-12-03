@@ -26,6 +26,7 @@ ushort bot_buttons[4] = {0, 0, 0, 0};
 ushort bot_pressed[4] = {0, 0, 0, 0};
 char bot_x_stick[4] = {0, 0, 0, 0};
 float nearest_item_box[4][3] = {{0.0, 0.0, 0.0,}, {0.0, 0.0, 0.0,}, {0.0, 0.0, 0.0,}, {0.0, 0.0, 0.0,}};
+float furthest_node[4][3] = {{0.0, 0.0, 0.0,}, {0.0, 0.0, 0.0,}, {0.0, 0.0, 0.0,}, {0.0, 0.0, 0.0,}};
 char TripleTap = 0;
 Bump bot_bump[4];
 
@@ -493,7 +494,19 @@ void SeekerBattleBot(int i)
         rival_y = CoursePaths[ci][keepAwayBotRunAwayNode][0].Position[1];
         rival_z = CoursePaths[ci][keepAwayBotRunAwayNode][0].Position[2];
     }
-
+    else if (game_mode == 7) //Battle Santa, bots will run away to the furthest node
+    {
+        keepAwayBotRunAwayTimer = decrementTimerWrapper(keepAwayBotRunAwayTimer);
+        if (keepAwayBotRunAwayTimer <= 0)
+        {
+            keepAwayBotRunAwayTimer = 350;
+            FindFurthestNode(GlobalPlayer[0].position, furthest_node[i], CoursePaths[ci], CoursePathLengths[ci], LineCounts[ci][0]);        
+        }        
+        rival_x = furthest_node[i][0];
+        rival_y = furthest_node[i][1];
+        rival_z = furthest_node[i][2];         
+                
+    }
     else if (game_mode == 3 && ctf_game_mode == 1) //If game mode is CTF and multiflag
         if (isSomeoneHoldingPlayerFlag(i) )//If someone has the player's flag, go for the person carrying the flag
         {

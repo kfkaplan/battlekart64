@@ -86,6 +86,7 @@ extern ushort check_bump(Bump *bump, float radius,float p1x,float p1y, float p1z
 //Bot stuff
 extern unsigned char bot_ai_type;
 extern unsigned char bot_status_p1[4];
+//extern bool bot_run_away_flag_p1[4];
 extern int bot_timer_p1[4];
 extern unsigned char bot_steering_p1[4];
 extern uint bot_controller_input_p1[4];
