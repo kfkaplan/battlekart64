@@ -30,8 +30,10 @@ cd /Users/kfkaplan/Dropbox/battlekart64
 /Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "library/PreSwitch.c" -o "library/PreSwitch.o"
 /Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "library/Gametypes/CTF.c" -o "library/Gametypes/CTF.o"
 /Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "library/Gametypes/Soccer.c" -o "library/Gametypes/Soccer.o"
+/Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "library/Gametypes/Slayer.c" -o "library/Gametypes/Slayer.o"
 /Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "library/Gametypes/GameTypesGeneric.c" -o "library/Gametypes/GameTypesGeneric.o"
 /Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "library/Gametypes/GBI/SNet.c" -o "library/Gametypes/GBI/SNet.o"
+/Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "library/CrashScreenEnhanced.c" -o "library/CrashScreenEnhanced.o"
 
 
 #Battlekart related c files

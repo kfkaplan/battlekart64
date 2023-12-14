@@ -30,6 +30,7 @@ extern int check_if_hit(int player);
 extern bool checkHitBomb(int player);
 extern int getEnemy(int player);
 extern int decrementTimerWrapper(int timer);
+extern int incrementTimerWrapper(int timer);
 extern int killPlayer(int player);
 extern void makePlayerBomb(int player);
 extern bool ctf_game_started;
@@ -101,4 +102,8 @@ extern bool isPlayerHoldingFlag(int player);
 // extern bool bot_timer_p2;
 // extern bool bot_timer_p3;
 // extern bool bot_timer_p4;
+
+//Test cutscene stuff
+extern bool BattleSantaCutsceneFlag;
+extern long BattleSantaCutsceneTimer;
 

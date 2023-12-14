@@ -337,6 +337,8 @@ void DisplayBattleSantaTitle()
 
         g_NewSequenceMode = 4;
 
+
+
         
     }
 
@@ -807,7 +809,7 @@ void keep_away_minimap_display_flag()
 
 
 
-bool detectEmulator()
+bool detectEmulatorOldVersion()
 {
     ConsolePlatform = CheckPlatform(); 
     return(ConsolePlatform);
@@ -1750,19 +1752,19 @@ void DrawPerScreen(Camera* LocalCamera)
                     float sinB = sinT(angle);
                     float cosB = cosT(angle);
 
-                    inGameAffineMatrix[0][0] =  cosB;
-                    inGameAffineMatrix[1][0] =  0.0f;
-                    inGameAffineMatrix[2][0] =  sinB;
-                    inGameAffineMatrix[0][1] =  0.0f;
-                    inGameAffineMatrix[1][1] =  1.0f;
-                    inGameAffineMatrix[2][1] =  0.0f;
-                    inGameAffineMatrix[0][2] = -sinB;
-                    inGameAffineMatrix[1][2] =  0.0f;
-                    inGameAffineMatrix[2][2] =  cosB;
-                    inGameAffineMatrix[0][3] =  0.0f;
-                    inGameAffineMatrix[1][3] =  0.0f;
-                    inGameAffineMatrix[2][3] =  0.0f;
-                    inGameAffineMatrix[3][3] =  1.0f; 
+                    AffineMatrix[0][0] =  cosB;
+                    AffineMatrix[1][0] =  0.0f;
+                    AffineMatrix[2][0] =  sinB;
+                    AffineMatrix[0][1] =  0.0f;
+                    AffineMatrix[1][1] =  1.0f;
+                    AffineMatrix[2][1] =  0.0f;
+                    AffineMatrix[0][2] = -sinB;
+                    AffineMatrix[1][2] =  0.0f;
+                    AffineMatrix[2][2] =  cosB;
+                    AffineMatrix[0][3] =  0.0f;
+                    AffineMatrix[1][3] =  0.0f;
+                    AffineMatrix[2][3] =  0.0f;
+                    AffineMatrix[3][3] =  1.0f; 
 
                     player_x = GlobalPlayer[playerHoldingFlag[flagNumber]].position[0];
                     player_y = GlobalPlayer[playerHoldingFlag[flagNumber]].position[1];
@@ -1772,12 +1774,12 @@ void DrawPerScreen(Camera* LocalCamera)
                                + pow(player_y - LocalCamera->camera_pos[1], 2)
                                + pow(player_z - LocalCamera->camera_pos[2], 2)      );
 
-                    inGameAffineMatrix[3][0] = player_x;// + offsetPosition[0];
-                    inGameAffineMatrix[3][1] = player_y + distance*5e-2;// + offsetPosition[1];
-                    inGameAffineMatrix[3][2] = player_z;// + offsetPosition[2];                
+                    AffineMatrix[3][0] = player_x;// + offsetPosition[0];
+                    AffineMatrix[3][1] = player_y + distance*5e-2;// + offsetPosition[1];
+                    AffineMatrix[3][2] = player_z;// + offsetPosition[2];                
                     
-                    ScalingMatrix(inGameAffineMatrix, distance*1.7e-3);    
-                    if(SetMatrix(inGameAffineMatrix,0) == 0)
+                    ScalingMatrix(AffineMatrix, distance*1.7e-3);    
+                    if(SetMatrix(AffineMatrix,0) == 0)
                     {
                         return;
                     }
@@ -1804,19 +1806,19 @@ void DrawPerScreen(Camera* LocalCamera)
                 float sinB = sinT(angle);
                 float cosB = cosT(angle);
 
-                inGameAffineMatrix[0][0] =  cosB;
-                inGameAffineMatrix[1][0] =  0.0f;
-                inGameAffineMatrix[2][0] =  sinB;
-                inGameAffineMatrix[0][1] =  0.0f;
-                inGameAffineMatrix[1][1] =  1.0f;
-                inGameAffineMatrix[2][1] =  0.0f;
-                inGameAffineMatrix[0][2] = -sinB;
-                inGameAffineMatrix[1][2] =  0.0f;
-                inGameAffineMatrix[2][2] =  cosB;
-                inGameAffineMatrix[0][3] =  0.0f;
-                inGameAffineMatrix[1][3] =  0.0f;
-                inGameAffineMatrix[2][3] =  0.0f;
-                inGameAffineMatrix[3][3] =  1.0f; 
+                AffineMatrix[0][0] =  cosB;
+                AffineMatrix[1][0] =  0.0f;
+                AffineMatrix[2][0] =  sinB;
+                AffineMatrix[0][1] =  0.0f;
+                AffineMatrix[1][1] =  1.0f;
+                AffineMatrix[2][1] =  0.0f;
+                AffineMatrix[0][2] = -sinB;
+                AffineMatrix[1][2] =  0.0f;
+                AffineMatrix[2][2] =  cosB;
+                AffineMatrix[0][3] =  0.0f;
+                AffineMatrix[1][3] =  0.0f;
+                AffineMatrix[2][3] =  0.0f;
+                AffineMatrix[3][3] =  1.0f; 
 
                 player_x = GlobalPlayer[i].position[0];
                 player_y = GlobalPlayer[i].position[1];
@@ -1826,12 +1828,12 @@ void DrawPerScreen(Camera* LocalCamera)
                            + pow(player_y - LocalCamera->camera_pos[1], 2)
                            + pow(player_z - LocalCamera->camera_pos[2], 2)      );
 
-                inGameAffineMatrix[3][0] = player_x;// + offsetPosition[0];
-                inGameAffineMatrix[3][1] = player_y + distance*5e-2;// + offsetPosition[1];
-                inGameAffineMatrix[3][2] = player_z;// + offsetPosition[2];                
+                AffineMatrix[3][0] = player_x;// + offsetPosition[0];
+                AffineMatrix[3][1] = player_y + distance*5e-2;// + offsetPosition[1];
+                AffineMatrix[3][2] = player_z;// + offsetPosition[2];                
                 
-                ScalingMatrix(inGameAffineMatrix, distance*1.7e-3);    
-                if(SetMatrix(inGameAffineMatrix,0) == 0)
+                ScalingMatrix(AffineMatrix, distance*1.7e-3);    
+                if(SetMatrix(AffineMatrix,0) == 0)
                 {
                     return;
                 }
@@ -2263,6 +2265,10 @@ void customCourseRunEveryFrame()
     SetWeatherType((char)OverKartHeader.WeatherType);
     SetWeather3D(OverKartHeader.SkyType == 3);
     SetWaterType((char)OverKartHeader.WaterType);
+
+
+
+
 }
 
 
@@ -2499,3 +2505,57 @@ void setBKCheckAddress()
 //     printStringUnsignedHex(0x00, 0x20, "Thing 2", thing2);
 //     //*(uint*)0x82000000 = 1; //Force a crash
 // }
+
+
+
+
+// //Make it snow at course startup for battle santa
+// void makeItSnow()
+// {
+//     SetCloudType(3); //Make it snow
+//     SetWeatherType(0); 
+//     GlobalShortA = g_courseID;
+//     g_courseID = CloudCourseID;
+//     KWKumo_Alloc();
+// }
+
+
+//Test Battle Santa Cutscene
+void TestCutscene()
+{
+
+    // makeItSnow();
+
+
+
+    if (BattleSantaCutsceneFlag == true)
+    {
+        GlobalPlayer[0].flag = 0xE000; //Freeze all players so they can't move
+        GlobalPlayer[1].flag = 0xE000;
+        GlobalPlayer[2].flag = 0xE000;
+        GlobalPlayer[3].flag = 0xE000;
+
+        //loadBigFont();
+        BattleSantaCutsceneTimer = incrementTimerWrapper(BattleSantaCutsceneTimer);
+        if (BattleSantaCutsceneTimer > 250 && BattleSantaCutsceneTimer < 300)
+        {
+            printString(38,14,"This is a test"); //Display title
+        }
+        else if (BattleSantaCutsceneTimer > 300 && BattleSantaCutsceneTimer < 350)
+        {
+            printString(38,14, "of a cutscene"); //Display title
+
+        }
+        else if(BattleSantaCutsceneTimer > 350)
+        {
+            BattleSantaCutsceneFlag = false; //Cutscene is over
+            GlobalPlayer[0].flag = 0xC000; //Unfreeze all players so they can't move
+            GlobalPlayer[1].flag = 0xC000;
+            GlobalPlayer[2].flag = 0xC000;
+            GlobalPlayer[3].flag = 0xC000;
+        }
+    }
+
+
+}
+

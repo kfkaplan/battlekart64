@@ -17,6 +17,9 @@ int keepAwayBotRunAwayTimer = 0;
 int keepAwayBotRunAwayNode = 0;
 
 
+//Test cutscene
+bool BattleSantaCutsceneFlag = true;
+long BattleSantaCutsceneTimer = 0;
 
 
 //Flag spawning positions for single flag

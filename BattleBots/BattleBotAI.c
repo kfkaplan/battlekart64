@@ -14,7 +14,7 @@
 
 
 
-#define TURNASSIST //Toggle turn assist for bots to help debug pathfinding
+//#define TURNASSIST //Toggle turn assist for bots to help debug pathfinding
 
 
 extern int getRival();
@@ -41,6 +41,7 @@ short *LineCounts[] = {BlockFortPaths_LineCounts, DoubleDeckerPaths_LineCounts, 
 float BattleLevelHeightChecks[] = {15.0, 9.0, 75.0, 75.0};
 float BattleLevelHeightChecksSquared[] = {15.0*15.0, 9.0*9.0, 75.0*75.0, 75.0*75.0};
 short BattleLevelPathSearchRadius[] = {150, 350, 150, 400};
+float turn_towards_rival_radius[] = {60.0, 200, 60, 250}; //Distance bot must get to rival to just start turning twoards them wholesale
 //Used to index above array of arrays based on course, indexed by g_courseID
 char BattleLevelConverts[20] =     {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1 ,-1 , -1, -1, -1, -1, 0, 2, 1, -1, 3};
 
@@ -355,7 +356,7 @@ void StandardBattleBot(int i)
 void SeekerBattleBot(int i)
 {
     float rival_x, rival_y, rival_z;
-    float turn_towards_rival_radius = 60.0; //Distance bot must get to rival to just start turning twoards them wholesale
+    //float turn_towards_rival_radius = 60.0; //Distance bot must get to rival to just start turning twoards them wholesale
     short ci = BattleLevelConverts[g_courseID]; //Grab index for current course, used to index path arrays
 
 
@@ -456,7 +457,6 @@ void SeekerBattleBot(int i)
                 rival_x = nearest_item_box[i][0]; //x,y,z coords of rival
                 rival_y = nearest_item_box[i][1];
                 rival_z = nearest_item_box[i][2];   
-                turn_towards_rival_radius = 80;     
                 bot_rival_p1[i] = getRival(i); //Grab a new rival
                 bot_timer_p1[i] = MakeRandomLimmit(1200) +  3000; //Reset bot timer 50-70 seconds. (600 = 10 seconds)
             }
@@ -743,43 +743,43 @@ void SeekerBattleBot(int i)
 
     
 
-    // if (i == 1)
-    // {
+    if (i == 1)
+    {
         
-    //     loadFont();
-    //     //printString(0, 120, "P2 target");
+        loadFont();
+        //printString(0, 120, "P2 target");
 
         // printStringNumber(140, 10, "P1 x", GlobalPlayer[0].position[0]);
         // printStringNumber(140, 20, "P1 y", GlobalPlayer[0].position[1]);
         // printStringNumber(140, 30, "P1 z", GlobalPlayer[0].position[2]);
 
-    //     printStringNumber(0, 120, "Distance", AIPathfinder[i].Distance);
-    //     printStringNumber(0, 130, "Target[0]", AIPathfinder[i].Target[0]);
-    //     printStringNumber(0, 140, "Target[1]", AIPathfinder[i].Target[1]);
-    //     printStringNumber(0, 150, "Target[2]", AIPathfinder[i].Target[2]);
-    //     printStringNumber(0, 160, "Progression",  AIPathfinder[i].Progression);
-    //     printStringNumber(0, 170, "Nearest",  AIPathfinder[i].NearestMarker);
-    //     printStringNumber(0, 180, "Direction",  AIPathfinder[i].Direction);
-    //     printStringNumber(0, 190, "PathType",  AIPathfinder[i].PathType);
-    //     printStringNumber(0, 200, "TargetPath",  AIPathfinder[i].TargetPath);
-    //     printStringNumber(0, 210, "LastPath",  AIPathfinder[i].LastPath);
+        printStringNumber(0, 120, "Distance", AIPathfinder[i].Distance);
+        printStringNumber(0, 130, "Target[0]", AIPathfinder[i].Target[0]);
+        printStringNumber(0, 140, "Target[1]", AIPathfinder[i].Target[1]);
+        printStringNumber(0, 150, "Target[2]", AIPathfinder[i].Target[2]);
+        printStringNumber(0, 160, "Progression",  AIPathfinder[i].Progression);
+        printStringNumber(0, 170, "Nearest",  AIPathfinder[i].NearestMarker);
+        printStringNumber(0, 180, "Direction",  AIPathfinder[i].Direction);
+        printStringNumber(0, 190, "PathType",  AIPathfinder[i].PathType);
+        printStringNumber(0, 200, "TargetPath",  AIPathfinder[i].TargetPath);
+        printStringNumber(0, 210, "LastPath",  AIPathfinder[i].LastPath);
 
 
-    //     printStringNumber(140, 120, "ixbox x", nearest_item_box[1][0]);
-    //     printStringNumber(140, 130, "ixbox y", nearest_item_box[1][1]);
-    //     printStringNumber(140, 140, "ixbox z", nearest_item_box[1][2]);
-    //     printStringNumber(140, 150, "ixbox count", ItemBoxCount);
+        printStringNumber(140, 120, "ixbox x", nearest_item_box[1][0]);
+        printStringNumber(140, 130, "ixbox y", nearest_item_box[1][1]);
+        printStringNumber(140, 140, "ixbox z", nearest_item_box[1][2]);
+        printStringNumber(140, 150, "ixbox count", ItemBoxCount);
 
 
-    //     printStringNumber(140, 160, "bot x", bot_x);
-    //     printStringNumber(140, 170, "bot y", bot_y);
-    //     printStringNumber(140, 180, "bot z", bot_z);
-    //     printStringNumber(140, 190, "Rival", bot_rival_p1[i]);
-    //     printStringNumber(140, 200, "ProgressTimer", AIPathfinder[i].ProgressTimer);
+        printStringNumber(140, 160, "bot x", bot_x);
+        printStringNumber(140, 170, "bot y", bot_y);
+        printStringNumber(140, 180, "bot z", bot_z);
+        printStringNumber(140, 190, "Rival", bot_rival_p1[i]);
+        printStringNumber(140, 200, "ProgressTimer", AIPathfinder[i].ProgressTimer);
 
-    //     printStringHex(140, 210, "The fuck?", *(unsigned int*)(0x8028EFF0));
-    //     *(unsigned int*)(0x8028EFF0) = 0x00000000;
-    // }
+        // printStringHex(140, 210, "The fuck?", *(unsigned int*)(0x8028EFF0));
+        // *(unsigned int*)(0x8028EFF0) = 0x00000000;
+    }
 
 
 
@@ -1066,7 +1066,7 @@ void SeekerBattleBot(int i)
     }
 
 
-    if (TestCollideSphere(AIPathfinder[i].Target, turn_towards_rival_radius, GlobalPlayer[i].position, turn_towards_rival_radius) && (pow(bot_y-rival_y, 2) < BattleLevelHeightChecksSquared[ci]*0.25))
+    if (TestCollideSphere(AIPathfinder[i].Target, turn_towards_rival_radius[ci], GlobalPlayer[i].position, turn_towards_rival_radius[ci]) && (pow(bot_y-rival_y, 2) < BattleLevelHeightChecksSquared[ci]*0.25))
     {   
         nearest_item_box[i][0] = 0.0; //Reset nearest item box
         nearest_item_box[i][1] = 0.0;

@@ -27,6 +27,8 @@
 
 
 
+
+
 .definelabel FlagModel, 0x08001350
 .definelabel BaseModel, 0x08002BC0
 
@@ -364,6 +366,9 @@
 .org 0x08EDC0
 	J hijackSetBrokenWhenSquished
 
+
+
+
 // // overwrite boot function
 // .org 0x17EC //RAM address 0x80000BEC
 // 	LUI a0, hi(PAYLOAD_RAM) //RAM address
@@ -534,7 +539,7 @@ setDefaults:
 	sw a2, 0x2C (sp)
 	sw a3, 0x30 (sp)
 	//Run emulator check and store result in t9
-	JAL detectEmulator
+	JAL detectEmulatorOldVersion
 	NOP
 	MOVE t9, v0
 	//First blank the ram
@@ -787,6 +792,19 @@ decrementTimer:
 	JR ra
 	SUB a3, a3, a1 //Subtract game tempo
 
+//This function increments a timer (e.g. time score timer or hot potato battle countdown) based on the game tempo
+//a3 is both the input and output ofr the timer to decrement
+incrementTimer:
+	LBU a0, status_options_tempo //Load game tempo menu option	
+	LW a1, 0x80150114 //Load game tempo to subtract from timer, this is the default
+	BEQ a0, zero, @@branch_game_tempo_option_on //If game tempo is set on in the menu, use that tempo instead
+		LI a2, 5
+		SUB a1, a2, a0
+		@@branch_game_tempo_option_on:
+	JR ra
+	ADD a3, a3, a1 //Subtract game tempo
+
+
 //This function returns the tempo
 getTempo:
 	ADDI sp, sp, -0x30
@@ -813,6 +831,19 @@ decrementTimerWrapper:
 	ADDI sp, sp, -0x30
 	SW ra, 0x0020 (sp)
 	JAL decrementTimer
+	MOVE a3, a0
+	LW ra, 0x0020 (sp)
+	MOVE v0, a3
+	JR ra //Jump back
+	ADDI sp, sp, 0x30
+
+//Wrap decrement timer in a function for c
+//a0 == input
+//v0 == output
+incrementTimerWrapper:
+	ADDI sp, sp, -0x30
+	SW ra, 0x0020 (sp)
+	JAL incrementTimer
 	MOVE a3, a0
 	LW ra, 0x0020 (sp)
 	MOVE v0, a3
@@ -2886,6 +2917,10 @@ runGameModePresents:
 	//store registers
 	ADDI sp, sp, -0x30
 	SW ra, 0x20 (sp)
+
+	//Test cutscene
+	JAL TestCutscene
+	NOP
 
 	//Run hit detection to find who as hit last and process 
 	JAL hitDetection
@@ -6345,12 +6380,12 @@ menuPlaySound:
 			LI a1, theModels
 			JAL SetSegment
 			LI a0, 8
-			//Disable  flag, "press start" and the Mario Raceway time on title screen and zero out timer for demo
-			lui a0, 0x8019
-			SW zero, 0xDA30 (a0) //g_mflagID
-			SW zero, 0xDA58 (a0) //g_mpressstartID
-			SW zero, 0xDA80 (a0) //g_mracewayTime
-			SW zero, 0xEE00 (a0) //Stop title demo counter at 8018EE00 from counting anything
+			// //Disable  flag, "press start" and the Mario Raceway time on title screen and zero out timer for demo
+			// lui a0, 0x8019
+			// SW zero, 0xDA30 (a0) //g_mflagID
+			// SW zero, 0xDA58 (a0) //g_mpressstartID
+			// SW zero, 0xDA80 (a0) //g_mracewayTime
+			// SW zero, 0xEE00 (a0) //Stop title demo counter at 8018EE00 from counting anything
 			//Set up battle santa defaults
 			LI a0, 4
 			SB a0, 0x800e86a9
@@ -6384,6 +6419,17 @@ menuPlaySound:
 
 		JAL DisplayBattleSantaTitle
 		NOP
+
+
+
+		//Disable  flag, "press start" and the Mario Raceway time on title screen and zero out timer for demo
+		lui a0, 0x8019
+		SW zero, 0xDA30 (a0) //g_mflagID
+		SW zero, 0xDA58 (a0) //g_mpressstartID
+		SW zero, 0xDA80 (a0) //g_mracewayTime
+		SW zero, 0xEE00 (a0) //Stop title demo counter at 8018EE00 from counting anything
+
+
 
 		LW ra, 0x0038 (sp)
 		JR ra  //Jump back
@@ -7210,6 +7256,12 @@ runAtCourseInitialization:
 	// NOP
 
 
+	// .ifdef BattleSanta
+	// 	JAL makeItSnow
+	// 	NOP
+	// .endif
+	
+
 	JAL 0x80002A18//Run InitialRaceSequence which was overwritten by the hook
 	NOP
 	
@@ -7974,13 +8026,25 @@ RAMCheck:
      .align 0x10
 RAMCheckEnd:
 
+ .definelabel OverWriteFonts, 1
+
+ .align 0x10
+ NiceFontROM:
+ .import "../library/data/nice_font.mio0.bin"
+
+ .align 0x10
+ HudButtonsROM:
+ .import "../library/data/hud_buttons.mio0.bin"
+
+ .align 0x10
+ BigFontROM:
+ .import "data/Newfont.MIO0"
+
 //LibraryBUILD3 needs to be EOF
 .align 0x10
 .include "../Library/LibraryBUILD3.asm"
 .align 0x10
 .include "../Library/LibraryBUILD4.asm"
 .align 0x10
-
-
 
 .close
