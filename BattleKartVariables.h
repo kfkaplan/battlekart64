@@ -1,6 +1,7 @@
-#define BattleSanta //Uncomment to turn battle kart into battle santa
-
+extern int timer;
+extern int max_timer;
 extern short p1_score[];
+extern short high_score;
 extern int playerHoldingFlag[];
 extern int flag_count[];
 extern int flagTimer[];
@@ -80,6 +81,7 @@ extern int checkTriangleZX(Bump *bump,float radius,float p1x,float p1y, float p1
 extern int checkTriangleXY(Bump *bump,float radius,float p1x,float p1y, float p1z, ushort pointer);
 extern int checkTriangleYZ(Bump *bump,float radius,float p1x,float p1y, float p1z, ushort pointer);
 extern ushort check_bump(Bump *bump, float radius,float p1x,float p1y, float p1z);
+extern void hijackHitItemBox(int playerID);
 // extern 
 // check_bump(BUMP *bump,float radius,float px,float py,float pz)
 
@@ -103,7 +105,18 @@ extern bool isPlayerHoldingFlag(int player);
 // extern bool bot_timer_p3;
 // extern bool bot_timer_p4;
 
+extern bool BattleSantaTitleScreenStartFlag;
+
 //Test cutscene stuff
 extern bool BattleSantaCutsceneFlag;
 extern long BattleSantaCutsceneTimer;
+extern int BattleSantaCutsceneTotalLength;
+extern int BattleSantaCutsceneLength;
+extern int BattleSantaCutsceneIndex;
+extern bool BattleSantaCutsceneBeginning;
+extern bool BattleSantaEndgameFlag;
+extern short BattleSantaCurrentScore;
 
+
+//Music stuff
+extern void NaSeqStart(u16); 

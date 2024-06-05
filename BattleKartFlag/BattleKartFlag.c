@@ -23,6 +23,84 @@ Object BKObjectiveArray[MaxBKObjectives]; //internal array for Objective Items s
 #define BK_PRESENT 1
 
 
+
+void ItemboxCollideCheck(Player* Car, Object* Target)
+{
+    int PlayerID = (*(long*)&Car - (long)&g_PlayerStructTable) / 0xDD8;
+    if (CollisionSphere(Car, Target))
+    {
+        Target->sparam = 3;
+        Target->flag = EXISTOBJ;
+        Target->counter = 0;
+            
+        if (Car->flag & IS_PLAYER)
+        {
+            if (game_mode == 6)
+            {
+                hijackHitItemBox(PlayerID);
+            }
+            else
+            {
+                RouletteStart(PlayerID, Target->bump.dummy);
+            }
+            
+        }
+    }
+    else
+    {
+        if (Target->sparam == 0)
+        {
+            Target->sparam = 1;
+            Target->flag = EXISTOBJ;
+        }
+    }
+
+}
+
+
+
+//Load custom logo to replace the spinning nintendo
+void loadChristmasLogo()
+{
+
+    
+    
+    //804CCB9C
+    SetSegment(0x8,(int)(&ok_Logo));
+    
+    *sourceAddress = (int)(&LogoROM);
+    *targetAddress = (int)(&ok_FreeSpace);
+    //dataLength = 0x38C0; //for regular kimura
+    dataLength = 0x4014; //for christmas kimura
+    runDMA();
+    *sourceAddress = (int)(&ok_FreeSpace);
+    *targetAddress = (int)(&ok_Logo);
+    runMIO();
+
+    g_NintendoLogoOffset = 0x08005A70;
+    g_NintendoLogoBorder = 0x256B9478;
+}
+
+void loadLogo()
+{
+
+    
+    
+    //804CCB9C
+    SetSegment(0x8,(int)(&ok_Logo));
+    
+    *sourceAddress = (int)(&LogoROM);
+    *targetAddress = (int)(&ok_FreeSpace);
+    dataLength = 0x38C0; //for regular kimura
+    runDMA();
+    *sourceAddress = (int)(&ok_FreeSpace);
+    *targetAddress = (int)(&ok_Logo);
+    runMIO();
+
+    g_NintendoLogoOffset = 0x08005A70;
+    g_NintendoLogoBorder = 0x256B9478;
+}
+
 static void MakeBKObjectiveData(Object *obj, Vector pos, SVector angle, Vector velo, short category)
 {
 	CopyVector(obj->position,pos);
@@ -34,6 +112,7 @@ static void MakeBKObjectiveData(Object *obj, Vector pos, SVector angle, Vector v
 	obj->sparam=0;
 	obj->fparam=0;
 	obj->radius=0;
+    obj->bump.dummy = MakeRandomLimmit(7);
     InitialBump((Bump*)&obj->bump);
 }
 
@@ -134,9 +213,6 @@ void CopyBump(Camera* LocalCamera, Player LocalPlayer)
 
 void FirstPersonCamera()
 {
-
-
-
 
 
 
@@ -261,7 +337,7 @@ void FirstPersonCamera()
 int find_nearest_player(int current_player)
 {
     int nearest_player = 0;
-    float furthest_distance = 999999999.0;
+    float furthest_distance = 99999999.0;
     float distanceCheck;
     float x = GlobalPlayer[current_player].position[0];
     float y = GlobalPlayer[current_player].position[1];
@@ -298,19 +374,30 @@ void DropCoins(int PlayerIndex)
     objectAngle[1] = 0;
     objectAngle[2] = 0;
 
-    objectVelocity[0] = -3 + (MakeRandomLimmit(6));
-    objectVelocity[1] = 4;
-    objectVelocity[2] = -4 + (MakeRandomLimmit(8));
-    MakeAlignVector(objectVelocity,(GlobalPlayer[PlayerIndex].direction[1]));
-    AddBKObjective(objectPosition, objectAngle, objectVelocity, BK_PRESENT, 3.0);
+    for (int i=0; i<3; i++) 
+    {        
+        objectVelocity[0] = -3 + (MakeRandomLimmit(6));
+        objectVelocity[1] = 4;
+        objectVelocity[2] = -4 + (MakeRandomLimmit(8));
+        MakeAlignVector(objectVelocity,(GlobalPlayer[PlayerIndex].direction[1]));
+        AddBKObjective(objectPosition, objectAngle, objectVelocity, BK_PRESENT, 3.0);
+    }
+
     
 }
 
 void DisplayBattleSantaTitle()
 {
-    PrintBigText(38,14, 1.15f,"BATTLE SANTA 64"); //Display title
-    PrintBigText(60,50, 0.5f,"By");
-    PrintBigText(50,65, 0.5f,"Triclon and DeadHamster");    
+    if (BattleSantaTitleScreenStartFlag == true) //Run only at beginning of battle santa title screen
+    {
+        NaSeqStart(8); //Set music for title screen in this case, to the "snow" music
+        BattleSantaTitleScreenStartFlag = false;
+    }
+    PrintBigText(34,12, 1.15f,"BATTLE SANTA 64"); //Display title
+    PrintBigText(105,45, 0.5f,"By Triclon");
+    PrintBigText(102,59, 0.5f,"DeadHamster");    
+    PrintBigText(113,73, 0.5f,"& MtZuul");    
+
 
 
     //Automatically load Double Deck from title screen
@@ -344,25 +431,27 @@ void DisplayBattleSantaTitle()
 
 }
 
-// void setBattleSantaCharacters()
-// {
-//     GlobalPlayer[0].kart = 0;
-//     GlobalPlayer[1].kart = 4; //Set to DK
-//     GlobalPlayer[2].kart = 5; //Set to wario
-//     GlobalPlayer[3].kart = 7; //Set to bowser
-// }
+
 
 void DisplayBattleKartTitle()
 {
 
-    PrintBigText(38,14, 0.87f,"BATTLE KART 64"); //Display title
-    PrintBigText(255,12, 0.5f,"By");
-    PrintBigText(240,25, 0.5f,"Triclon");
+    // PrintBigText(36,15, 0.9f,"BATTLE");
+    // PrintBigText(128,18, 0.9f,"KART");
+    // PrintBigText(190,21, 0.9f,"64");
+
+    PrintBigText(36,17, 0.85f,"B T L  K R  6 ");
+    PrintBigText(36,19, 0.85f," A T E  A T  4");
 
 
-    SpriteBtnL(18, 47, 1.0, false); //Display L, Z, and R button icons
-    SpriteBtnZ(18, 62, 1.0, false);
-    SpriteBtnR(300, 56, 1.0, false);
+    PrintBigText(272,13, 0.32f,"v3.0b2");
+    PrintBigText(250,16, 0.5f,"by");
+    PrintBigText(230,30, 0.5f,"Triclon");  
+
+
+    SpriteBtnL(18, 50, 1.0, false); //Display L, Z, and R button icons
+    SpriteBtnZ(18, 64, 1.0, false);
+    SpriteBtnR(300, 58, 1.0, false);
 
     int y=0;
     if (MENU_TAB == 0) //Set y position for arrow icons based on what menu I am on
@@ -1655,7 +1744,8 @@ void DisplayBKObjectives()
                 
                 case BK_PRESENT:
                 {
-                    GlobalAddressB = (long)PresentBlue;
+                    //GlobalAddressB = (long)PresentBlue;
+                    GlobalAddressB = (long)PresentModels[BKObjectiveArray[ThisObjective].bump.dummy]; //Set present color
                     UpdateObjectGravity((Object*)&BKObjectiveArray[ThisObjective]);
                     UpdateObjectVelocity((Object*)&BKObjectiveArray[ThisObjective]);
                     
@@ -1667,15 +1757,19 @@ void DisplayBKObjectives()
                         BKObjectiveArray[ThisObjective].velocity[1] = 0;
                     }
                     
-                    objectPosition[0] = BKObjectiveArray[ThisObjective].position[0];
-                    objectPosition[1] = BKObjectiveArray[ThisObjective].position[1];
-                    objectPosition[2] = BKObjectiveArray[ThisObjective].position[2];
 
-                    
                     BKObjectiveArray[ThisObjective].angle[1] += DEG1 * 3;
-                    objectAngle[0] = BKObjectiveArray[ThisObjective].angle[0];
-                    objectAngle[1] = BKObjectiveArray[ThisObjective].angle[1];
-                    objectAngle[2] = BKObjectiveArray[ThisObjective].angle[2];
+
+                    for (int i=0; i<3; i++)
+                    {
+                        objectPosition[i] = BKObjectiveArray[ThisObjective].position[i];
+                        objectAngle[i] = (short)BKObjectiveArray[ThisObjective].angle[i];
+                        if (objectPosition[i] < -2000.0 || objectPosition[i] > 2000.0) //Catch presents that wander off too far and delete them, to get rid of that pesky error
+                        {
+                            BKObjectiveArray[ThisObjective].flag = 0;
+                            break;
+                        }
+                    }
 
 
                     DrawGeometryScale(objectPosition,objectAngle,GlobalAddressB, 0.025f);
@@ -2261,10 +2355,10 @@ void customCourseRunEveryFrame()
     // printStringUnsignedHex(10,10, "thing", *(uint*)(0x800F6990));
 
     //Needed for custom courses
-    SetCloudType((char)OverKartHeader.SkyType);
-    SetWeatherType((char)OverKartHeader.WeatherType);
-    SetWeather3D(OverKartHeader.SkyType == 3);
-    SetWaterType((char)OverKartHeader.WaterType);
+    // SetCloudType((char)OverKartHeader.SkyType);
+    // SetWeatherType((char)OverKartHeader.WeatherType);
+    // SetWeather3D(OverKartHeader.SkyType == 3);
+    // SetWaterType((char)OverKartHeader.WaterType);
 
 
 
@@ -2309,13 +2403,19 @@ void bootCustomCourseStuff()
     FreeSpaceAddress = (int)&ok_Storage;
 
     copyCourseTable(1);
-    NopSplashCheckCode();
+    // NopSplashCheckCode();
     FlyCamInit();
     nopASM = 0;
     HotSwapID = 0;
 
     // asm_SongA = 0x240E0001;
     // asm_SongB = 0x240E0001;
+
+
+    // OverKartHeader.SkyType = 3;
+    // OverKartHeader.WeatherType = 0;
+    // HotSwapID = 1;
+
 
 }    
 
@@ -2398,9 +2498,9 @@ void DisplayObject(void *Camera, Object *Object)
 
 			
 			Object->angle[1] += DEG1 * 3;
-			objectAngle[0] = Object->angle[0];
-			objectAngle[1] = Object->angle[1];
-			objectAngle[2] = Object->angle[2];
+			objectAngle[0] = (short)Object->angle[0];
+			objectAngle[1] = (short)Object->angle[1];
+			objectAngle[2] = (short)Object->angle[2];
 
 
 			DrawGeometryScale(objectPosition,objectAngle,GlobalAddressB, 0.05f);
@@ -2468,10 +2568,15 @@ void CollideObject(Player* car, Object* Object)
     return;
 }
 
-void allRun()
-{
-    //nothing goes here
-}
+// void allRun()
+// {
+//     // if (startupSwitch != 35) //Run stuff here only at boot
+//     // {
+//     //   startupSwitch = 35;
+//     //   loadLogo(); //Load custom logo at boot
+//     // }
+    
+// }
 
 
 
@@ -2523,39 +2628,261 @@ void setBKCheckAddress()
 //Test Battle Santa Cutscene
 void TestCutscene()
 {
-
-    // makeItSnow();
-
-
-
     if (BattleSantaCutsceneFlag == true)
     {
-        GlobalPlayer[0].flag = 0xE000; //Freeze all players so they can't move
-        GlobalPlayer[1].flag = 0xE000;
-        GlobalPlayer[2].flag = 0xE000;
-        GlobalPlayer[3].flag = 0xE000;
-
+        
+        g_startingIndicator = 0x1; //Force game to not start by forcing g_startingIndicator to be 0x1
+        // GlobalPlayer[0].flag = 0xE000; //Freeze all players so they can't move
+        // GlobalPlayer[1].flag = 0xE000;
+        // GlobalPlayer[2].flag = 0xE000;
+        // GlobalPlayer[3].flag = 0xE000;
         //loadBigFont();
         BattleSantaCutsceneTimer = incrementTimerWrapper(BattleSantaCutsceneTimer);
-        if (BattleSantaCutsceneTimer > 250 && BattleSantaCutsceneTimer < 300)
+        // float fractionCutsceneTime = (float)(BattleSantaCutsceneTimer - BattleSantaCutsceneTotalLength) / (float)BattleSantaCutsceneLength ;
+        if (BattleSantaCutsceneIndex > 0)
         {
-            printString(38,14,"This is a test"); //Display title
-        }
-        else if (BattleSantaCutsceneTimer > 300 && BattleSantaCutsceneTimer < 350)
-        {
-            printString(38,14, "of a cutscene"); //Display title
 
+            GraphPtr = DrawRectangle(GraphPtr, 0X10, 172, 0x130, 217, 0, 0, 0, 0xA0); //Large box for text and selection
+            loadFont();
         }
-        else if(BattleSantaCutsceneTimer > 350)
+        
+
+
+        switch(BattleSantaCutsceneIndex)
         {
-            BattleSantaCutsceneFlag = false; //Cutscene is over
-            GlobalPlayer[0].flag = 0xC000; //Unfreeze all players so they can't move
-            GlobalPlayer[1].flag = 0xC000;
-            GlobalPlayer[2].flag = 0xC000;
-            GlobalPlayer[3].flag = 0xC000;
+            case 0:
+            {
+                // //Set the initial positions of Bowser, Wario, and DK
+                // GlobalPlayer[1].position[0] = GlobalPlayer[0].position[0] - 0; 
+                // GlobalPlayer[1].position[1] = GlobalPlayer[0].position[1] + .5; 
+                // GlobalPlayer[1].position[2] = GlobalPlayer[0].position[2] - 60.5;
+                // GlobalPlayer[2].position[0] = GlobalPlayer[0].position[0] - 40;
+                // GlobalPlayer[2].position[1] = GlobalPlayer[0].position[1] + .5; 
+                // GlobalPlayer[2].position[2] = GlobalPlayer[0].position[2] - 60.5;
+                // GlobalPlayer[3].position[0] = GlobalPlayer[0].position[0] + 40; 
+                // GlobalPlayer[3].position[1] = GlobalPlayer[0].position[1] + .5;
+                // GlobalPlayer[3].position[2] = GlobalPlayer[0].position[2] - 60.5;
+                break;
+            }
+            case 1:
+            {
+                BattleSantaCutsceneLength = 280;
+                if (BattleSantaCutsceneBeginning)
+                {
+                    playSound(0x29008009 + 0x10);
+                }        
+                printString(0,160,"Santa: Stop! Those presents belong");
+                printString(0,172,"       to the Children! Return them");
+                printString(0,184,"       at once!");
+                break;
+            }       
+            case 2: //Focus on Bowser
+            {
+                BattleSantaCutsceneLength = 280;
+                if (BattleSantaCutsceneBeginning)
+                {
+                    playSound(0x2900800d + 0x70);
+                }        
+                float CameraOffset[3] = {-75, 10, 20};
+                for (int ThisVector = 0; ThisVector < 3; ThisVector++)
+                {
+                    GlobalCamera[0]->camera_pos[ThisVector] = GlobalPlayer[3].position[ThisVector] + CameraOffset[ThisVector];
+                    GlobalCamera[0]->lookat_pos[ThisVector] = GlobalPlayer[3].position[ThisVector];
+                }
+                printString(0,160,"Bowser: Gwrar never! We are tired");
+                printString(0,172,"        of always being on your ");
+                printString(0,184,"        naughty list.");
+                break;
+            }
+            case 3: //Focus on Wario
+            {
+                BattleSantaCutsceneLength = 280;
+                if (BattleSantaCutsceneBeginning)
+                {
+                    playSound(0x2900800d + 0x50);
+                }               
+                float CameraOffset[3] = {75, 10,  20};
+                //float CameraLookatOffset[3] = {00, 00, 20};
+                //MakeAlignVector(CameraVelocty, GlobalPlayer[1].direction[1]);
+                for (int ThisVector = 0; ThisVector < 3; ThisVector++)
+                {
+                    GlobalCamera[0]->camera_pos[ThisVector] = GlobalPlayer[2].position[ThisVector] + CameraOffset[ThisVector];
+                    GlobalCamera[0]->lookat_pos[ThisVector] = GlobalPlayer[2].position[ThisVector];
+
+                }
+                printString(0,160,"Wario: Wahahaha finally I have the");
+                printString(0,172,"       treasures I deserve. No coal"); 
+                printString(0,184,"       this Christmas!");
+                break;
+            }
+
+            case 4: //Focus on DK
+            {
+                BattleSantaCutsceneLength = 280;
+                if (BattleSantaCutsceneBeginning)
+                {
+                    playSound(0x2900800d + 0x40);
+                }
+                float CameraOffset[3] = {00, 10, 70};
+                for (int ThisVector = 0; ThisVector < 3; ThisVector++)
+                {
+                    GlobalCamera[0]->camera_pos[ThisVector] = GlobalPlayer[1].position[ThisVector] + CameraOffset[ThisVector];
+                    GlobalCamera[0]->lookat_pos[ThisVector] = GlobalPlayer[1].position[ThisVector];
+                }
+                printString(0,160,"DK:  No chance old man! Donkey will");
+                printString(0,172,"     keep his presents! Ooo-WEAH"); 
+                printString(0,184,"     Ooo-WEAH!");
+                break;
+            }
+            case 5:
+            {
+                if (BattleSantaCutsceneBeginning)
+                {
+                    playSound(0x29008009 + 0x10);
+                }        
+                BattleSantaCutsceneLength = 280;
+                printString(0,160,"Santa: If you won't see reason, I");
+                printString(0,172,"       will just have to get them");
+                printString(0,184,"       back myself!");
+                break;
+            }
+            default:
+            {
+                NaSeqStart(8); //Set music, in this case, to the "snow" music
+                BattleSantaCutsceneFlag = false; //Cutscene is over
+                // GlobalPlayer[0].flag = 0xC000; //Unfreeze all players so they can't move
+                // GlobalPlayer[1].flag = 0xC000;
+                // GlobalPlayer[2].flag = 0xC000;
+                // GlobalPlayer[3].flag = 0xC000;
+                break;
+            }
         }
+
+        BattleSantaCutsceneBeginning = false;
+        if (BattleSantaCutsceneTimer > BattleSantaCutsceneTotalLength + BattleSantaCutsceneLength)
+        {
+            BattleSantaCutsceneTotalLength += BattleSantaCutsceneLength;
+            BattleSantaCutsceneIndex += 1;
+            BattleSantaCutsceneBeginning = true;
+        }
+        //printStringNumber(5,5,"Cutscene index", BattleSantaCutsceneIndex);
+    }
+    else if (timer == max_timer)
+    {
+
+        NaSeqStart(8); //Set music, in this case, to the "snow" music
+
+        //Slow CPU players down a little to make them easier to catch
+        GlobalPlayer[1].acc_maxcount = 0.9*GlobalPlayer[0].acc_maxcount;
+        GlobalPlayer[2].acc_maxcount = 0.9*GlobalPlayer[0].acc_maxcount;
+        GlobalPlayer[3].acc_maxcount = 0.9*GlobalPlayer[0].acc_maxcount;
+
+        //*(unsigned int*)(0x802B7714) = 0; //Nop problematic instruction causing crashes
+        //*(unsigned int*)(0x802B7718) = 0; //Nop problematic instruction causing crashes
+
+    }
+}
+
+
+//Code that executes at the end of battle santa
+void BattleSantaEndgame()
+{
+    GlobalPlayer[0].flag = 0xE000; //Freeze all players so they can't move
+    GlobalPlayer[1].flag = 0xE000;
+    GlobalPlayer[2].flag = 0xE000;
+    GlobalPlayer[3].flag = 0xE000;
+    if ((BattleSantaCurrentScore != p1_score[0]) && (p1_score[0] != 0))
+    {
+        NaSeqStart(0x0017); //Set music, in this case, to the "results" music
+        BattleSantaCurrentScore = p1_score[0];
+        if (p1_score[0] > high_score) //set high score if new score was higher
+        {
+            high_score = p1_score[0];
+        }
+
     }
 
+    //GraphPtr = DrawRectangle(GraphPtr, 0x10, 0xC, 0x12C, 0x40, 0, 0, 0, 0xA0); //Large box for text and selection
+    GraphPtr = DrawRectangle(GraphPtr, 0X14, 0x50, 0x12C, 0xB0, 0, 0, 0, 0xA0); //Large box for text and selection
+    loadFont();
+    printString(0xC, 0x40, "Time is up");
+    printString(0xC, 0x4C, "");
+    printStringNumber(0xC, 0x58, "Presents recovered: ", BattleSantaCurrentScore);
+    printStringNumber(0xC, 0x64, "        High score: ", high_score);
+    printString(0xC, 0x90, "Press A+B to play again.");
+
+
+    if ( (GlobalController[0]->ButtonPressed & BTN_A) &&  (GlobalController[0]->ButtonPressed & BTN_B))
+    {
+        
+        // //StartGame
+        // KBGNumber = 0xFF;
+
+        // g_ScreenSplitA = 4;
+        // g_ScreenSplitB = 3;
+        // g_cupSelect = 0;
+        // g_courseSelect = 0;
+        // g_courseID = 0x11;
+        // *(char*)(0x8018EDF1) = 0;
+        // //g_raceClass = Difficulty;
+        // g_playerCount = 4;
+        // g_gameMode = 3;
+        // g_menuMultiplayerSelection = 4;
+
+        
+        // // courseValue = MapToggle;
+        
+
+        // g_NewSequenceMode = 4;
+
+        BattleSantaEndgameFlag = false;
+
+        *(char*)(0x800DC50F) = 0; //Force reset
+        
+    }
 
 }
 
+// ENEMY VOICE SOUND EFFECT NOTES FROM DEADHAMSTER
+// if (PlayerOK[PlayerIndex] != 1)
+//                          {
+//                               PlayerOK[PlayerIndex] = 1;
+//                               int SoundOffset = (0x10 * CharacterConvert[(int)PlayerCharacterSelect[PlayerIndex] + 1]);
+//                               playSound(0x2900800e + SoundOffset);  
+//                          }
+// /*  Voice  */
+// #define SE_VOICE_SHOT        0x29008000
+// #define SE_VOICE_GOGO        0x29008001
+// #define SE_VOICE_GOGO2        0x29008002
+// #define SE_VOICE_SPIN        0x29008003
+// #define SE_VOICE_FALL        0x29008004
+// #define SE_VOICE_DAMAGE        0x29008005
+// #define SE_VOICE_HIT        0x29008006
+// #define SE_VOICE_GOALIN        0x29008007
+// #define SE_VOICE_LUCKY        0x29008008
+// #define SE_ENM_VOICE_LUCKY    0x29008008
+// #define SE_ENM_VOICE_THROW    0x29008009
+// #define SE_ENM_VOICE_SPIN    0x2900800a
+// #define SE_ENM_VOICE_DAMAGE    0x2900800b
+// #define SE_VOICE_JUMP        0x2900800c
+// #define SE_VOICE_YAHHO        0x2900800d
+// #define SE_ENM_VOICE_OVERTAKE    0x2900800d
+// #define SE_VOICE_DECIDE        0x2900800e
+// these values
+// +
+// int SoundOffset = (0x10 * CharacterConvert[(int)PlayerCharacterSelect[PlayerIndex] + 1]);
+// 29008000 mario 29008010 luigi 29008020 whoever
+
+            //  float CameraVelocty[3] = {0, 0, 20};
+            // MakeAlignVector(CameraVelocty, GlobalPlayer[ThisPlayer].direction[1]);
+            // for (int ThisVector = 0; ThisVector < 3; ThisVector++)
+            // {
+            //     GlobalCamera[ThisPlayer]->camera_pos[ThisVector] = GlobalPlayer[ThisPlayer].position[ThisVector] ;//+ CameraVelocty[ThisVector] / 2;               
+            //     GlobalCamera[ThisPlayer]->lookat_pos[ThisVector] = GlobalPlayer[ThisPlayer].position[ThisVector] + CameraVelocty[ThisVector];
+            // }               
+// these values
+// +
+// int SoundOffset = (0x10 * CharacterConvert[(int)PlayerCharacterSelect[PlayerIndex] + 1]);
+// 29008000 mario 29008010 luigi 29008020 whoever
+// so you want like, voice gogo, or gogo2, or lucky
+// or yahho

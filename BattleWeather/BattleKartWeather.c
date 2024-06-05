@@ -2,36 +2,38 @@
 
 void KWKumo_Alloc_Hook()
 {
-	if (HotSwapID > 0)
-	{
-		LoadCustomHeader(courseValue + gpCourseIndex);
+	// if (HotSwapID > 0)
+	// {
+		//LoadCustomHeader(courseValue + gpCourseIndex);
 
-		SetCloudType((char)OverKartHeader.SkyType);
-		SetWeatherType((char)OverKartHeader.WeatherType);
+		// SetCloudType((char)OverKartHeader.SkyType);
+		// SetWeatherType((char)OverKartHeader.WeatherType);
+		SetCloudType(3);
+		SetWeatherType(0);		
 		GlobalShortA = g_courseID;
 		g_courseID = CloudCourseID;
 		KWKumo_Alloc();
 		g_courseID = GlobalShortA;
-	}
-	else
-	{
-		KWKumo_Alloc();
-	}
+	// }
+	// else
+	// {
+	// 	KWKumo_Alloc();
+	// }
 }
 
 void KWChart_Kumo_Hook(int screen_num)
 {
-	if (HotSwapID > 0)
-	{
+	// if (HotSwapID > 0)
+	// {
 		GlobalShortA = g_courseID;
 		g_courseID = CloudCourseID;
 		KWChart_Kumo(screen_num);
 		g_courseID = GlobalShortA;
-	}
-	else
-	{
-		KWChart_Kumo(screen_num);
-	}
+	// }
+	// else
+	// {
+	// 	KWChart_Kumo(screen_num);
+	// }
 
 	if ((char)OverKartHeader.WeatherType == 0)
 	{

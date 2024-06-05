@@ -1,10 +1,10 @@
 #include "../../Library/MainInclude.h"
 
 
-Marker SkyscraperPaths_OutsidePath00[13] = 
+Marker Skyscraper_OutsidePath00[13] = 
 {
-	{ {450, 480, -55} , 1},
-	{ {450, 480, -74} , 1},
+	{ {450, 480, -55} , 45},
+	{ {450, 480, -74} , 45},
 	{ {449, 480, -94} , 1},
 	{ {449, 480, -114} , 1},
 	{ {442, 480, -132} , 1},
@@ -17,10 +17,10 @@ Marker SkyscraperPaths_OutsidePath00[13] =
 	{ {343, 480, -231} , 1},
 	{ {329, 480, -245} , 1},
 };
-Marker SkyscraperPaths_OutsidePath01[13] = 
+Marker Skyscraper_OutsidePath01[13] = 
 {
-	{ {55, 480, -450} , 1},
-	{ {74, 480, -450} , 1},
+	{ {55, 480, -450} , 45},
+	{ {74, 480, -450} , 45},
 	{ {94, 480, -450} , 1},
 	{ {114, 480, -450} , 1},
 	{ {132, 480, -442} , 1},
@@ -33,10 +33,10 @@ Marker SkyscraperPaths_OutsidePath01[13] =
 	{ {231, 480, -343} , 1},
 	{ {245, 480, -329} , 1},
 };
-Marker SkyscraperPaths_OutsidePath02[13] = 
+Marker Skyscraper_OutsidePath02[13] = 
 {
-	{ {-55, 480, -450} , 1},
-	{ {-74, 480, -450} , 1},
+	{ {-55, 480, -450} , 45},
+	{ {-74, 480, -450} , 45},
 	{ {-94, 480, -450} , 1},
 	{ {-114, 480, -450} , 1},
 	{ {-132, 480, -442} , 1},
@@ -49,10 +49,10 @@ Marker SkyscraperPaths_OutsidePath02[13] =
 	{ {-231, 480, -343} , 1},
 	{ {-245, 480, -329} , 1},
 };
-Marker SkyscraperPaths_OutsidePath03[13] = 
+Marker Skyscraper_OutsidePath03[13] = 
 {
-	{ {-450, 480, -55} , 1},
-	{ {-450, 480, -74} , 1},
+	{ {-450, 480, -55} , 45},
+	{ {-450, 480, -74} , 45},
 	{ {-450, 480, -94} , 1},
 	{ {-450, 480, -114} , 1},
 	{ {-442, 480, -132} , 1},
@@ -65,10 +65,10 @@ Marker SkyscraperPaths_OutsidePath03[13] =
 	{ {-343, 480, -231} , 1},
 	{ {-329, 480, -245} , 1},
 };
-Marker SkyscraperPaths_OutsidePath04[13] = 
+Marker Skyscraper_OutsidePath04[13] = 
 {
-	{ {-450, 480, 55} , 1},
-	{ {-450, 480, 74} , 1},
+	{ {-450, 480, 55} , 45},
+	{ {-450, 480, 74} , 45},
 	{ {-450, 480, 94} , 1},
 	{ {-450, 480, 114} , 1},
 	{ {-442, 480, 132} , 1},
@@ -81,10 +81,10 @@ Marker SkyscraperPaths_OutsidePath04[13] =
 	{ {-343, 480, 231} , 1},
 	{ {-329, 480, 245} , 1},
 };
-Marker SkyscraperPaths_OutsidePath05[13] = 
+Marker Skyscraper_OutsidePath05[13] = 
 {
-	{ {-54, 480, 450} , 1},
-	{ {-74, 480, 450} , 1},
+	{ {-54, 480, 450} , 45},
+	{ {-74, 480, 450} , 45},
 	{ {-94, 480, 450} , 1},
 	{ {-114, 480, 450} , 1},
 	{ {-132, 480, 442} , 1},
@@ -97,10 +97,10 @@ Marker SkyscraperPaths_OutsidePath05[13] =
 	{ {-231, 480, 343} , 1},
 	{ {-245, 480, 329} , 1},
 };
-Marker SkyscraperPaths_OutsidePath06[13] = 
+Marker Skyscraper_OutsidePath06[13] = 
 {
-	{ {55, 480, 450} , 1},
-	{ {74, 480, 450} , 1},
+	{ {55, 480, 450} , 45},
+	{ {74, 480, 450} , 45},
 	{ {94, 480, 450} , 1},
 	{ {114, 480, 450} , 1},
 	{ {132, 480, 442} , 1},
@@ -113,10 +113,10 @@ Marker SkyscraperPaths_OutsidePath06[13] =
 	{ {231, 480, 343} , 1},
 	{ {245, 480, 329} , 1},
 };
-Marker SkyscraperPaths_OutsidePath07[13] = 
+Marker Skyscraper_OutsidePath07[13] = 
 {
-	{ {450, 480, 54} , 1},
-	{ {450, 480, 74} , 1},
+	{ {450, 480, 54} , 45},
+	{ {450, 480, 74} , 45},
 	{ {450, 480, 94} , 1},
 	{ {450, 480, 114} , 1},
 	{ {442, 480, 132} , 1},
@@ -129,121 +129,122 @@ Marker SkyscraperPaths_OutsidePath07[13] =
 	{ {343, 480, 231} , 1},
 	{ {329, 480, 245} , 1},
 };
-Marker SkyscraperPaths_InsidePath00[9] = 
+Marker Skyscraper_InsidePath00[9] = 
 {
-	{ {-175, 480, -55} , 1},
-	{ {-160, 480, -69} , 1},
+	{ {-175, 480, -55} , 25},
+	{ {-160, 480, -69} , 25},
 	{ {-146, 480, -83} , 1},
 	{ {-132, 480, -97} , 1},
 	{ {-118, 480, -111} , 1},
 	{ {-104, 480, -125} , 1},
 	{ {-90, 480, -139} , 1},
-	{ {-76, 480, -153} , 1},
-	{ {-61, 480, -168} , 1},
+	{ {-76, 480, -153} , 25},
+	{ {-61, 480, -168} , 25},
 };
-Marker SkyscraperPaths_InsidePath01[9] = 
+Marker Skyscraper_InsidePath01[9] = 
 {
-	{ {55, 480, -175} , 1},
-	{ {69, 480, -160} , 1},
+	{ {55, 480, -175} , 25},
+	{ {69, 480, -160} , 25},
 	{ {83, 480, -146} , 1},
 	{ {97, 480, -132} , 1},
 	{ {111, 480, -118} , 1},
 	{ {125, 480, -104} , 1},
 	{ {139, 480, -90} , 1},
-	{ {153, 480, -76} , 1},
-	{ {168, 480, -61} , 1},
+	{ {153, 480, -76} , 25},
+	{ {168, 480, -61} , 25},
 };
-Marker SkyscraperPaths_InsidePath02[9] = 
+Marker Skyscraper_InsidePath02[9] = 
 {
-	{ {175, 480, 54} , 1},
-	{ {160, 480, 69} , 1},
+	{ {175, 480, 54} , 25},
+	{ {160, 480, 69} , 25},
 	{ {146, 480, 83} , 1},
 	{ {132, 480, 97} , 1},
 	{ {118, 480, 111} , 1},
 	{ {104, 480, 125} , 1},
 	{ {90, 480, 139} , 1},
-	{ {76, 480, 153} , 1},
-	{ {61, 480, 168} , 1},
+	{ {76, 480, 153} , 25},
+	{ {61, 480, 168} , 25},
 };
-Marker SkyscraperPaths_InsidePath03[9] = 
+Marker Skyscraper_InsidePath03[9] = 
 {
-	{ {-54, 480, 175} , 1},
-	{ {-69, 480, 160} , 1},
+	{ {-54, 480, 175} , 25},
+	{ {-69, 480, 160} , 25},
 	{ {-83, 480, 146} , 1},
 	{ {-97, 480, 132} , 1},
 	{ {-111, 480, 118} , 1},
 	{ {-125, 480, 104} , 1},
 	{ {-139, 480, 90} , 1},
-	{ {-153, 480, 76} , 1},
-	{ {-168, 480, 61} , 1},
+	{ {-153, 480, 76} , 25},
+	{ {-168, 480, 61} , 25},
 };
-Marker SkyscraperPaths_Bridge00[11] = 
+Marker Skyscraper_Bridge00[11] = 
 {
-	{ {424, 480, 0} , 1},
-	{ {405, 480, 0} , 1},
+	{ {424, 480, 0} , 45},
+	{ {405, 480, 0} , 45},
 	{ {385, 480, 0} , 1},
 	{ {365, 479, 0} , 1},
 	{ {345, 479, 0} , 1},
 	{ {325, 479, 0} , 1},
 	{ {305, 480, 0} , 1},
-	{ {285, 480, 0} , 1},
-	{ {265, 480, 0} , 1},
-	{ {245, 480, 0} , 1},
-	{ {225, 479, 0} , 1},
+	{ {285, 480, 0} , 10},
+	{ {265, 480, 0} , 25},
+	{ {245, 480, 0} , 25},
+	{ {225, 479, 0} , 25},
 };
-Marker SkyscraperPaths_Bridge01[11] = 
+Marker Skyscraper_Bridge01[11] = 
 {
-	{ {0, 480, 425} , 1},
-	{ {0, 480, 405} , 1},
+	{ {0, 480, 425} , 45},
+	{ {0, 480, 405} , 45},
 	{ {0, 480, 385} , 1},
 	{ {0, 479, 365} , 1},
 	{ {0, 479, 345} , 1},
 	{ {0, 479, 325} , 1},
 	{ {0, 480, 305} , 1},
-	{ {0, 480, 285} , 1},
-	{ {0, 480, 265} , 1},
-	{ {0, 480, 245} , 1},
-	{ {0, 479, 225} , 1},
+	{ {0, 480, 285} , 10},
+	{ {0, 480, 265} , 25},
+	{ {0, 480, 245} , 25},
+	{ {0, 479, 225} , 25},
 };
-Marker SkyscraperPaths_Bridge02[11] = 
+Marker Skyscraper_Bridge02[11] = 
 {
-	{ {0, 480, -425} , 1},
-	{ {0, 480, -405} , 1},
+	{ {0, 480, -425} , 45},
+	{ {0, 480, -405} , 45},
 	{ {0, 480, -385} , 1},
 	{ {0, 479, -365} , 1},
 	{ {0, 479, -345} , 1},
 	{ {0, 479, -325} , 1},
 	{ {0, 480, -305} , 1},
-	{ {0, 480, -285} , 1},
-	{ {0, 480, -265} , 1},
-	{ {0, 480, -245} , 1},
-	{ {0, 479, -225} , 1},
+	{ {0, 480, -285} , 10},
+	{ {0, 480, -265} , 25},
+	{ {0, 480, -245} , 25},
+	{ {0, 479, -225} , 25},
 };
-Marker SkyscraperPaths_Bridge03[11] = 
+Marker Skyscraper_Bridge03[11] = 
 {
-	{ {-425, 480, 0} , 1},
-	{ {-405, 480, 0} , 1},
+	{ {-425, 480, 0} , 45},
+	{ {-405, 480, 0} , 45},
 	{ {-385, 480, 0} , 1},
 	{ {-365, 479, 0} , 1},
 	{ {-345, 479, 0} , 1},
 	{ {-325, 479, 0} , 1},
 	{ {-305, 480, 0} , 1},
-	{ {-285, 480, 0} , 1},
-	{ {-265, 480, 0} , 1},
-	{ {-245, 480, 0} , 1},
-	{ {-225, 479, 0} , 1},
+	{ {-285, 480, 0} , 10},
+	{ {-265, 480, 0} , 25},
+	{ {-245, 480, 0} , 25},
+	{ {-225, 479, 0} , 25},
 };
-Marker *SkyscraperPaths_Paths[] = 
-{ SkyscraperPaths_OutsidePath00, SkyscraperPaths_OutsidePath01, SkyscraperPaths_OutsidePath02, SkyscraperPaths_OutsidePath03, SkyscraperPaths_OutsidePath04, SkyscraperPaths_OutsidePath05, SkyscraperPaths_OutsidePath06, SkyscraperPaths_OutsidePath07, SkyscraperPaths_InsidePath00, SkyscraperPaths_InsidePath01, SkyscraperPaths_InsidePath02, SkyscraperPaths_InsidePath03, SkyscraperPaths_Bridge00, SkyscraperPaths_Bridge01, SkyscraperPaths_Bridge02, SkyscraperPaths_Bridge03};
-short SkyscraperPaths_PathLengths[16] = 
+Marker *Skyscraper_Paths[] = 
+{ Skyscraper_OutsidePath00, Skyscraper_OutsidePath01, Skyscraper_OutsidePath02, Skyscraper_OutsidePath03, Skyscraper_OutsidePath04, Skyscraper_OutsidePath05, Skyscraper_OutsidePath06, Skyscraper_OutsidePath07, Skyscraper_InsidePath00, Skyscraper_InsidePath01, Skyscraper_InsidePath02, Skyscraper_InsidePath03, Skyscraper_Bridge00, Skyscraper_Bridge01, Skyscraper_Bridge02, Skyscraper_Bridge03};
+short Skyscraper_PathLengths[16] = 
 { 12, 12, 12, 12, 12, 12, 12, 12, 8, 8, 8, 8, 10, 10, 10, 10};
-Marker *SkyscraperPaths_Ramps[] = 
+Marker *Skyscraper_Ramps[] = 
 { };
-short SkyscraperPaths_RampLengths[0] = 
+short Skyscraper_RampLengths[0] = 
 { };
-Marker *SkyscraperPaths_Drops[] = 
+Marker *Skyscraper_Drops[] = 
 { };
-short SkyscraperPaths_DropLengths[0] = 
+short Skyscraper_DropLengths[0] = 
 { };
-short SkyscraperPaths_LineCounts[3] = 
+short Skyscraper_LineCounts[3] = 
 { 16, 0, 0};
+

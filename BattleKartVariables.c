@@ -17,9 +17,17 @@ int keepAwayBotRunAwayTimer = 0;
 int keepAwayBotRunAwayNode = 0;
 
 
+bool BattleSantaTitleScreenStartFlag = true;
+
 //Test cutscene
 bool BattleSantaCutsceneFlag = true;
 long BattleSantaCutsceneTimer = 0;
+int BattleSantaCutsceneTotalLength = 0;
+int BattleSantaCutsceneLength = 200;
+int BattleSantaCutsceneIndex = 0;
+bool BattleSantaCutsceneBeginning = true;
+bool BattleSantaEndgameFlag = false;
+short BattleSantaCurrentScore = 0;
 
 
 //Flag spawning positions for single flag

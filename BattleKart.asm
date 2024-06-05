@@ -1,13 +1,13 @@
 .n64
 
-.definelabel BattleSanta, 0 //Sets if Battlekart will be BattleSanta or regular BattleKart, commented=OFF, uncommented=ON
+//.definelabel BattleSanta, 0 //Sets if Battlekart will be BattleSanta or regular BattleKart, commented=OFF, uncommented=ON
 
 .ifdef BattleSanta
-	.open "marioissanta.z64", "BattleKart64.z64", 0 //Path to MK64 rom with mario sprite replaced with santa sprite
+	.open "BattleSantaBase.z64", "BattleKart64.z64", 0 //Path to MK64 rom with mario sprite replaced with santa sprite
 	.definelabel save_key, 0x98989898 //Value (2 bytes) to check for if save exists or not, update every new version
 .else
 	.open "../Mario Kart 64.z64", "BattleKart64.z64", 0 //Path to the MK64 rom and output name of battle kart rom
-	.definelabel save_key, 0x01234561 //Value (2 bytes) to check for if save exists or not, update every new version
+	.definelabel save_key, 0x1AB3452E //Value (2 bytes) to check for if save exists or not, update every new version
 .endif
 
 //LibraryBUILD3 needs to be start of file
@@ -27,11 +27,13 @@
 
 
 
-
-
 .definelabel FlagModel, 0x08001350
 .definelabel BaseModel, 0x08002BC0
 
+
+//Overwrite name in rom header to be battle kart
+.org 0x20
+.asciiz "BATTLE KART 64 v3.0b1"
 
 
 // //Bug check for collisionSphere
@@ -259,7 +261,8 @@
 .definelabel who_hit_p2_last, VARIABLE_RAM_BASE+0xD2
 .definelabel who_hit_p3_last, VARIABLE_RAM_BASE+0xD3
 .definelabel who_hit_p4_last, VARIABLE_RAM_BASE+0xD4
-
+.definelabel startup_flag, VARIABLE_RAM_BASE+0xD5 //1 byte, flag to store if startup has run or not
+.definelabel high_score, VARIABLE_RAM_BASE+0xD6 //2 bytes, variable to store a high score
 
 
 //NOTE EVERYTHING ABOVE HERE IS SAVED TO THE EPPROM, EVERYTHING BELOW IS NOT, SAVE IS FIRST 512 OR 0x200 BYTES
@@ -330,10 +333,11 @@
 .org 0x002A64
 	JAL hijackMakeBorder
 
-//Hijack hit item box function
-//.org 0x10A2CC
-.org 0x10A328
-	J hijackHitItemBox
+// //Hijack hit item box function
+// //.org 0x10A2CC
+// .org 0x10A328
+// 	J hijackHitItemBox
+
 
 
 //Hijack voice playing in collision_check_routin which denotes owner of an item, used for scoring
@@ -399,7 +403,7 @@ start_label:
 .align 0x10
 
 text_title_1: .asciiz "BATTLE KART 64"
-text_title_2: .asciiz " v2.2b1 by Triclon"
+text_title_2: .asciiz " v3.0b1 by Triclon"
 text_Z: .asciiz "Z"
 text_L: .asciiz "L"
 text_R: .asciiz "R"
@@ -563,6 +567,8 @@ setDefaults:
 	sb a0, bot_respawn_flag
 	sb a0, bot_use_items
 	sb a0, ctf_game_started
+	li a1, 1 //Set bot default AI to be seeker
+	SB a1, bot_ai_type
 	li a1, 3
 	SH a1, max_hp
 	li a1, 0x8CBC //Set default time limit to 10 minutes
@@ -1495,7 +1501,7 @@ displayTimer:
 	SW a3, 0x24 (sp)
 	BEQ a0, zero, @@branch_set_y_position_for_timer
 	LI a1, 0x60 //Default y position
-		LI a1, 0xCC //y position for timer if 
+		LI a1, 0xCA //y position for timer if 
 		@@branch_set_y_position_for_timer:
 	SW a1, 0x30 (sp)
 
@@ -2750,6 +2756,15 @@ resetGame:
 		SB a0, who_hit_p2_last
 		SB a0, who_hit_p3_last
 		SB a0, who_hit_p4_last
+		//Fix item boxes on big donut
+		LBU a1, 0x800DC5A1 //Load current track from cup course index 0x8018EE0B
+		LI a0, 0x13 //Check if Big Donut, if it is, skip the rest of this
+		BNE a0, a1, @@branch_course_big_donut		
+			LI a0, 0x4375
+			SH a0, 0x80160304
+			LI a0, 0x4360
+			SH a0, 0x80160374
+			@@branch_course_big_donut:
 		//Find nearest item boxes
 		ADDI sp, sp, -0x30
 		SW RA, 0x20 (sp)
@@ -2918,6 +2933,11 @@ runGameModePresents:
 	ADDI sp, sp, -0x30
 	SW ra, 0x20 (sp)
 
+	// //Attempt to display snow
+	// JAL 0x800517C8 //JAL KWDisplaySnow
+	// NOP
+
+
 	//Test cutscene
 	JAL TestCutscene
 	NOP
@@ -2950,10 +2970,46 @@ runGameModePresents:
 
 	JAL checkPesentCollision //Check if you collide with a present
 	NOP
-	JAL displayNumberOfPresents //Display the score
-	NOP
-	JAL displayTimer //Display timer(if in a time match)
-	NOP
+
+	LBU a1, BattleSantaCutsceneFlag
+	BNE a1, zero, @@branch_display_stuff
+		LBU a1, game_paused //Only run counter and display HP and countdown when not paused (game tempo is zero or less)
+		LBU a2, in_game
+		XOR a1, a2, a1 //Check if game is not paused or in the results screen
+		BEQ a1, zero, @@branch_display_stuff
+		NOP
+			JAL displayNumberOfPresents //Display the score
+			NOP
+			JAL displayTimer //Display timer(if in a time match)
+			NOP
+			@@branch_display_stuff:
+
+
+
+	LW a0, timer
+	SLTI a0, a0, 1
+	BEQ a0, zero, @@branch_presents_endgame_start //If timer is < zero
+		NOP
+		NOR a0, zero, zero //Set to be on
+		SB a0, BattleSantaEndgameFlag
+		@@branch_presents_endgame_start:
+
+
+	LBU a0, BattleSantaEndgameFlag
+	BEQ a0, zero, @@branch_presents_endgame
+		NOP
+		JAL BattleSantaEndgame
+		NOP
+		@@branch_presents_endgame:
+
+
+	//Force pause menu to be continue
+	LBU a0, 0x8018DA5F
+	SLTI a1, a0, 0x2A
+	BNE a1, zero, @@branch_force_pause_to_continue
+		LI a0, 0x29
+		SB a0, 0x8018DA5F
+		@@branch_force_pause_to_continue:
 
 	//Jump back
 	LW ra, 0x20 (sp)
@@ -6256,7 +6312,23 @@ menuToggleBots:
 	BEQ a2, zero, @@branch_fix_camera_zoom_in_1_player_full_screen
 		LI a0, 0x080071DA //assembly instruction J 0x8001C768
 		SW a0, 0x8001C6E8 //Store jump that forces player 1 zoom
+
+		SW zero, 0x80001D08 //Do not render the other screens to save on processing power
+		SW zero, 0x80001D10
+		SW zero, 0x80001D18
+		SW zero, 0x80001D20
 		@@branch_fix_camera_zoom_in_1_player_full_screen:
+	BNE a2, zero, @@branch_no_fix_camera_zoom_in_1_player_full_screen
+		LI a0, 0x1440000B //Restore code to render all 4 screens if not in 1P full screen mode
+		SW a0, 0x80001D08
+		LI a0, 0x0C0A9AEC
+		SW a0, 0x80001D10
+		LI a0, 0x0C0A9BA5
+		SW a0, 0x80001D18
+		LI a0, 0x0C0A9C5E
+		SW a0, 0x80001D20
+		@@branch_no_fix_camera_zoom_in_1_player_full_screen:
+
 
 
 	LW ra, 0x001C (sp)
@@ -6369,6 +6441,10 @@ menuPlaySound:
 		LB a0, boot_flag
 		BNE a0, zero, @@run_boot_flag
 
+			SW zero, 0x8009F890 //Disable Mario Kart 64 logo in the title screen
+			LI a0, 0x8000  //Move the copyright 1996 nintendo notice way off screen so we don't see it
+			SH a0, 0x8019BEC4
+
 			LI a0, 1 //Set background to be on in game
 			SB a0, gBackgroundFlag
 			JAL setDefaults //Set defaults as the first thing that happens
@@ -6387,6 +6463,8 @@ menuPlaySound:
 			// SW zero, 0xDA80 (a0) //g_mracewayTime
 			// SW zero, 0xEE00 (a0) //Stop title demo counter at 8018EE00 from counting anything
 			//Set up battle santa defaults
+			LI a0, 1
+			SB a0, 0x800e86a8 //Set P1 to luigi (santa)
 			LI a0, 4
 			SB a0, 0x800e86a9
 			LI a0, 6
@@ -6403,6 +6481,20 @@ menuPlaySound:
 			SB a0, game_mode //Set game mode to "Presents"
 			LI a0, 1
 			SB a0, bot_ai_type //Set bot AI type to 'seeker'
+
+			li a1, 0x8CBC/2 //Set default time limit to 5 minutes
+			SW a1, max_timer
+
+			//turn on some items
+			SB zero, status_item_banana
+			//SB zero, status_item_bananabunch
+			//SB zero, status_item_greenshell
+			//SB zero, status_item_threegreenshells
+			///SB zero, status_item_redshell
+			SB zero, status_item_fakeitembox
+			//SB zero, status_item_star
+			SB zero, status_item_ghost
+
 			// LI 	a0, 1
 			// NOR a0, zero, zero //Set to be on
 			// SB a0, bot_run_away_flag_p1
@@ -6583,9 +6675,9 @@ menuPlaySound:
 		//Display menu seperator between battle kart and credit title and tabs
 		LW a0, 0x80150298 //Load dlistBuffer from to 0x80150298 to $a0
 		ORI a1, zero, 0x10 //x1
-		ORI a2, zero, 0x2A //y1
+		ORI a2, zero, 0x30 //y1
 		ORI a3, zero, 0x12E //x2
-		ORI t6, zero, 0x2C //y2
+		ORI t6, zero, 0x32 //y2
 		SW t6, 0x0010 (sp) //(argument passing starts at offset of 0x10 in stack)
 		ORI t6, zero, 0x80
 		SW t6, 0x0014 (sp) //u32 r
@@ -7129,12 +7221,12 @@ runAtCourseInitialization:
 
 
 	//Set zombombs score mode to be timed, if zombombs is loaded
-	LI a0, game_mode
+	LBU a0, game_mode
 	LI a1, 5
-	BEQ a0, a1, @@branch_set_zombombs_sccore_mode
+	BNE a0, a1, @@branch_set_zombombs_score_mode
 		LI a1, 1
 		SB a1, score_mode
-		@@branch_set_zombombs_sccore_mode:
+		@@branch_set_zombombs_score_mode:
 
 
 	//Set course start flag to zero so that we know the course is in the middle of loading
@@ -7330,6 +7422,9 @@ afterMapDataLoads:
 	NOP
 	JAL getStartingPositions
 	NOP
+
+
+	
 	J 0x8003D0BC //Jump back
 	NOP
 
@@ -7430,7 +7525,11 @@ PaletteBowser:
 .importobj "BattleKartPaths/DoubleDeckerPaths.o"
 .importobj "BattleKartPaths/SkyscraperPaths.o"
 .importobj "BattleKartPaths/BigDonutPaths.o"
+.importobj "BattleKartPaths/RaceCoursePaths.o"
 
+
+// //Import battle kart custom weather code
+// .importobj "BattleWeather/BattleKartWeather.o"
 
 
 //universalHook:
@@ -7444,11 +7543,12 @@ PrintMenuFunction:
 	JAL menuStuff
 	NOP
 
-
-	//Enable mirror mode
-	LI a0, 0xFF00
-	LUI a1, hi(0x8018ED12)
-	SH a0, lo(0x8018ED12) (a1)
+	.ifndef BattleSanta //Only enable if not battle santa
+		//Enable mirror mode
+		LI a0, 0xFF00
+		LUI a1, hi(0x8018ED12)
+		SH a0, lo(0x8018ED12) (a1)
+	.endif
 
 	LUI a0, hi(currentMenu)
 	LW a0, lo(currentMenu) (a0)
@@ -7651,15 +7751,15 @@ botControlWrapper:
 
 //Function that hijacks hitting an itembox
 hijackHitItemBox:
-	LBU t1, game_mode //check if running shell shooter, if so, skip getting an item
-	LI t2, 6
-	BEQ t1, t2, @@branch_skip_for_shell_shooter
-		NOP
-		.word 0x0C01EAFF //jal   KwanmRouletteStart, runs if not shell shooter
-		NOP
-		J 0x802A0D20 //Jump back
-		NOP
-		@@branch_skip_for_shell_shooter:
+	// LBU t1, game_mode //check if running shell shooter, if so, skip getting an item
+	// LI t2, 6
+	// BEQ t1, t2, @@branch_skip_for_shell_shooter
+	// 	NOP
+	// 	.word 0x0C01EAFF //jal   KwanmRouletteStart, runs if not shell shooter
+	// 	NOP
+	// 	J 0x802A0D20 //Jump back
+	// 	NOP
+	// 	@@branch_skip_for_shell_shooter:
 
 	LUI t1, hi(shooter_ammo_p1)
 	LWC1 f2, lo(shooter_ammo_max) (t1) //Load ammo max to f2	
@@ -7679,7 +7779,8 @@ hijackHitItemBox:
 			@@branch_max_ammo:
 		SWC1 f0, lo(shooter_ammo_p1) (t2) //Store result
 		@@branch_increment_ammo:
-	J 0x802A0D20 //Jump back
+	// J 0x802A0D20 //Jump back
+	JR RA
 	NOP//Run instruction overwritten by hook
 
 //Hijack where Na_plyvoice_start runs when an item hits someone to increment the score of the owner
@@ -7962,11 +8063,30 @@ hijackSetBrokenWhenSquished:
 	J 0x8008E1C8 //Jump back out of hook
 	NOP
 
+//Run every frame, useful for running things at boot like replacing the spinning Nintendo logo
+allRun:
+	ADDIU sp, sp, -0x40
+	SW ra, 0x14 (sp)
 
+	LI a0, 35
+	LH a1, startupSwitch
+	BEQ a0, a1, @@branch_run_only_at_startup
+		NOP
+		.ifdef BattleSanta
+			JAL loadChristmasLogo
+		.else
+			JAL loadLogo
+		.endif
+		NOP
+		LI a0, 35
+		SH a0, startupSwitch
+		@@branch_run_only_at_startup:
 
+	LW ra, 0x14 (sp)
+	JR ra
+	ADDIU sp, sp, 0x40
 
 // //For custom courses
-
 
 .align 0x10
 set0:
@@ -7999,6 +8119,9 @@ set4:
 set4end:
 
 
+
+
+
 .align 0x10000
 
 
@@ -8015,10 +8138,17 @@ end_label:
 
 
 
+
+
 .headersize 0
 
 
 //Texturex and stuff for previews and crash screens, outside of ram
+
+
+
+
+
 .align 0x10
 
 RAMCheck:
@@ -8039,6 +8169,21 @@ RAMCheckEnd:
  .align 0x10
  BigFontROM:
  .import "data/Newfont.MIO0"
+
+
+ //Christmas Kimura logo
+ .align 0x10
+.ifdef BattleSanta
+	LogoROM:
+ 	.import "Data/ChristmasLogo.bin" ;; 0xD388
+.else
+	LogoROM:
+ 	.import "Data/Logo.bin" ;; 0xD388	
+.endif
+
+
+
+
 
 //LibraryBUILD3 needs to be EOF
 .align 0x10
