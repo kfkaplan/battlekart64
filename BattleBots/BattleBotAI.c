@@ -50,20 +50,21 @@ short *CourseDropLengths[] = {BlockFortPaths_DropLengths, DoubleDeckerPaths_Drop
 short *LineCounts[] = {BlockFortPaths_LineCounts, DoubleDeckerPaths_LineCounts, Skyscraper_LineCounts, BigDonut_LineCounts,
                          RacePaths_LineCounts};
 //short dummyPathLengths[2] = {0x258, 0x258};
-float BattleLevelHeightChecks[] = {15.0, 9.0, 75.0, 75.0, 
+const float BattleLevelHeightChecks[] = {15.0, 9.0, 75.0, 75.0, 
                                     150.0};
-float BattleLevelHeightChecksSquared[] = {15.0*15.0, 9.0*9.0, 75.0*75.0, 75.0*75.0,
+const float BattleLevelHeightChecksSquared[] = {15.0*15.0, 9.0*9.0, 75.0*75.0, 75.0*75.0,
                                                     150.0*150.0};
-short BattleLevelPathSearchRadius[] = {250, 350, 150, 400,
+const short BattleLevelPathSearchRadius[] = {250, 350, 150, 400,
                                                      400};
-float turn_towards_rival_radius[] = {90.0, 100, 70, 150, 
+const float turn_towards_rival_radius[] = {90.0, 100, 70, 150, 
                                                     200}; //Distance bot must get to rival to just start turning twoards them wholesale
 //Used to index above array of arrays based on course, indexed by g_courseID
-char BattleLevelConverts[20] =     {4, 4, 4, 4, 4, 4, 4, 4, 4, 4 , 4, 4, 4, 4, 4, 0, 2, 1, 4, 3};
+const char BattleLevelConverts[20] =     {4, 4, 4, 4, 4, 4, 4, 4, 4, 4 , 4, 4, 4, 4, 4, 0, 2, 1, 4, 3};
 short RaceCoursePathLength;
 
 //(Marker **)GetRealAddress(PathTable[g_courseID])}
 //*(short *)(&g_pathLength)[g_courseID][0]}
+
 
 
 float test_bot_sphere_position[4][3] = 
@@ -90,6 +91,12 @@ void ResetPathfinderBots() //Runs at beginning of game
             GlobalPlayer[i].acc_maxcount *= 1.1; //Speed up bot to make them faster
             bot_topspeed[i] = GlobalPlayer[i].acc_maxcount;
         }
+
+        randomBotTimers[i] = 0;
+        randomBotTargetNodes[i] = 0;
+        botFiringTimers[4] = 0;
+
+
     } 
 
 
@@ -468,11 +475,10 @@ void SeekerBattleBot(int i)
     float bot_z = GlobalPlayer[i].position[2];
 
 
-    if  (*(unsigned char*)(0x800F6990 + (0xDD8 * bot_rival_p1[i])) != 0xC0 ||  *(unsigned char*)(0x800F699C + (0xDD8 * bot_rival_p1[i])) == 0x8) //If rival is dead or a bomb, get a new rival
+    if  (*(unsigned char*)(0x800F6990 + (0xDD8 * bot_rival_p1[i])) != 0xC0 ||  *(unsigned char*)(0x800F6991 + (0xDD8 * bot_rival_p1[i])) == 0x50) //If rival is dead or a bomb, get a new rival
     {
         bot_rival_p1[i] = getRival(i);
     }
-
 
     // bool hitting_wall = GlobalPlayer[i].wallhitcount != 0; //Store if bot is hitting wall, move towards nearest node
     // if (hitting_wall)
@@ -545,9 +551,9 @@ void SeekerBattleBot(int i)
         int baseNumber = getBaseNumber(i);
         
 
-        rival_x = (float)basePositions[basePositionSelection][g_courseID][baseNumber][0];
-        rival_y = (float)basePositions[basePositionSelection][g_courseID][baseNumber][1];
-        rival_z = (float)basePositions[basePositionSelection][g_courseID][baseNumber][2];
+        rival_x = (float)basePositionsHolder[basePositionSelection][baseNumber][0];
+        rival_y = (float)basePositionsHolder[basePositionSelection][baseNumber][1];
+        rival_z = (float)basePositionsHolder[basePositionSelection][baseNumber][2];
     }
     else if ((checkItems(i) == 0) && !(GlobalPlayer[i].slip_flag & STAR) && !isPlayerHoldingFlag(i) && (game_mode != 6))// || hitting_wall)
     {
@@ -585,17 +591,39 @@ void SeekerBattleBot(int i)
         rival_y = currentFlagPositionsHeight[0];
         rival_z = currentFlagPositionsY[0];  
     }
-    else if (game_mode == 4 && playerHoldingFlag[0] == i) //If game mode is keep away and current bot has the flag, run to a random node
+    else if (game_mode == 4 && playerHoldingFlag[0] == i)
     {
         keepAwayBotRunAwayTimer = decrementTimerWrapper(keepAwayBotRunAwayTimer); //Give bots holding the flag random nodes to run away too
         if (keepAwayBotRunAwayTimer <= 0)
         {
-            keepAwayBotRunAwayTimer = 700;
-            keepAwayBotRunAwayNode = MakeRandomLimmit(LineCounts[ci][0]);
-        }
+            keepAwayBotRunAwayTimer = 300 + MakeRandomLimmit(800);    
+            keepAwayBotRunAwayNode =  MakeRandomLimmit(LineCounts[ci][0]);
+        }    
         rival_x = CoursePaths[ci][keepAwayBotRunAwayNode][0].Position[0];
         rival_y = CoursePaths[ci][keepAwayBotRunAwayNode][0].Position[1];
         rival_z = CoursePaths[ci][keepAwayBotRunAwayNode][0].Position[2];
+    }
+    else if (bot_ai_type == RANDOM_AI || (game_mode==5 && (*(unsigned char*)(0x800F6991 + (0xDD8 * i)) != 0x50)))  //If bot AI mode is set to RANDOM or if in zombombs and player is not a bomb, run to a random node
+    {
+
+
+        randomBotTimers[i] = decrementTimerWrapper(randomBotTimers[i]); //Give bots holding the flag random nodes to run away too
+        if (randomBotTimers[i] <= 0)
+        {
+            randomBotTimers[i] = 300 + MakeRandomLimmit(800);
+            randomBotTargetNodes[i] = MakeRandomLimmit(LineCounts[ci][0]);
+        }
+        rival_x = CoursePaths[ci][randomBotTargetNodes[i]][0].Position[0];
+        rival_y = CoursePaths[ci][randomBotTargetNodes[i]][0].Position[1];
+        rival_z = CoursePaths[ci][randomBotTargetNodes[i]][0].Position[2];
+        // //If near near target node, find a different node, commented out for now because it seems to cause a glitch where bots get stuck
+        // objectPosition[0] = (float)rival_x;
+        // objectPosition[1] = (float)rival_y;
+        // objectPosition[2] = (float)rival_z;
+        // if (TestCollideSphere(objectPosition, turn_towards_rival_radius[ci], GlobalPlayer[i].position, turn_towards_rival_radius[ci]))
+        // {
+        //     keepAwayBotRunAwayTimer = 0;    
+        // }
     }
     else if (game_mode == 7) //Battle Santa, bots will run away to the furthest node
     {
@@ -634,20 +662,13 @@ void SeekerBattleBot(int i)
         }
     else if (game_mode == 3 && ctf_game_mode == 0) //If someone does not have the flag, go for the flag
     {
-            if (isSomeoneHoldingPlayerFlag(0))
-            {
-                bot_rival_p1[i] = getRival(i); //Grab a new rival
-                rival_x = currentFlagPositionsX[0];
-                rival_y = currentFlagPositionsHeight[0];
-                rival_z = currentFlagPositionsY[0];                      
-            }
-            else
-            {
-                rival_x = currentFlagPositionsX[0];
-                rival_y = currentFlagPositionsHeight[0];
-                rival_z = currentFlagPositionsY[0];                   
-            }
-            
+        if (isSomeoneHoldingPlayerFlag(0))
+        {
+            bot_rival_p1[i] = getRival(i); //Grab a new rival
+        }
+        rival_x = currentFlagPositionsX[0];
+        rival_y = currentFlagPositionsHeight[0];
+        rival_z = currentFlagPositionsY[0];                      
     }
     else{ //else target rival
         rival_x = GlobalPlayer[bot_rival_p1[i]].position[0]; //x,y,z coords of rival
@@ -854,7 +875,7 @@ void SeekerBattleBot(int i)
 
     
 
-    // if (i == 1)
+    // if (i == 1) //Bot debugging wall o' text
     // {
         
     //     loadFont();
@@ -869,7 +890,8 @@ void SeekerBattleBot(int i)
     //     printStringUnsignedHex(50,50,"gcourseID", g_courseID);
     //     printStringNumber(50, 60, "Course conversion", ci);
     //     printStringNumber(50, 70, "RaceCoursePathLength", RaceCoursePathLength);
-
+    //     printStringUnsignedHex(50, 80, "P2 stick control", bot_x_stick[1]);
+    //     printStringUnsignedHex(50, 90, "P2 button control", bot_buttons[1]);
 
     //     // printStringNumber(50,0,"", PathLengthTable[0][0]);
     //     // printStringNumber(50,10,"",   PathLengthTable[1][0]);
@@ -1210,6 +1232,9 @@ void SeekerBattleBot(int i)
             break;
     }
 
+
+
+
     if (AIPathfinder[i].TargetPath == -1)//If no path is found, just move around as standard bot for a little bit until a path can be reacquired
     {
         nearest_item_box[i][0] = 0.0; //Reset nearest item box
@@ -1235,6 +1260,20 @@ void SeekerBattleBot(int i)
     
 
     ProSteeringPlus(i, ci, CoursePaths[ci], CourseRamps[ci], CourseDrops[ci]);
+
+    //Occasionally fire weapon, more often if in RANDOM AI
+    int multiplier = 3;
+    if (bot_ai_type == RANDOM_AI)
+    {
+        multiplier = 1;
+    }
+    botFiringTimers[i] = decrementTimerWrapper(botFiringTimers[i]); //decrement the current bot's timer
+    if (botFiringTimers[i] <= 0)
+    {
+        bot_pressed[i] = BTN_Z;
+        bot_buttons[i] = BTN_A + BTN_Z;
+        botFiringTimers[i] = (250 + MakeRandomLimmit(500)) * multiplier;
+    }
         
 
 }
@@ -1366,7 +1405,7 @@ void RandomBattleBot(int i)
 void runBots()
 {
 
-    loadFont();
+    //loadFont();
     //printStringNumber(80,120, "g_courseID", g_courseID);
 
 
@@ -1511,24 +1550,7 @@ void runBots()
                //      bot_controller_input_p1[i] = 0x80005000; //Preess B+R (to hop, turn left)                    
                //  }
                // else if (bot_ai_type == 0) //Normal bot AI type
-                switch(bot_ai_type)
-                {
-                    case STANDARD_AI:
-                    {
-                        StandardBattleBot(i); 
-                        break;
-                    }
-                    case SEEKER_AI:
-                    {
-                        SeekerBattleBot(i); 
-                        break;
-                    }
-                    case RANDOM_AI:
-                    {
-                        RandomBattleBot(i); 
-                        break;
-                    }
-                }
+                SeekerBattleBot(i); 
             }
 
 
@@ -1650,10 +1672,22 @@ int getRival(int currentPlayer) //Note current player is 1,2,3,4, NOT 0,1,2,3
         }
 
     }
+    else if (game_mode == 5 && player_count == 2) //Error catch to get rid of lag 
+    {
+        if (currentPlayer == 1)
+        {
+            return 0;
+        }
+        else
+        {
+            return 1;
+        }
+    }
     //else if game mode is anything else
     //else if (MakeRandomLimmit(4) == 0) //Find a new rival 25% of the time
     else //Turn off random chance of getting a rival for now
     {
+        int count = 0;
         int enemy = 0;
 
         do{
@@ -1673,7 +1707,8 @@ int getRival(int currentPlayer) //Note current player is 1,2,3,4, NOT 0,1,2,3
                 }
 
             }
-        }while(currentPlayer == enemy ||  *(unsigned char*)(0x800F699C + (0xDD8 * enemy)) == 0x8); //If returned rival is the current player, dead or a bomb, reroll the dice until a living rival can be found
+            count++;
+        }while(currentPlayer == enemy ||  *(unsigned char*)(0x800F6991 + (0xDD8 * enemy)) == 0x50 || count < 20); //If returned rival is the current player, dead or a bomb, reroll the dice until a living rival can be found
         //return(getEnemy(currentPlayer)); //Run the old rival finding function that was written in assembly
 
         return(enemy);

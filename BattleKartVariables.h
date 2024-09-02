@@ -8,14 +8,20 @@ extern int flagTimer[];
 extern int keepAwayTimer;
 extern int keepAwayBotRunAwayTimer;
 extern int keepAwayBotRunAwayNode;
+extern int randomBotTimers[4];
+extern int randomBotTargetNodes[4];
+extern int botFiringTimers[4];
 extern bool flagDropped[];
 extern unsigned char game_paused;
 extern float currentFlagPositionsX[];
 extern float currentFlagPositionsHeight[];
 extern float currentFlagPositionsY[];
-extern int singleFlagPositions[][3];
-extern int multiFlagPositions[4][20][4][3];
-extern int basePositions[4][20][4][3];
+extern const short singleFlagPositions[][3];
+extern const short multiFlagPositions[4][20][4][3];
+extern const short basePositions[4][20][4][3];
+extern short singleFlagPositionsHolder[3];
+extern short multiFlagPositionsHolder[4][4][3];
+extern short basePositionsHolder[4][4][3];
 extern char game_mode; // game mode, 3=CTF
 extern char player_count; //Byte storing number of players (1=1P, 2=2P, 3=3P, 4=4P)
 extern char player_count_2;
@@ -49,6 +55,7 @@ extern int Characters[];
 extern int basePositionSelection;
 extern long marioDotSprite;
 extern long theMinimapSprites;
+extern long PressRforOptionsGraphic;
 extern bool one_player_full_screen;
 extern char in_results;
 extern bool status_options_widescreen;
@@ -62,6 +69,7 @@ extern char MENU_TAB;
 extern char MENU_Y_GAME;
 extern char MENU_Y_ITEMS;
 extern char MENU_Y_BOTS;
+extern char MENU_Y_GRAPHICS;
 extern char MENU_Y_OPTIONS;
 extern char insideMenu;
 extern float shooter_health_p1[];
@@ -71,6 +79,7 @@ extern float shooter_ammo_max;
 extern char who_hit_p1_last[];
 extern char who_was_hit_last;
 extern float inGameAffineMatrix[4][4];
+extern bool using_hle;
 
 extern int checkItems(int player);
 extern int getTempo();
@@ -82,6 +91,11 @@ extern int checkTriangleXY(Bump *bump,float radius,float p1x,float p1y, float p1
 extern int checkTriangleYZ(Bump *bump,float radius,float p1x,float p1y, float p1z, ushort pointer);
 extern ushort check_bump(Bump *bump, float radius,float p1x,float p1y, float p1z);
 extern void hijackHitItemBox(int playerID);
+extern void menuFunction();
+extern void drawTitleScreen();
+extern void TexBuffLoadP2(int address, int something);
+extern void KartPosControlFull();
+// extern void yokog(void* Car, Vector power_vec);
 // extern 
 // check_bump(BUMP *bump,float radius,float px,float py,float pz)
 
@@ -120,3 +134,14 @@ extern short BattleSantaCurrentScore;
 
 //Music stuff
 extern void NaSeqStart(u16); 
+
+//Balloon color stuff
+typedef struct BalloonColor{ //For changing balloon colors
+    char Blank;
+    char R,G,B;
+} BalloonColor;
+
+extern BalloonColor  BalloonColorArray[8]; //0x800E4934
+extern BalloonColor  BalloonAdjustArray[8]; //0x800E4954
+extern BalloonColor  BalloonColorArrayB[8]; //0x800E4974
+extern BalloonColor  BalloonAdjustArrayB[8]; //0x800E4994

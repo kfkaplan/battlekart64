@@ -22,6 +22,167 @@ Object BKObjectiveArray[MaxBKObjectives]; //internal array for Objective Items s
 
 #define BK_PRESENT 1
 
+long PreviousKBGNumber, PreviousKBGNumberNext; //Global to store previous menu ID
+bool inBattleKartMenu = false;
+
+
+
+
+
+// void gpModePunishment()
+// {
+//     // if (g_gameMode == 0)
+//     // {
+//         player_count = 4;
+//         player_count_2 = 3;
+//         g_player2Character = 5;
+//         g_player3Character = 5;
+//         g_player4Character = 5;
+//     // }
+// }
+
+
+void SetBalloonColor(int PlayerIndex, int R, int G, int B, int AdjR, int AdjG, int AdjB)
+{
+    
+    BalloonColorArray[GlobalPlayer[PlayerIndex].kart].R = R;
+    BalloonColorArray[GlobalPlayer[PlayerIndex].kart].G = G;
+    BalloonColorArray[GlobalPlayer[PlayerIndex].kart].B = B;
+    BalloonAdjustArray[GlobalPlayer[PlayerIndex].kart].R = AdjR;
+    BalloonAdjustArray[GlobalPlayer[PlayerIndex].kart].G = AdjG;
+    BalloonAdjustArray[GlobalPlayer[PlayerIndex].kart].B = AdjB;
+
+    BalloonColorArrayB[GlobalPlayer[PlayerIndex].kart].R = R;
+    BalloonColorArrayB[GlobalPlayer[PlayerIndex].kart].G = G;
+    BalloonColorArrayB[GlobalPlayer[PlayerIndex].kart].B = B;
+    BalloonAdjustArrayB[GlobalPlayer[PlayerIndex].kart].R = AdjR;
+    BalloonAdjustArrayB[GlobalPlayer[PlayerIndex].kart].G = AdjG;
+    BalloonAdjustArrayB[GlobalPlayer[PlayerIndex].kart].B = AdjB;
+
+}
+
+
+void setTeamBallonColorsRedVsBlue() //Set balloon colors to red and blue for teams
+{
+    SetBalloonColor(0, 150, 0, 0, 0, 0, 0); //P1 is red
+    SetBalloonColor(1, 150, 0, 0, 0, 0, 0); //P2 is red
+    SetBalloonColor(2, 0, 0, 150, 0, 0, 0); //P3 is blue
+    SetBalloonColor(3, 0, 0, 150, 0, 0, 0); //P3 is blue
+
+}
+
+
+void BattleInit() //Initialize for positions of a course
+{
+
+
+
+    if (HotSwapID > 0) //For custom courses
+    {
+        CustomObjectivePoints = (BattleObjectivePoint*)(GetRealAddress(0x06000210));
+
+        for (int ThisObj = 0; ThisObj < 64; ThisObj++)
+        {
+            if (CustomObjectivePoints[ThisObj].Position[0] == (short)-32768)
+            {
+                ThisObj = 64;                    
+            }
+            else
+            {           
+                //if (CustomObjectivePoints[ThisObj].GameMode == BATTLE_GAMETYPE)
+                //{
+                    switch (CustomObjectivePoints[ThisObj].Type)
+                    {
+                        case (SPAWN_POINT):
+                        {
+                            SpawnPoint[CustomObjectivePoints[ThisObj].Player][0] = (float)CustomObjectivePoints[ThisObj].Position[0];//Set player spawns for a custom course
+                            SpawnPoint[CustomObjectivePoints[ThisObj].Player][1] = (float)CustomObjectivePoints[ThisObj].Position[1];//Set player spawns for a custom course
+                            SpawnPoint[CustomObjectivePoints[ThisObj].Player][2] = (float)CustomObjectivePoints[ThisObj].Position[2];//Set player spawns for a custom course
+                           
+                            break;
+                        }
+                        case (FLAG_POINT):
+                        {   
+                            for (int i = 0; i < 4; i++) //For now just make copies of each set so I don't have to modify my code much
+                            {
+                                multiFlagPositionsHolder[i][CustomObjectivePoints[ThisObj].Player][0] = CustomObjectivePoints[ThisObj].Position[0];
+                                multiFlagPositionsHolder[i][CustomObjectivePoints[ThisObj].Player][1] = CustomObjectivePoints[ThisObj].Position[1];
+                                multiFlagPositionsHolder[i][CustomObjectivePoints[ThisObj].Player][2] = CustomObjectivePoints[ThisObj].Position[2];
+                            }
+                            break;
+                        }                        
+                        case (BASE_POINT):
+                        {
+                            for (int i = 0; i < 4; i++) //For now just make copies of each set so I don't have to modify my code much
+                            {
+                                basePositionsHolder[i][CustomObjectivePoints[ThisObj].Player][0] = CustomObjectivePoints[ThisObj].Position[0];
+                                basePositionsHolder[i][CustomObjectivePoints[ThisObj].Player][1] = CustomObjectivePoints[ThisObj].Position[1];
+                                basePositionsHolder[i][CustomObjectivePoints[ThisObj].Player][2] = CustomObjectivePoints[ThisObj].Position[2];
+                            }
+                            break;
+                        }
+                    }
+                //}
+            }
+        }
+        
+    }
+    else //For stock courses
+    {
+        singleFlagPositionsHolder[0] = singleFlagPositions[g_courseID][0];
+        singleFlagPositionsHolder[1] = singleFlagPositions[g_courseID][1];
+        singleFlagPositionsHolder[2] = singleFlagPositions[g_courseID][2];
+        for (int i = 0; i < 4; i++)
+        {
+            for (int player = 0; player < 4; player++)
+            {
+                multiFlagPositionsHolder[i][player][0] = multiFlagPositions[i][g_courseID][player][0];
+                multiFlagPositionsHolder[i][player][1] = multiFlagPositions[i][g_courseID][player][1];
+                multiFlagPositionsHolder[i][player][2] = multiFlagPositions[i][g_courseID][player][2];
+                basePositionsHolder[i][player][0] = basePositions[i][g_courseID][player][0];
+                basePositionsHolder[i][player][1] = basePositions[i][g_courseID][player][1];
+                basePositionsHolder[i][player][2] = basePositions[i][g_courseID][player][2];                
+            }
+        }
+    }
+
+}
+
+
+
+//Needed to run custom courses in emulator or on console
+//See 
+void setCullDLParameters()
+{
+    if (using_hle == true)
+    {
+        //Emulator
+        CullDL_Parameters = 0x0000000E;
+    }
+    else
+    {
+        //Console
+        CullDL_Parameters = 0x00000140;
+    }
+}
+
+
+
+// //Hijack run kart and set to VS temporarily if on a race course so kart handling is like race courses, even though we are in battle mode
+// void hijackYokog(Player* Car, Vector power_vec)
+// {
+//     if (*(char*)0x8018EE09 < 3) //If playifng a race course
+//     {
+        
+//         g_gameMode = 2; //Force VS mode temporarily
+//         yokog(Car, power_vec); //run KartPosControlFull
+//         g_gameMode = 3; //Restore battle mode
+//     }
+//     else{
+//         yokog(Car, power_vec); //Default just run RunKart
+//     }
+    
+// }
 
 
 void ItemboxCollideCheck(Player* Car, Object* Target)
@@ -35,9 +196,21 @@ void ItemboxCollideCheck(Player* Car, Object* Target)
             
         if (Car->flag & IS_PLAYER)
         {
-            if (game_mode == 6)
+            if (game_mode == 6) //if game mode is shell shooter
             {
-                hijackHitItemBox(PlayerID);
+                //Play a sound when picking up ammo in shell shell shooter
+                //playSound(0x1901904e); //Coffin clang sound
+                //playSound(0x19008001); //"metal" sound
+                //playSound(0x0100fe47); //get item sound
+                //playSound(0x51038009); //bowser fire
+                //playSound(0x4900801f); //cheep cheep charge
+                //playSound(0x5102800a); //Bowser small fire
+                //playSound(0x1900851e); //overdrift
+                //playSound(0x1900a209); //landing
+                //playSound(0x49008017); //coin
+                //playSound(0x1900a04c); //hit thwomp
+                NAPlyTrgStart(PlayerID,  0x49008017);
+                hijackHitItemBox(PlayerID); //Increment ammo for player
             }
             else
             {
@@ -444,7 +617,7 @@ void DisplayBattleKartTitle()
     PrintBigText(36,19, 0.85f," A T E  A T  4");
 
 
-    PrintBigText(272,13, 0.32f,"v3.0b2");
+    PrintBigText(272,13, 0.32f,"v3.0b4");
     PrintBigText(250,16, 0.5f,"by");
     PrintBigText(230,30, 0.5f,"Triclon");  
 
@@ -467,6 +640,10 @@ void DisplayBattleKartTitle()
         y = MENU_Y_BOTS * 12;
     }
     else if (MENU_TAB == 3)
+    {
+         y = MENU_Y_GRAPHICS * 12;
+    }
+    else if (MENU_TAB == 4)
     {
         y = MENU_Y_OPTIONS * 12;
     }
@@ -526,7 +703,7 @@ void bombSlowdown()
 {
     for (int i=0; i<player_count; i++)
     {
-        if (*(unsigned char*)(0x800F699C + (0xDD8 * i)) == 0x8) //If player is a bomb
+        if (*(unsigned char*)(0x800F6991 + (0xDD8 * i)) == 0x50) //If player is a bomb
         {
             GlobalPlayer[i].acc_maxcount /= fractionSpeedWhenBomb; //Slow player who has turned into a bomb back to their normal top speed
         }
@@ -576,7 +753,18 @@ void displayGameTempo()
 //Automatically set race course starting positions based off the 0th path marker (e.g. where the finish line is)
 void getStartingPositions()
 {
-    if (g_courseID != 0x13 && g_courseID != 0x11 && g_courseID != 0x10 && g_courseID != 0xF) //If not in a battle course
+    if (HotSwapID > 0) //Set starting positions to the spawn points for a custom course   
+    {
+        // FVector origin = {0., 0., 0.};
+        for (int i=0; i < player_count; i++)
+        {
+            GlobalPlayer[i].position[0] = SpawnPoint[i][0];
+            GlobalPlayer[i].position[1] = SpawnPoint[i][1];
+            GlobalPlayer[i].position[2] = SpawnPoint[i][2];
+            GlobalPlayer[i].direction[1] = (short)(CalcDirection(GlobalPlayer[i].position, Origin) * -1);
+        }
+    }
+    else if (g_courseID != 0x13 && g_courseID != 0x11 && g_courseID != 0x10 && g_courseID != 0xF) //If not in a battle course
     {   
         
         float extraModeScale = 1.0; //Flip everything for extra/mirror mode
@@ -781,7 +969,7 @@ short angleToBase(int currentPlayer)
 {
     int baseNumber = getBaseNumber(currentPlayer);
 
-    return(angleToObject(currentPlayer, (float)basePositions[basePositionSelection][g_courseID][baseNumber][0], (float)basePositions[basePositionSelection][g_courseID][baseNumber][2]));
+    return(angleToObject(currentPlayer, (float)basePositionsHolder[basePositionSelection][baseNumber][0], (float)basePositionsHolder[basePositionSelection][baseNumber][2]));
 }
 
 
@@ -860,7 +1048,7 @@ void ctf_minimap_display_flags_and_bases()
         for (int i=0; i<player_count; i++)
         {
             GlobalAddressA = (long)(&theMinimapSprites) + BaseSpriteOffsets[Characters[i]];
-            minimap_display_sprite(basePositions[basePositionSelection][g_courseID][i][0], basePositions[basePositionSelection][g_courseID][i][2], GlobalAddressA); 
+            minimap_display_sprite(basePositionsHolder[basePositionSelection][i][0], basePositionsHolder[basePositionSelection][i][2], GlobalAddressA); 
             if (ctf_game_mode == 1) //If multiflag
             {
                 GlobalAddressA = (long)(&theMinimapSprites) + FlagSpriteOffsets[Characters[i]];
@@ -871,9 +1059,9 @@ void ctf_minimap_display_flags_and_bases()
     else //If teams
     {
         GlobalAddressA = (long)(&theMinimapSprites) + BaseSpriteOffsets[Characters[0]];
-        minimap_display_sprite(basePositions[basePositionSelection][g_courseID][0][0], basePositions[basePositionSelection][g_courseID][0][2], GlobalAddressA);
+        minimap_display_sprite(basePositionsHolder[basePositionSelection][0][0], basePositionsHolder[basePositionSelection][0][2], GlobalAddressA);
         GlobalAddressA = (long)(&theMinimapSprites) + BaseSpriteOffsets[Characters[2]];
-        minimap_display_sprite(basePositions[basePositionSelection][g_courseID][1][0], basePositions[basePositionSelection][g_courseID][1][2], GlobalAddressA);
+        minimap_display_sprite(basePositionsHolder[basePositionSelection][1][0], basePositionsHolder[basePositionSelection][1][2], GlobalAddressA);
         if (ctf_game_mode == 1) //If multiflag
         {
             GlobalAddressA = (long)(&theMinimapSprites) + FlagSpriteOffsets[Characters[0]];
@@ -978,7 +1166,17 @@ void hijackExecuteItem(void *Car)
         if (shooter_ammo_p1[carID] > 0.0)
         {
             //Play sound for firing shell, here the "explosion" sound
-            playSound(0x19018010);
+            //playSound(0x19018010); //quiet "smwoosh"
+            //playSound(0x49008021); //Loud pew
+            //playSound(0x4900801e); //Fireworks sound
+            //playSound(0x1900701a); //hit guard rail
+            //playSound(0x19007019); //hit wall
+            //playSound(0x1900701b); //hit hand rail
+            //playSound(0x1900a04c); //hit thwomp
+            //playSound(0x19008054); //shell hit
+            //playSound(0x1900a40b); //dash
+            NAPlyTrgStart(carID, 0x1900a40b); //dash
+
 
             //Set shell angle and position
             objectAngle[0] = 0;
@@ -1238,16 +1436,16 @@ void setFlag(int flagNumber)
         {
             if (flagNumber == 0) //If team 1
             {
-                x = multiFlagPositions[basePositionSelection][g_courseID][0][0];
-                y = multiFlagPositions[basePositionSelection][g_courseID][0][1];
-                z = multiFlagPositions[basePositionSelection][g_courseID][0][2];
+                x = multiFlagPositionsHolder[basePositionSelection][0][0];
+                y = multiFlagPositionsHolder[basePositionSelection][0][1];
+                z = multiFlagPositionsHolder[basePositionSelection][0][2];
                 //GlobalShortA = CreateObjectSimple(multiFlagPositions[basePositionSelection][g_courseID][0][0], multiFlagPositions[basePositionSelection][g_courseID][0][1], multiFlagPositions[basePositionSelection][g_courseID][0][2], 0x0000, 50);  //Spawn or regenerate flag at it's spawn point (x, y, z, angle, objid)    
             }
             else //else if Team 2
             {
-                x = multiFlagPositions[basePositionSelection][g_courseID][1][0];
-                y = multiFlagPositions[basePositionSelection][g_courseID][1][1];
-                z = multiFlagPositions[basePositionSelection][g_courseID][1][2];
+                x = multiFlagPositionsHolder[basePositionSelection][1][0];
+                y = multiFlagPositionsHolder[basePositionSelection][1][1];
+                z = multiFlagPositionsHolder[basePositionSelection][1][2];
                 //GlobalShortA = CreateObjectSimple(multiFlagPositions[basePositionSelection][g_courseID][1][0], multiFlagPositions[basePositionSelection][g_courseID][1][1], multiFlagPositions[basePositionSelection][g_courseID][1][2], 0x0000, 50);  //Spawn or regenerate flag at it's spawn point (x, y, z, angle, objid)    
             }
         }
@@ -1255,34 +1453,34 @@ void setFlag(int flagNumber)
         {
             //GlobalShortA = CreateObjectSimple(multiFlagPositions[g_courseID][flagNumber][0], multiFlagPositions[g_courseID][flagNumber][1], multiFlagPositions[g_courseID][flagNumber][2], 0x0000, 50);  //Spawn or regenerate flag at it's spawn point (x, y, z, angle, objid)    
             //GlobalShortA = CreateObjectSimple(multiFlagPositions[basePositionSelection][g_courseID][flagNumber][0], multiFlagPositions[basePositionSelection][g_courseID][flagNumber][1], multiFlagPositions[basePositionSelection][g_courseID][flagNumber][2], 0x0000, 50);  //Spawn or regenerate flag at it's spawn point (x, y, z, angle, objid)    
-            x = multiFlagPositions[basePositionSelection][g_courseID][flagNumber][0];
-            y = multiFlagPositions[basePositionSelection][g_courseID][flagNumber][1];
-            z = multiFlagPositions[basePositionSelection][g_courseID][flagNumber][2];        
+            x = multiFlagPositionsHolder[basePositionSelection][flagNumber][0];
+            y = multiFlagPositionsHolder[basePositionSelection][flagNumber][1];
+            z = multiFlagPositionsHolder[basePositionSelection][flagNumber][2];        
         }
     }
     else //Else if single flag
     {
 
-        if (MakeRandomLimmit(4) == 0 || (g_courseID != 0x13 && g_courseID != 0x11 && g_courseID != 0x10 && g_courseID != 0xF))  //If random is zero or if not on a battle course, 
+        if (HotSwapID==0 && (MakeRandomLimmit(4) == 0 || (g_courseID != 0x13 && g_courseID != 0x11 && g_courseID != 0x10 && g_courseID != 0xF)) )  //If random is zero or if not on a battle course, 
         {
             if (g_raceClass != 3) //If not extra mode
             {
-                x = singleFlagPositions[g_courseID][0];
+                x = singleFlagPositionsHolder[0];
             }
             else //else if extra mode, flip the x position
             {
-                x = - singleFlagPositions[g_courseID][0];
+                x = - singleFlagPositionsHolder[0];
             }
-            y = singleFlagPositions[g_courseID][1];
-            z = singleFlagPositions[g_courseID][2];
+            y = singleFlagPositionsHolder[1];
+            z = singleFlagPositionsHolder[2];
         }
         else //or else randomly spawn flag at one of th 4 predetermined multiflag locations for a course
         {
             int random_flag_location_number = MakeRandomLimmit(4);
             int random_starting_position_set = MakeRandomLimmit(3);
-            x = multiFlagPositions[random_starting_position_set][g_courseID][random_flag_location_number][0];
-            y = multiFlagPositions[random_starting_position_set][g_courseID][random_flag_location_number][1];
-            z = multiFlagPositions[random_starting_position_set][g_courseID][random_flag_location_number][2];                
+            x = multiFlagPositionsHolder[random_starting_position_set][random_flag_location_number][0];
+            y = multiFlagPositionsHolder[random_starting_position_set][random_flag_location_number][1];
+            z = multiFlagPositionsHolder[random_starting_position_set][random_flag_location_number][2];                
         }
     }
     
@@ -1302,14 +1500,14 @@ void setFlag(int flagNumber)
 void setBase(int posNumber, int baseNumber)
 {
     
-    int x = basePositions[basePositionSelection][g_courseID][posNumber][0];
-    int y = basePositions[basePositionSelection][g_courseID][posNumber][1];
-    int z = basePositions[basePositionSelection][g_courseID][posNumber][2];
+    short x = basePositionsHolder[basePositionSelection][posNumber][0];
+    short y = basePositionsHolder[basePositionSelection][posNumber][1];
+    short z = basePositionsHolder[basePositionSelection][posNumber][2];
     if (status_options_flatcourses) //If courses are flat, set y (height) to match the course height, which is set to player 1's height at course initialization
     {
         y = (int)course_height - 5;
     }
-    //GlobalShortA = CreateObjectSimple(basePositions[basePositionSelection][g_courseID][posNumber][0], basePositions[basePositionSelection][g_courseID][posNumber][1], basePositions[basePositionSelection][g_courseID][posNumber][2], 0x0000, 51);  //Spawn or flag the flag at it's spawn point (x, y, z, angle, objid)
+    //GlobalShortA = CreateObjectSimple(basePositionsHolder[basePositionSelection][posNumber][0], basePositionsHolder[basePositionSelection][posNumber][1], basePositionsHolder[basePositionSelection][posNumber][2], 0x0000, 51);  //Spawn or flag the flag at it's spawn point (x, y, z, angle, objid)
     GlobalShortA = CreateObjectSimple(x, y, z, 0x0000, 51);  //Spawn or flag the flag at it's spawn point (x, y, z, angle, objid)
     GlobalAddressA = (long)(&g_SimpleObjectArray);
     *(short*)(GlobalAddressA + (0x70 * GlobalShortA) + 4) = baseNumber; //Store base number in simple object
@@ -1352,65 +1550,65 @@ void selectStartingPositions()
             {
                 for (int i=0; i < player_count; i++) //Set player starting positions for FFA
                 {
-                    *(float*)((&g_player1LocationX) + (i*0xDD8/4)) = (float)multiFlagPositions[basePositionSelection][g_courseID][i][0] + 5;
+                    *(float*)((&g_player1LocationX) + (i*0xDD8/4)) = (float)multiFlagPositionsHolder[basePositionSelection][i][0] + 5;
                     if (status_options_flatcourses) 
                     {
                         *(float*)((&g_player1LocationY) + (i*0xDD8/4)) = course_height;
                     }
                     else
                     {
-                        *(float*)((&g_player1LocationY) + (i*0xDD8/4)) = (float)multiFlagPositions[basePositionSelection][g_courseID][i][1] + 5;
+                        *(float*)((&g_player1LocationY) + (i*0xDD8/4)) = (float)multiFlagPositionsHolder[basePositionSelection][i][1] + 5;
                     }                    
-                    *(float*)((&g_player1LocationZ) + (i*0xDD8/4)) = (float)multiFlagPositions[basePositionSelection][g_courseID][i][2] + 5;
+                    *(float*)((&g_player1LocationZ) + (i*0xDD8/4)) = (float)multiFlagPositionsHolder[basePositionSelection][i][2] + 5;
                 }
             }
             else //If teams
             {
                 //Set player 1
-                *(float*)((&g_player1LocationX)) = (float)multiFlagPositions[basePositionSelection][g_courseID][0][0] + 5;
+                *(float*)((&g_player1LocationX)) = (float)multiFlagPositionsHolder[basePositionSelection][0][0] + 5;
                 if (status_options_flatcourses) 
                 {
                     *(float*)((&g_player1LocationY)) = course_height;
                 }
                 else
                 {
-                    *(float*)((&g_player1LocationY)) = (float)multiFlagPositions[basePositionSelection][g_courseID][0][1] + 5;
+                    *(float*)((&g_player1LocationY)) = (float)multiFlagPositionsHolder[basePositionSelection][0][1] + 5;
                 }
-                *(float*)((&g_player1LocationZ)) = (float)multiFlagPositions[basePositionSelection][g_courseID][0][2] + 5;
+                *(float*)((&g_player1LocationZ)) = (float)multiFlagPositionsHolder[basePositionSelection][0][2] + 5;
                 //Set player 2
-                *(float*)((&g_player1LocationX) + (1*0xDD8/4)) = (float)multiFlagPositions[basePositionSelection][g_courseID][0][0] - 5;
+                *(float*)((&g_player1LocationX) + (1*0xDD8/4)) = (float)multiFlagPositionsHolder[basePositionSelection][0][0] - 5;
                 if (status_options_flatcourses) 
                 {
                     *(float*)((&g_player1LocationY) + (1*0xDD8/4)) = course_height;
                 }
                 else
                 {
-                    *(float*)((&g_player1LocationY) + (1*0xDD8/4)) = (float)multiFlagPositions[basePositionSelection][g_courseID][0][1] + 5;
+                    *(float*)((&g_player1LocationY) + (1*0xDD8/4)) = (float)multiFlagPositionsHolder[basePositionSelection][0][1] + 5;
                 }
                 
-                *(float*)((&g_player1LocationZ) + (1*0xDD8/4)) = (float)multiFlagPositions[basePositionSelection][g_courseID][0][2] - 5;
+                *(float*)((&g_player1LocationZ) + (1*0xDD8/4)) = (float)multiFlagPositionsHolder[basePositionSelection][0][2] - 5;
                 //Set player 3
-                *(float*)((&g_player1LocationX) + (2*0xDD8/4)) = (float)multiFlagPositions[basePositionSelection][g_courseID][1][0] + 5;
+                *(float*)((&g_player1LocationX) + (2*0xDD8/4)) = (float)multiFlagPositionsHolder[basePositionSelection][1][0] + 5;
                 if (status_options_flatcourses) 
                 {
                     *(float*)((&g_player1LocationY) + (2*0xDD8/4)) = course_height;
                 }
                 else
                 {
-                    *(float*)((&g_player1LocationY) + (2*0xDD8/4)) = (float)multiFlagPositions[basePositionSelection][g_courseID][1][1] + 5;
+                    *(float*)((&g_player1LocationY) + (2*0xDD8/4)) = (float)multiFlagPositionsHolder[basePositionSelection][1][1] + 5;
                 }
-                *(float*)((&g_player1LocationZ) + (2*0xDD8/4)) = (float)multiFlagPositions[basePositionSelection][g_courseID][1][2] + 5;
+                *(float*)((&g_player1LocationZ) + (2*0xDD8/4)) = (float)multiFlagPositionsHolder[basePositionSelection][1][2] + 5;
                 //Set player 4
-                *(float*)((&g_player1LocationX) + (3*0xDD8/4)) = (float)multiFlagPositions[basePositionSelection][g_courseID][1][0] - 5;
+                *(float*)((&g_player1LocationX) + (3*0xDD8/4)) = (float)multiFlagPositionsHolder[basePositionSelection][1][0] - 5;
                 if (status_options_flatcourses) 
                 {
                     *(float*)((&g_player1LocationY) + (3*0xDD8/4)) = course_height;
                 }
                 else
                 {
-                    *(float*)((&g_player1LocationY) + (3*0xDD8/4)) = (float)multiFlagPositions[basePositionSelection][g_courseID][1][1] + 5;
+                    *(float*)((&g_player1LocationY) + (3*0xDD8/4)) = (float)multiFlagPositionsHolder[basePositionSelection][1][1] + 5;
                 } 
-                *(float*)((&g_player1LocationZ) + (3*0xDD8/4)) = (float)multiFlagPositions[basePositionSelection][g_courseID][1][2] - 5;
+                *(float*)((&g_player1LocationZ) + (3*0xDD8/4)) = (float)multiFlagPositionsHolder[basePositionSelection][1][2] - 5;
             }
 
         
@@ -1560,12 +1758,12 @@ void selectStartingPositions()
             {
                 for (int i=0; i < player_count; i++)
                 {
-                    multiFlagPositions[3][g_courseID][i][0] = (int) (*(float*)((&g_player1LocationX) + (i*0xDD8/4)) -5);
-                    multiFlagPositions[3][g_courseID][i][1] = (int) (*(float*)((&g_player1LocationY) + (i*0xDD8/4)) -5);
-                    multiFlagPositions[3][g_courseID][i][2] = (int) (*(float*)((&g_player1LocationZ) + (i*0xDD8/4)) -5);
-                    basePositions[3][g_courseID][i][0] = (int) (*(float*)((&g_player1LocationX) + (i*0xDD8/4)) - 25);
-                    basePositions[3][g_courseID][i][1] = (int) (*(float*)((&g_player1LocationY) + (i*0xDD8/4)) -5 );
-                    basePositions[3][g_courseID][i][2] = (int) (*(float*)((&g_player1LocationZ) + (i*0xDD8/4)) -25);
+                    multiFlagPositionsHolder[3][i][0] = (short) (*(float*)((&g_player1LocationX) + (i*0xDD8/4)) -5);
+                    multiFlagPositionsHolder[3][i][1] = (short) (*(float*)((&g_player1LocationY) + (i*0xDD8/4)) -5);
+                    multiFlagPositionsHolder[3][i][2] = (short) (*(float*)((&g_player1LocationZ) + (i*0xDD8/4)) -5);
+                    basePositionsHolder[3][i][0] = (short) (*(float*)((&g_player1LocationX) + (i*0xDD8/4)) - 25);
+                    basePositionsHolder[3][i][1] = (short) (*(float*)((&g_player1LocationY) + (i*0xDD8/4)) -5 );
+                    basePositionsHolder[3][i][2] = (short) (*(float*)((&g_player1LocationZ) + (i*0xDD8/4)) -25);
                 }
                 basePositionSelection = 3; //Set basePositionSelection back to 3 so that bases and flags will spawn in the correct position
             }
@@ -2109,7 +2307,8 @@ void BaseCollide(void *Car, void *Base)
             {
                 setFlag(flagNumber); 
                 incrementScore(carID);
-                playSound(0x49008017);
+                //playSound(0x49008017);
+                NAPlyTrgStart(carID, 0x49008017);
                 flagTimer[flagNumber] = 0;
                 if (slow_when_holding_flag != 0)
                 {
@@ -2176,7 +2375,8 @@ void FlagCollide(void *Car, void *Flag)
             if (canHitFlag) //If not your own flag, pick it up
             {                
                 deleteObjectBuffer(Flag);
-                playSound(0x49008017);
+                //playSound(0x49008017);
+                NAPlyTrgStart(carID,  0x49008017);
                 flag_count[flagNumber]++;
                 playerHoldingFlag[flagNumber] = carID;
                 if (slow_when_holding_flag != 0)
@@ -2200,7 +2400,8 @@ void FlagCollide(void *Car, void *Flag)
             else if(flagTimer[flagNumber] > 0) //If your own flag and it is sitting on the course and hasn't respawned, respawn it
             {
                 deleteObjectBuffer(Flag);
-                playSound(0x49008017);
+                //playSound(0x49008017);
+                NAPlyTrgStart(carID,  0x49008017);
                 setFlag(flagNumber);
                 flagTimer[flagNumber] = 0;
                 flagDropped[flagNumber] = false;
@@ -2218,15 +2419,21 @@ void FlagCollide(void *Car, void *Flag)
 }
 
 
+
+
+
+
 /////MENU STUFF
 
 //Function to handle the ability to select custom courses
 void menuStuff()
 {
 
+
     // //Print an address for debugging
     // loadFont();
-    // // printStringUnsignedHex( 0, 10, "", (uint)(&RAM_END) );
+    // printStringUnsignedHex( 0, 10, "", (uint)(&PressRforOptionsGraphic) );
+    // printStringUnsignedHex( 0, 20, "", (uint)(PressRforOptionsGraphic) );
     // printStringNumber( 0, 0, "Course Value", courseValue) ;
     // printStringNumber( 0, 0x10, "courseValue", courseValue) ;
     // printStringNumber( 0, 0x20, "HotSwapID", HotSwapID) ;
@@ -2245,6 +2452,38 @@ void menuStuff()
     // SetWeather3D(OverKartHeader.SkyType == 3);
     // SetWaterType((char)OverKartHeader.WaterType);
     
+
+    //If the button R is pressed in the menu, go to the battle kart 64 menu
+    if ((inBattleKartMenu == false) && (KBGNumber > 10)) //If in main menu and not in options menu
+    {
+        int PressRTextureX = 70;
+        int PressRTextureY = 200;  //Set position of PressRforOptionsGraphic texture for player select screen
+        if (KBGNumber == 12)
+        {
+            PressRTextureX = 263;
+            PressRTextureY = 40;
+        }
+
+        if ((GlobalController[0]->ButtonReleased & BTN_R)) //On Relese R, load the Battle Kart menu
+        {
+            playSound(0x49009010); 
+            inBattleKartMenu = true;
+            *(uint*)(0x80001F14) = 0x00000000; //NOP jal UpdateController to prevent controller input on the menu
+
+        }
+        else if (GlobalController[0]->ButtonHeld & BTN_R) //If R is held down
+        {
+            KWTexture2DRGBA(PressRTextureX, PressRTextureY, 0, 1.0f, (uchar*)&PressRforOptionsGraphic+0x1000, (void*)&V64x32, 64, 32, 64, 32); //Highlight R option texture
+        }
+        else
+        {
+            KWTexture2DRGBA(PressRTextureX, PressRTextureY, 0, 1.0f, (uchar*)(&PressRforOptionsGraphic), (void*)&V64x32, 64, 32, 64, 32); //Display R option texture
+        }
+                
+    }
+
+
+
     
     
     if (SYSTEM_Region == 0x01)
@@ -2319,13 +2558,18 @@ void menuStuff()
             break;
         }
 
+
     }
+
+
+
+
 
 
     if (MenuChanged == 13)
     {
     
-        DrawBox(60,15,200,40,0,0,0,255);
+        DrawBox(60,15,200,40,0,0,0,158);
         if (HotSwapID == 0)
         {
             PrintBigText(75,20, 0.80f,"Original Set");
@@ -2338,10 +2582,26 @@ void menuStuff()
         {
             PrintBigTextNumber(75,20, 0.80f,"Custom Set ",HotSwapID);
         }
-        SpriteBtnCLeft(45,35,1.0,false);
-        SpriteBtnCRight(279,35,1.0,false);
+        SpriteBtnCLeft(45,35,1.5,false);
+        SpriteBtnCRight(279,35,1.5,false);
         
     }
+
+    if (inBattleKartMenu == true)  //Display battle kart menu over in game menu after R is pressed
+    {
+        menuFunction();
+        if ((GlobalController[0]->ButtonReleased & BTN_START) || (GlobalController[0]->ButtonReleased & BTN_B)) //Go back to in game menu when start or B is pressed
+        {
+            playSound(0x4900801A);
+            inBattleKartMenu = false;
+            saveEEPROM((uint)&VARIABLE_RAM_BASE); //Save changes to EEPROM
+            *(uint*)(0x80001F14) = 0x0C02C0D4; //restore jal UpdateController to allow controller input on the menu
+        }
+
+    }
+
+
+
 }
 
 //
@@ -2351,8 +2611,13 @@ void customCourseRunEveryFrame()
 {
 
 
-    // loadFont();
-    // printStringUnsignedHex(10,10, "thing", *(uint*)(0x800F6990));
+    loadFont();
+
+    //printStringUnsignedHex(10,10, "bot status", (*(unsigned char*)(0x800F6991 + 0xDD8)));
+    // printStringNumber(10,10,"check spawn position load", (int)SpawnPoint[0][0]);
+    // printStringNumber(10,20,"check spawn position load", (int)SpawnPoint[0][1]);
+    // printStringNumber(10,30,"check spawn position load", (int)SpawnPoint[0][2]);
+
 
     //Needed for custom courses
     // SetCloudType((char)OverKartHeader.SkyType);
@@ -2471,6 +2736,7 @@ void bootCustomCourseStuff()
 // }
 
 //
+
 
 void DisplayObject(void *Camera, Object *Object)
 {
@@ -2842,6 +3108,9 @@ void BattleSantaEndgame()
     }
 
 }
+
+
+
 
 // ENEMY VOICE SOUND EFFECT NOTES FROM DEADHAMSTER
 // if (PlayerOK[PlayerIndex] != 1)

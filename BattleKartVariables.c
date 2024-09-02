@@ -1,6 +1,9 @@
 #include <stdbool.h>
 #include "MinimapSprites/ImageData.h"
 
+
+
+
 int playerHoldingFlag[] = {-1, -1, -1, -1};
 int flag_count[] = {0,0,0,0};
 int flagTimer[] = {0,0,0,0};
@@ -17,6 +20,11 @@ int keepAwayBotRunAwayTimer = 0;
 int keepAwayBotRunAwayNode = 0;
 
 
+int randomBotTimers[4] = {0,0,0,0};
+int randomBotTargetNodes[4] = {0,0,0,0};
+int botFiringTimers[4] = {0,0,0,0};
+
+
 bool BattleSantaTitleScreenStartFlag = true;
 
 //Test cutscene
@@ -30,8 +38,43 @@ bool BattleSantaEndgameFlag = false;
 short BattleSantaCurrentScore = 0;
 
 
+//Holders for flag and base positions that can be updated
+short singleFlagPositionsHolder[3] = {0,0,0};
+
+short multiFlagPositionsHolder[4][4][3] = {
+		{//Position 1
+			{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0},
+		},
+		{//Position 2
+			{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0},
+		},
+		{//Position 3
+			{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0},
+		},
+		{//Position 4
+			{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0},
+		},
+	};
+
+
+short basePositionsHolder[4][4][3] = {
+		{//Position 1
+			{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0},
+		},
+		{//Position 2
+			{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0},
+		},
+		{//Position 3
+			{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0},
+		},
+		{//Position 4
+			{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0},
+		},
+	};
+
+
 //Flag spawning positions for single flag
-int singleFlagPositions[][3] = {
+const short singleFlagPositions[][3] = {
 	{1,4,-483}, //0x00 Mario Raceway
 	{20,16,-979}, //0x01 Choco Mountain
 	{13,5,-1486}, //0x02 Bowser's Castle
@@ -54,26 +97,28 @@ int singleFlagPositions[][3] = {
 	{-880,232,0}, //0x13 Big Donut
 };
 
+
+
 //Flag spawning positions for multi flag
 //[courseID][flagNumber][x,y,z]
-int multiFlagPositions[4][20][4][3] = 
+const short multiFlagPositions[4][20][4][3] = 
 	{
 		{//Position 1
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x00 Mario Raceway
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x01 Choco Mountain
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x02 Bowser's Castle
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x03 Banshee Boardwalk
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x04 Yoshi Valley
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x05 Frappe Snowland
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x06 Koopa Troopa Beach
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x07 Royal Raceway
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x08 Luigi Raceway
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x09 Moo Moo Farm
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x0A Toad's Turnkpike
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x0B Kalimari Desert
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x0C Sherbert Land
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x0D Rainbow Road
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x0E Wario Stadium
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x00 Mario Raceway, custom courses
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x01 Choco Mountain
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x02 Bowser's Castle
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x03 Banshee Boardwalk
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x04 Yoshi Valley
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x05 Frappe Snowland
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x06 Koopa Troopa Beach
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x07 Royal Raceway
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x08 Luigi Raceway
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x09 Moo Moo Farm
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x0A Toad's Turnkpike
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x0B Kalimari Desert
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x0C Sherbert Land
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x0D Rainbow Road
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x0E Wario Stadium
 			{{0,0,600}, {0,0,-600}, {-600,0,0},  {600,0,0}}, //0x0F Block Fort
 			{{0,480,280}, {0,480,-280}, {-280,480,0}, {280,480,0}}, //0x10 Skyscraper
 			{{680,0,680}, {-680,0,-680}, {-680,0,680}, {680,0,-680}},  //0x11 Double Deck
@@ -81,21 +126,21 @@ int multiFlagPositions[4][20][4][3] =
 			{{0,203,650}, {0,203,-650}, {-650,203,0,}, {650,203,0}} //0x13 Big Donut
 		},
 		{//Position 2
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x00 Mario Raceway
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x01 Choco Mountain
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x02 Bowser's Castle
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x03 Banshee Boardwalk
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x04 Yoshi Valley
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x05 Frappe Snowland
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x06 Koopa Troopa Beach
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x07 Royal Raceway
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x08 Luigi Raceway
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x09 Moo Moo Farm
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x0A Toad's Turnkpike
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x0B Kalimari Desert
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x0C Sherbert Land
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x0D Rainbow Road
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x0E Wario Stadium
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x00 Mario Raceway, custom courses
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x01 Choco Mountain
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x02 Bowser's Castle
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x03 Banshee Boardwalk
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x04 Yoshi Valley
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x05 Frappe Snowland
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x06 Koopa Troopa Beach
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x07 Royal Raceway
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x08 Luigi Raceway
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x09 Moo Moo Farm
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x0A Toad's Turnkpike
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x0B Kalimari Desert
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x0C Sherbert Land
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x0D Rainbow Road
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x0E Wario Stadium
 			{{650,0,650}, {-650,0,-650}, {-650,0,650}, {650,0,-650}}, //0x0F Block Fort
 			{{0,480,470}, {0,480,-470}, {-470,480,0}, {470,480,0}}, //0x10 Skyscraper
 			{{300,30,300}, {-300,30,-300}, {-300,30,300}, {300,30,-300}},  //0x11 Double Deck
@@ -103,21 +148,21 @@ int multiFlagPositions[4][20][4][3] =
 			{{663,253,663}, {-663,253,-663}, {-663,253,663}, {663,253,-663}} //0x13 Big Donut
 		},
 		{//Position 3
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x00 Mario Raceway
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x01 Choco Mountain
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x02 Bowser's Castle
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x03 Banshee Boardwalk
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x04 Yoshi Valley
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x05 Frappe Snowland
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x06 Koopa Troopa Beach
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x07 Royal Raceway
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x08 Luigi Raceway
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x09 Moo Moo Farm
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x0A Toad's Turnkpike
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x0B Kalimari Desert
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x0C Sherbert Land
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x0D Rainbow Road
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x0E Wario Stadium
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x00 Mario Raceway, custom courses
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x01 Choco Mountain
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x02 Bowser's Castle
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x03 Banshee Boardwalk
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x04 Yoshi Valley
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x05 Frappe Snowland
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x06 Koopa Troopa Beach
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x07 Royal Raceway
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x08 Luigi Raceway
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x09 Moo Moo Farm
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x0A Toad's Turnkpike
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x0B Kalimari Desert
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x0C Sherbert Land
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x0D Rainbow Road
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x0E Wario Stadium
 			{{500,47,540}, {-500,47,-540}, {-500,47,540}, {500,47,-540}}, //0x0F Block Fort
 			{{300,480,300}, {-300,480,-300}, {-300,480,300}, {300,480,-300}}, //0x10 Skyscraper
 			{{0,60,670}, {0,60,-670}, {-670,60,0}, {670,60, 0}},  //0x11 Double Deck
@@ -125,21 +170,21 @@ int multiFlagPositions[4][20][4][3] =
 			{{750,210,45}, {620,200,-45}, {620,200,45}, {750,211,-45}} //0x13 Big Donut
 		},
 		{//Position 4 (custom positions default to position 1)
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x00 Mario Raceway
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x01 Choco Mountain
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x02 Bowser's Castle
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x03 Banshee Boardwalk
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x04 Yoshi Valley
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x05 Frappe Snowland
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x06 Koopa Troopa Beach
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x07 Royal Raceway
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x08 Luigi Raceway
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x09 Moo Moo Farm
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x0A Toad's Turnkpike
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x0B Kalimari Desert
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x0C Sherbert Land
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x0D Rainbow Road
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x0E Wario Stadium
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x00 Mario Raceway, custom courses
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x01 Choco Mountain
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x02 Bowser's Castle
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x03 Banshee Boardwalk
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x04 Yoshi Valley
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x05 Frappe Snowland
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x06 Koopa Troopa Beach
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x07 Royal Raceway
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x08 Luigi Raceway
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x09 Moo Moo Farm
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x0A Toad's Turnkpike
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x0B Kalimari Desert
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x0C Sherbert Land
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x0D Rainbow Road
+			{{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0x0E Wario Stadium
 			{{0,0,600}, {0,0,-600}, {-600,0,0},  {600,0,0}}, //0x0F Block Fort
 			{{0,480,280}, {0,480,-280}, {-280,480,0}, {280,480,0}}, //0x10 Skyscraper
 			{{680,0,680}, {-680,0,-680}, {-680,0,680}, {680,0,-680}},  //0x11 Double Deck
@@ -152,10 +197,10 @@ int multiFlagPositions[4][20][4][3] =
 
 //Base spawning positions
 //[courseID][baseNumber][x,y,z]
-int basePositions[4][20][4][3] = 
+const short basePositions[4][20][4][3] = 
 	{
 		{//Position 1
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x00 Mario Raceway
+			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x00 Mario Raceway, custom courses
 			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x01 Choco Mountain
 			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x02 Bowser's Castle
 			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x03 Banshee Boardwalk
@@ -177,7 +222,7 @@ int basePositions[4][20][4][3] =
 			{{0,205,680}, {0,205,-680}, {-680,205,0}, {680,205,0}} //0x13 Big Donut
 		},
 		{//Position 2
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x00 Mario Raceway
+			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x00 Mario Raceway, custom courses
 			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x01 Choco Mountain
 			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x02 Bowser's Castle
 			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x03 Banshee Boardwalk
@@ -199,7 +244,7 @@ int basePositions[4][20][4][3] =
 			{{683,253,653}, {-683,253,-653}, {-653,253,683}, {653,253,-683}} //0x13 Big Donut
 		},
 		{//Position 3
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x00 Mario Raceway
+			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x00 Mario Raceway, custom courses
 			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x01 Choco Mountain
 			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x02 Bowser's Castle
 			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x03 Banshee Boardwalk
@@ -221,7 +266,7 @@ int basePositions[4][20][4][3] =
 			{{725,210,30}, {645,203,-30}, {645,203,30}, {725,209,-30}} //0x13 Big Donut
 		},
 		{//Position 4 (custom start positions defulat to position 1)
-			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x00 Mario Raceway
+			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x00 Mario Raceway, custom courses
 			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x01 Choco Mountain
 			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x02 Bowser's Castle
 			{{0,0,0}, {0,0,0}, {0,0,0,}, {0,0,0}}, //0x03 Banshee Boardwalk
@@ -245,7 +290,12 @@ int basePositions[4][20][4][3] =
 	};
 
 
-//regular models
+
+//Custom course variables
+
+
+
+//regular models 2023 backup
 const int BlueCoin= 0x080014E0;
 const int GoldCoin= 0x08002840;
 const int N64Coin= 0x08003788;
@@ -272,6 +322,36 @@ const int WarioMushroom= 0x0801CE20;
 const int YoshiMushroom= 0x0801E4C0;
 const int TargetMarker= 0x0801E710;
 const int SoccerBall= 0x0801F7B0;
+
+// //regular models 2024
+// const int BlueCoin= 0x080014F0;
+// const int GoldCoin= 0x08002860;
+// const int N64Coin= 0x080037B8;
+// const int RedCoin= 0x08004B20;
+// const int RedFlag = 0x08005DF8;
+// const int BlueFlag= 0x080070C8;
+// const int BowserFlag= 0x08008398;
+// const int DKFlag= 0x08009668;
+// const int LuigiFlag= 0x0800A938;
+// const int MarioFlag= 0x0800BC08;
+// const int PeachFlag= 0x0800CED8;
+// const int BattleFlag= 0x0800E1A8;
+// const int ToadFlag= 0x0800F478;
+// const int WarioFlag= 0x08010748;
+// const int YoshiFlag= 0x08011A18;
+// const int BowserMushroom= 0x080130C0;
+// const int DKMushroom= 0x08014770;
+// const int LuigiMushroom= 0x08015E20;
+// const int MarioMushroom= 0x080174D0;
+// const int PeachMushroom= 0x08018B80;
+// const int RedMushroom= 0x0801A230;
+// const int ToadMushroom= 0x0801B8E0;
+// const int WarioMushroom= 0x0801CF90;
+// const int YoshiMushroom= 0x0801E640;
+// const int TargetMarker= 0x0801F010;
+// const int SoccerBall= 0x080200C0;
+
+
 
 
 //christmas hack models
