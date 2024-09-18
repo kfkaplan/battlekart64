@@ -20,7 +20,7 @@
 #define MaxBKObjectives 30
 Object BKObjectiveArray[MaxBKObjectives]; //internal array for Objective Items separate from Shells/Itemboxes
 
-#define BK_PRESENT 1
+#define BK_COIN 1
 
 long PreviousKBGNumber, PreviousKBGNumberNext; //Global to store previous menu ID
 bool inBattleKartMenu = false;
@@ -64,10 +64,10 @@ void SetBalloonColor(int PlayerIndex, int R, int G, int B, int AdjR, int AdjG, i
 
 void setTeamBallonColorsRedVsBlue() //Set balloon colors to red and blue for teams
 {
-    SetBalloonColor(0, 150, 0, 0, 0, 0, 0); //P1 is red
-    SetBalloonColor(1, 150, 0, 0, 0, 0, 0); //P2 is red
-    SetBalloonColor(2, 0, 0, 150, 0, 0, 0); //P3 is blue
-    SetBalloonColor(3, 0, 0, 150, 0, 0, 0); //P3 is blue
+    SetBalloonColor(0, 180, 0, 0, 0, 0, 0); //P1 is red
+    SetBalloonColor(1, 180, 0, 0, 0, 0, 0); //P2 is red
+    SetBalloonColor(2, 0, 0, 180, 0, 0, 0); //P3 is blue
+    SetBalloonColor(3, 0, 0, 180, 0, 0, 0); //P3 is blue
 
 }
 
@@ -325,16 +325,28 @@ int checkBKObjectiveCollision(Vector localPosition)
 
 
 //Check collisions with presents for Battle Santa
-void checkPesentCollision()
+void checkCoinCollision()
 {
-    int i = checkBKObjectiveCollision(GlobalPlayer[0].position); //Check if P1 collides with a present
-    if (i != -1) //If player does collide
+    for (int ThisPlayer = 0; ThisPlayer < player_count; ThisPlayer++)
     {
-        playSound(0x49008016); //sound "menu ok"
-        BKObjectiveArray[i].flag = 0; //Delete present
-        incrementScore(0); //Increment P1's score
+        int i = checkBKObjectiveCollision(GlobalPlayer[ThisPlayer].position);
+        if (i != -1) //If player does collide
+        {
+            //playSound(0x49008016); //sound "menu ok"
+            playSound(0x49008017); //coin
+            BKObjectiveArray[i].flag = 0; //Delete coin
+            incrementScore(ThisPlayer); //Increment player's score
+        }
     }
 }
+//     }
+//     // int i = checkBKObjectiveCollision(GlobalPlayer[0].position); //Check if P1 collides with a present
+//     // if (i != -1) //If player does collide
+//     // {
+//     //     playSound(0x49008016); //sound "menu ok"
+//     //     BKObjectiveArray[i].flag = 0; //Delete present
+//     //     incrementScore(0); //Increment P1's score
+
 
 
 void displayNumberOfPresents()
@@ -553,7 +565,7 @@ void DropCoins(int PlayerIndex)
         objectVelocity[1] = 4;
         objectVelocity[2] = -4 + (MakeRandomLimmit(8));
         MakeAlignVector(objectVelocity,(GlobalPlayer[PlayerIndex].direction[1]));
-        AddBKObjective(objectPosition, objectAngle, objectVelocity, BK_PRESENT, 3.0);
+        AddBKObjective(objectPosition, objectAngle, objectVelocity, BK_COIN, 3.0);
     }
 
     
@@ -1838,7 +1850,21 @@ void initCTF()
 
         GlobalAddressA = (long)(&g_PlayerStructTable) + (0xDD8 * i); //Set characters for each player
         GlobalShortA = *(short*)(GlobalAddressA + 0x254);
-        Characters[i] = GlobalShortA;
+        if (ffa_or_teams == 0) //If FFA use character colors for flags and bases
+        {
+            Characters[i] = GlobalShortA;
+        }
+        else //Else if teams, use red or blue colors
+        {
+            if (i < 2)
+            {
+                Characters[i] = 8;  //Red team
+            }
+            else
+            {
+                Characters[i] = 9; //Blue team
+            }
+        }
 
     }
 
@@ -1926,12 +1952,11 @@ void dropFlagAfterHit()
     }
 }
 
-
-
 void DisplayBKObjectives()
 {
     //This function will loop through all BKObjectives and if an object exists it will be drawn
     //This function needs to be called from DrawPerScreen so that the perspective has been set.
+    
     
     for (int ThisObjective = 0; ThisObjective < MaxBKObjectives; ThisObjective++)
     {
@@ -1940,16 +1965,18 @@ void DisplayBKObjectives()
             switch(BKObjectiveArray[ThisObjective].category)
             {
                 
-                case BK_PRESENT:
+                case BK_COIN:
                 {
+                    //GlobalAddressB = (long)GoldCoin;
                     //GlobalAddressB = (long)PresentBlue;
-                    GlobalAddressB = (long)PresentModels[BKObjectiveArray[ThisObjective].bump.dummy]; //Set present color
-                    UpdateObjectGravity((Object*)&BKObjectiveArray[ThisObjective]);
-                    UpdateObjectVelocity((Object*)&BKObjectiveArray[ThisObjective]);
-                    
-                    UpdateObjectFrictionScale((Object*)&BKObjectiveArray[ThisObjective],0.5);
-                    UpdateObjectBump((Object*)&BKObjectiveArray[ThisObjective]);
-                    
+                    //GlobalAddressB = (long)PresentModels[BKObjectiveArray[ThisObjective].bump.dummy]; //Set present color
+                    if (abs(BKObjectiveArray[ThisObjective].velocity[0]) > 0 || abs(BKObjectiveArray[ThisObjective].velocity[2]) > 0)
+                    {
+                        UpdateObjectGravity((Object*)&BKObjectiveArray[ThisObjective]);
+                        UpdateObjectVelocity((Object*)&BKObjectiveArray[ThisObjective]);
+                        UpdateObjectFrictionScale((Object*)&BKObjectiveArray[ThisObjective],0.5);
+                        UpdateObjectBump((Object*)&BKObjectiveArray[ThisObjective]);                        
+                    }
                     if(BKObjectiveArray[ThisObjective].bump.distance_zx < 0)
                     {
                         BKObjectiveArray[ThisObjective].velocity[1] = 0;
@@ -1958,19 +1985,8 @@ void DisplayBKObjectives()
 
                     BKObjectiveArray[ThisObjective].angle[1] += DEG1 * 3;
 
-                    for (int i=0; i<3; i++)
-                    {
-                        objectPosition[i] = BKObjectiveArray[ThisObjective].position[i];
-                        objectAngle[i] = (short)BKObjectiveArray[ThisObjective].angle[i];
-                        if (objectPosition[i] < -2000.0 || objectPosition[i] > 2000.0) //Catch presents that wander off too far and delete them, to get rid of that pesky error
-                        {
-                            BKObjectiveArray[ThisObjective].flag = 0;
-                            break;
-                        }
-                    }
-
-
-                    DrawGeometryScale(objectPosition,objectAngle,GlobalAddressB, 0.025f);
+                    
+                    //DrawGeometryScale(objectPosition,objectAngle,GlobalAddressB, 0.05f);
                     break;
                 }
             }
@@ -1978,7 +1994,90 @@ void DisplayBKObjectives()
     }
 
 
+
+    for (int ThisObjective = 0; ThisObjective < MaxBKObjectives; ThisObjective++)
+    {
+        gSPDisplayList(GraphPtrOffset++, GoldCoin_texture);
+        if ( (BKObjectiveArray[ThisObjective].flag != 0) && (BKObjectiveArray[ThisObjective].category == BK_COIN) )
+        {
+            for (int i=0; i<3; i++)
+            {
+                objectPosition[i] = BKObjectiveArray[ThisObjective].position[i];
+                if (i == 1)
+                {
+                    objectPosition[i] = objectPosition[i] - 10.0; //Lower height of model slightly
+                }
+                objectAngle[i] = (short)BKObjectiveArray[ThisObjective].angle[i];
+                if (objectPosition[i] < -g_waterHeight || objectPosition[i] > 2000.0) //Catch presents that wander off too far and delete them, to get rid of that pesky error
+                {
+                    BKObjectiveArray[ThisObjective].flag = 0;
+                    break;
+                }
+            }
+            DrawGeometryScale(objectPosition,objectAngle,GoldCoin_geometry, 0.05f);
+        }
+    }
 }
+
+
+
+// void DisplayBKObjectives()
+// {
+//     //This function will loop through all BKObjectives and if an object exists it will be drawn
+//     //This function needs to be called from DrawPerScreen so that the perspective has been set.
+    
+//     for (int ThisObjective = 0; ThisObjective < MaxBKObjectives; ThisObjective++)
+//     {
+//         if (BKObjectiveArray[ThisObjective].flag != 0)
+//         {
+//             switch(BKObjectiveArray[ThisObjective].category)
+//             {
+                
+//                 case BK_COIN:
+//                 {
+//                     GlobalAddressB = (long)GoldCoin;
+//                     //GlobalAddressB = (long)PresentBlue;
+//                     //GlobalAddressB = (long)PresentModels[BKObjectiveArray[ThisObjective].bump.dummy]; //Set present color
+//                     if (abs(BKObjectiveArray[ThisObjective].velocity[0]) > 0 || abs(BKObjectiveArray[ThisObjective].velocity[2]) > 0)
+//                     {
+//                         UpdateObjectGravity((Object*)&BKObjectiveArray[ThisObjective]);
+//                         UpdateObjectVelocity((Object*)&BKObjectiveArray[ThisObjective]);
+//                         UpdateObjectFrictionScale((Object*)&BKObjectiveArray[ThisObjective],0.5);
+//                         UpdateObjectBump((Object*)&BKObjectiveArray[ThisObjective]);                        
+//                     }
+//                     if(BKObjectiveArray[ThisObjective].bump.distance_zx < 0)
+//                     {
+//                         BKObjectiveArray[ThisObjective].velocity[1] = 0;
+//                     }
+                    
+
+//                     BKObjectiveArray[ThisObjective].angle[1] += DEG1 * 3;
+
+//                     for (int i=0; i<3; i++)
+//                     {
+//                         objectPosition[i] = BKObjectiveArray[ThisObjective].position[i];
+//                         if (i == 1)
+//                         {
+//                             objectPosition[i] = objectPosition[i] - 10.0; //Lower height of model slightly
+//                         }
+//                         objectAngle[i] = (short)BKObjectiveArray[ThisObjective].angle[i];
+//                         if (objectPosition[i] < -2000.0 || objectPosition[i] > 2000.0) //Catch presents that wander off too far and delete them, to get rid of that pesky error
+//                         {
+//                             BKObjectiveArray[ThisObjective].flag = 0;
+//                             break;
+//                         }
+//                     }
+
+
+//                     DrawGeometryScale(objectPosition,objectAngle,GlobalAddressB, 0.05f);
+//                     break;
+//                 }
+//             }
+//         }
+//     }
+
+
+// }
 
 //void DrawLightBulb()
 void DrawPerScreen(Camera* LocalCamera)

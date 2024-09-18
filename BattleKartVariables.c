@@ -293,35 +293,108 @@ const short basePositions[4][20][4][3] =
 
 //Custom course variables
 
+//Sept 2024 model addresses
+const int BattleFlag= 0x0800B8B0;
+const int BattleFlag_geometry= 0x0800A740;
+const int BattleFlag_texture= 0x0800A488;
+const int BlueFlag= 0x0800B8D0;
+const int BlueFlag_geometry= 0x0800A928;
+const int BlueFlag_texture= 0x0800A510;
+const int BowserFlag= 0x0800B8F0;
+const int BowserFlag_geometry= 0x0800AB10;
+const int BowserFlag_texture= 0x0800A048;
+const int DKFlag= 0x0800B910;
+const int DKFlag_geometry= 0x0800ACF8;
+const int DKFlag_texture= 0x0800A378;
+const int LuigiFlag= 0x0800B930;
+const int LuigiFlag_geometry= 0x0800AEE0;
+const int LuigiFlag_texture= 0x0800A158;
+const int MarioFlag= 0x0800B950;
+const int MarioFlag_geometry= 0x0800B0C8;
+const int MarioFlag_texture= 0x0800A0D0;
+const int PeachFlag= 0x0800B970;
+const int PeachFlag_geometry= 0x0800B2B0;
+const int PeachFlag_texture= 0x0800A1E0;
+const int ToadFlag= 0x0800B990;
+const int ToadFlag_geometry= 0x0800B498;
+const int ToadFlag_texture= 0x0800A268;
+const int WarioFlag= 0x0800B9B0;
+const int WarioFlag_geometry= 0x0800B680;
+const int WarioFlag_texture= 0x0800A2F0;
+const int YoshiFlag= 0x0800B9D0;
+const int YoshiFlag_geometry= 0x0800B868;
+const int YoshiFlag_texture= 0x0800A400;
+const int BowserMushroom= 0x080182C0;
+const int BowserMushroom_geometry= 0x08015400;
+const int BowserMushroom_texture= 0x08014DF0;
+const int DKMushroom= 0x080182E0;
+const int DKMushroom_geometry= 0x080159C0;
+const int DKMushroom_texture= 0x08014D68;
+const int LuigiMushroom= 0x08018300;
+const int LuigiMushroom_geometry= 0x08015F80;
+const int LuigiMushroom_texture= 0x08014B48;
+const int MarioMushroom= 0x08018320;
+const int MarioMushroom_geometry= 0x08016540;
+const int MarioMushroom_texture= 0x08014AC0;
+const int PeachMushroom= 0x08018340;
+const int PeachMushroom_geometry= 0x08016B00;
+const int PeachMushroom_texture= 0x08014BD0;
+const int RedMushroom= 0x08018360;
+const int RedMushroom_geometry= 0x080170C0;
+const int RedMushroom_texture= 0x08014A38;
+const int ToadMushroom= 0x08018380;
+const int ToadMushroom_geometry= 0x08017680;
+const int ToadMushroom_texture= 0x08014C58;
+const int WarioMushroom= 0x080183A0;
+const int WarioMushroom_geometry= 0x08017C40;
+const int WarioMushroom_texture= 0x08014E78;
+const int YoshiMushroom= 0x080183C0;
+const int YoshiMushroom_geometry= 0x08018200;
+const int YoshiMushroom_texture= 0x08014CE0;
+const int BlueCoin= 0x08019C30;
+const int BlueCoin_geometry= 0x080196B0;
+const int BlueCoin_texture= 0x08019428;
+const int GoldCoin= 0x08019C50;
+const int GoldCoin_geometry= 0x08019930;
+const int GoldCoin_texture= 0x08019428;
+const int RedCoin= 0x08019C70;
+const int RedCoin_geometry= 0x08019BB0;
+const int RedCoin_texture= 0x08019428;
+const int TargetMarker= 0x08019ED0;
+const int TargetMarker_geometry= 0x08019EA0;
+const int TargetMarker_texture= 0x08019D20;
 
 
-//regular models 2023 backup
-const int BlueCoin= 0x080014E0;
-const int GoldCoin= 0x08002840;
-const int N64Coin= 0x08003788;
-const int RedCoin= 0x08004AE0;
-const int RedFlag = 0x08005DA8;
-const int BlueFlag= 0x08007068;
-const int BowserFlag= 0x08008328;
-const int DKFlag= 0x080095E8;
-const int LuigiFlag= 0x0800A8A8;
-const int MarioFlag= 0x0800BB68;
-const int PeachFlag= 0x0800CE28;
-const int BattleFlag= 0x0800E0E8;
-const int ToadFlag= 0x0800F3A8;
-const int WarioFlag= 0x08010668;
-const int YoshiFlag= 0x08011928;
-const int BowserMushroom= 0x08012FC0;
-const int DKMushroom= 0x08014660;
-const int LuigiMushroom= 0x08015D00;
-const int MarioMushroom= 0x080173A0;
-const int PeachMushroom= 0x08018A40;
-const int RedMushroom= 0x0801A0E0;
-const int ToadMushroom= 0x0801B780;
-const int WarioMushroom= 0x0801CE20;
-const int YoshiMushroom= 0x0801E4C0;
-const int TargetMarker= 0x0801E710;
-const int SoccerBall= 0x0801F7B0;
+
+
+
+// //regular models 2023 backup
+// const int BlueCoin= 0x080014E0;
+// const int GoldCoin= 0x08002840;
+// const int N64Coin= 0x08003788;
+// const int RedCoin= 0x08004AE0;
+// const int RedFlag = 0x08005DA8;
+// const int BlueFlag= 0x08007068;
+// const int BowserFlag= 0x08008328;
+// const int DKFlag= 0x080095E8;
+// const int LuigiFlag= 0x0800A8A8;
+// const int MarioFlag= 0x0800BB68;
+// const int PeachFlag= 0x0800CE28;
+// const int BattleFlag= 0x0800E0E8;
+// const int ToadFlag= 0x0800F3A8;
+// const int WarioFlag= 0x08010668;
+// const int YoshiFlag= 0x08011928;
+// const int BowserMushroom= 0x08012FC0;
+// const int DKMushroom= 0x08014660;
+// const int LuigiMushroom= 0x08015D00;
+// const int MarioMushroom= 0x080173A0;
+// const int PeachMushroom= 0x08018A40;
+// const int RedMushroom= 0x0801A0E0;
+// const int ToadMushroom= 0x0801B780;
+// const int WarioMushroom= 0x0801CE20;
+// const int YoshiMushroom= 0x0801E4C0;
+// const int TargetMarker= 0x0801E710;
+// const int SoccerBall= 0x0801F7B0;
 
 // //regular models 2024
 // const int BlueCoin= 0x080014F0;
@@ -374,9 +447,9 @@ const int HouseModels[4] = {0x080055D0, 0x080055E8, 0x08005618, 0x080056C8};
 
 const long marioDotSprite = 0x0D02CCD8;
 
-
-long FlagOffsets[] = {MarioFlag, LuigiFlag, YoshiFlag, ToadFlag, DKFlag, WarioFlag, PeachFlag,  BowserFlag}; //Pointers to flag models
-long BaseOffsets[] = {RedMushroom, LuigiMushroom, YoshiMushroom, ToadMushroom, DKMushroom, WarioMushroom, PeachMushroom, BowserMushroom}; //Pointers to base models]
-long FlagSpriteOffsets[] = {FlagIconMario, FlagIconLuigi, FlagIconYoshi, FlagIconToad, FlagIconDK, FlagIconWario, FlagIconPeach,  FlagIconBowser}; //Pointers for minimap flag sprites
-long BaseSpriteOFfsets[] = {BaseIconMario, BaseIconLuigi, BaseIconYoshi, BaseIconToad, BaseIconDK, BaseIconwario, BaseIconPeach,  BaseIconBowser}; //Pointers for minimap base sprites
+//Note last two entries in each array are red and blue colored for teams red and blue
+long FlagOffsets[] = {MarioFlag, LuigiFlag, YoshiFlag, ToadFlag, DKFlag, WarioFlag, PeachFlag,  BowserFlag, BattleFlag, BlueFlag}; //Pointers to flag models
+long BaseOffsets[] = {RedMushroom, LuigiMushroom, YoshiMushroom, ToadMushroom, DKMushroom, WarioMushroom, PeachMushroom, BowserMushroom, RedMushroom, ToadMushroom}; //Pointers to base models]
+long FlagSpriteOffsets[] = {FlagIconMario, FlagIconLuigi, FlagIconYoshi, FlagIconToad, FlagIconDK, FlagIconWario, FlagIconPeach,  FlagIconBowser, FlagIconMario, FlagIconToad}; //Pointers for minimap flag sprites
+long BaseSpriteOFfsets[] = {BaseIconMario, BaseIconLuigi, BaseIconYoshi, BaseIconToad, BaseIconDK, BaseIconwario, BaseIconPeach,  BaseIconBowser, BaseIconMario, BaseIconToad}; //Pointers for minimap base sprites
 int Characters[] = {0,0,0,0}; //Array holds which characters each player is
