@@ -8,7 +8,8 @@
 .else
 	//.open "../Mario Kart 64.z64", "BattleKart64.z64", 0 //Path to the MK64 rom and output name of battle kart rom
 	//.open "Farm.z64", "BattleKart64.z64", 0 //Path to the MK64 rom and output name of battle kart rom
-	.open "BattleFarm.z64", "BattleKart64.z64", 0 //Path to the MK64 rom and output name of battle kart rom
+	//.open "BattleFarm.z64", "BattleKart64.z64", 0 //Path to the MK64 rom and output name of battle kart rom
+	.open "BattleKart64Base.z64", "BattleKart64.z64", 0 //Path to the MK64 rom and output name of battle kart rom	
 	//.open "OverKart64 V6.z64", "BattleKart64.z64", 0
 	//.open "battle.z64", "BattleKart64.z64", 0 //Path to the MK64 rom and output name of battle kart rom
 	.definelabel save_key, 0x432AB496 //Value (2 bytes) to check for if save exists or not, update every new version
@@ -221,6 +222,7 @@
 .definelabel final_lap_music_flag, VARIABLE_RAM_BASE+0x5C //1 byte -  Play "final lap music" flag whne timer is low (0=Not played, 1=Has played)
 .definelabel final_sudden_death_music_flag, VARIABLE_RAM_BASE+0x5D //Play sudden music flag when timer is zero (0=Not played, 1=Has played)
 .definelabel who_was_hit_last, VARIABLE_RAM_BASE+0x5E //Who was hit last (and the hot potato) (0=nobody, 1=P2, 2=P2, 3=P3, 4=P4)
+.definelabel bots_target_humans,  VARIABLE_RAM_BASE+0x5F //1 byte, True = if all bots will favor targeting humans as rivals, False=default rival finding behavior
 .definelabel team_1_score, VARIABLE_RAM_BASE+0x60 //2 bytes - Score for Team 1
 .definelabel team_2_score, VARIABLE_RAM_BASE+0x62 //2 bytes - Score for Team 2
 .definelabel max_points, VARIABLE_RAM_BASE+0x64 //2 bytes - Max team points (for team point score mode)
@@ -574,6 +576,7 @@ text_char_bowser: .asciiz "BOWSER"
 text_bombs_win: .asciiz "BOMBS WIN"
 text_survivors_win: .asciiz "SURVIVORS WIN"
 text_shell_shooter: .asciiz "Shell SHOOTER"
+text_presents: .asciiz "PRESENTS"
 text_minus_one_when_hit: .asciiz "-1 WHEN HIT"
 text_plus_one_hit_enemy: .asciiz "+1 HIT ENEMY"
 text_team_1_wins: .asciiz "TEAM 1 WINS"
@@ -581,6 +584,7 @@ text_team_2_wins: .asciiz "TEAM 2 WINS"
 text_max_health: .asciiz "MAX HEALTH      "
 text_max_ammo: .asciiz "MAX AMM0        "
 text_using_hle: .asciiz "USING HLE"
+text_target_humans: .asciiz "TARGET HUMANS"
 
 
 
@@ -3037,9 +3041,9 @@ runGameModePresents:
 	// NOP
 
 
-	//Test cutscene
-	JAL TestCutscene
-	NOP
+	// //Test cutscene
+	// JAL TestCutscene
+	// NOP
 
 	//Run hit detection to find who as hit last and process 
 	JAL hitDetection
@@ -3058,8 +3062,6 @@ runGameModePresents:
 
 	LBU a0, who_was_hit_last //Load whoever might have been hit
 	BEQ a0, zero, @@branch_someone_was_hit //Branch if no one was hit
-	lI a1, 1
-	BEQ a0, a1, @@branch_someone_was_hit //Branch if self was hit (only P2, P3, P4 drop presents)
 		ADDI a0, a0, -1 //Subtract one to change who was hit to player index
 		JAL DropCoins //Drop coins
 		NOP
@@ -3067,39 +3069,55 @@ runGameModePresents:
 		@@branch_someone_was_hit:
 
 
-	JAL checkPesentCollision //Check if you collide with a present
+	JAL checkCoinCollision //Check if you collide with a present
 	NOP
 
-	LBU a1, BattleSantaCutsceneFlag
-	BNE a1, zero, @@branch_display_stuff
-		LBU a1, game_paused //Only run counter and display HP and countdown when not paused (game tempo is zero or less)
-		LBU a2, in_game
-		XOR a1, a2, a1 //Check if game is not paused or in the results screen
-		BEQ a1, zero, @@branch_display_stuff
+	//DISPLAY HP and run the time scoring (if it is selected as an option)
+	LBU a1, game_paused //Only run counter and display HP and countdown when not paused (game tempo is zero or less)
+	LBU a2, in_game
+	XOR a1, a2, a1 //Check if game is not paused or in the results screen
+	BEQ a1, zero, @@branch_run_counter_and_display_hp
 		NOP
-			JAL displayNumberOfPresents //Display the score
-			NOP
-			JAL displayTimer //Display timer(if in a time match)
-			NOP
-			@@branch_display_stuff:
-
-
-
-	LW a0, timer
-	SLTI a0, a0, 1
-	BEQ a0, zero, @@branch_presents_endgame_start //If timer is < zero
+		JAL FUNCTION_LOAD_FONT //Load font
 		NOP
-		NOR a0, zero, zero //Set to be on
-		SB a0, BattleSantaEndgameFlag
-		@@branch_presents_endgame_start:
+		JAL displayScore //Display HP
+		NOP
+		JAL displayTimer //Display timer(if in a time match)
+		NOP
+		JAL winConditions //If in team points scoring mode, check if a team has won
+		NOP
+		@@branch_run_counter_and_display_hp:
+
+	// // LBU a1, BattleSantaCutsceneFlag
+	// // BNE a1, zero, @@branch_display_stuff
+	// 	LBU a1, game_paused //Only run counter and display HP and countdown when not paused (game tempo is zero or less)
+	// 	LBU a2, in_game
+	// 	XOR a1, a2, a1 //Check if game is not paused or in the results screen
+	// 	BEQ a1, zero, @@branch_display_stuff
+	// 	NOP
+	// 		JAL displayNumberOfPresents //Display the score
+	// 		NOP
+	// 		JAL displayTimer //Display timer(if in a time match)
+	// 		NOP
+	// 		@@branch_display_stuff:
 
 
-	LBU a0, BattleSantaEndgameFlag
-	BEQ a0, zero, @@branch_presents_endgame
-		NOP
-		JAL BattleSantaEndgame
-		NOP
-		@@branch_presents_endgame:
+
+	// LW a0, timer
+	// SLTI a0, a0, 1
+	// BEQ a0, zero, @@branch_presents_endgame_start //If timer is < zero
+	// 	NOP
+	// 	NOR a0, zero, zero //Set to be on
+	// 	SB a0, BattleSantaEndgameFlag
+	// 	@@branch_presents_endgame_start:
+
+
+	// LBU a0, BattleSantaEndgameFlag
+	// BEQ a0, zero, @@branch_presents_endgame
+	// 	NOP
+	// 	JAL BattleSantaEndgame
+	// 	NOP
+	// 	@@branch_presents_endgame:
 
 
 	//Force pause menu to be continue
@@ -5025,7 +5043,7 @@ menuDispModeTraditional:
 
 
 	//Set max distance you can scroll down in y on menu
-	LI a1, 6
+	LI a1, 7
 	SB a1, MENU_Y_MAX
 
 	// //Set variable for this mode to be hit based (not objective based)
@@ -5091,6 +5109,13 @@ menuDispPageGame:
 		NOP
 		LI a2, text_shell_shooter
 		@@BRANCH_MODE_SELECT_FPS:
+	LI t1, 7
+	BNE t0, t1, @@BRANCH_MODE_SELECT_PRESENTS
+		NOP
+		LI a2, text_presents
+		@@BRANCH_MODE_SELECT_PRESENTS:
+
+
 	//Actually show the selected option
 	LI a0, 0x90 //x
 	JAL FUNCTION_DISPLAY_TEXT
@@ -5174,7 +5199,13 @@ menuDispPageGame:
 		SW a0, 0x802B3870
 		@@BRANCH_MODE_NOT_SHELL_SHOOTER:
 
-
+	//Display presents
+	LBU a0, game_mode	
+	LI a1, 7
+	BNE a0, a1, @@BRANCH_MODE_DISPLAY_PRESENTS
+		NOP
+		//Stuff will go here
+		@@BRANCH_MODE_DISPLAY_PRESENTS:
 
 	LW ra, 0x0020 (sp)
 	JR ra
@@ -5293,23 +5324,27 @@ menuDispPageBots:
 	// JAL menuDispOnOff
 	// LI a1, 0x7C //y
 
-	LI a2, text_bot_use_items //Display "BOTS CANNOT FALL"
+	LI a2, text_bot_use_items //Display "BOTS USE ITEMS"
 	LBU a3, bot_use_items
 	JAL menuDispOnOff
 	//LI a1, 0x88 //y
 	LI a1, 0x7C //y
 
 
-	LI a2, text_1p_full_screen //Display "BOTS CANNOT FALL"
+	LI a2, text_1p_full_screen //Display "1P FULL SCREEN"
 	LBU a3, one_player_full_screen
 	JAL menuDispOnOff
 	// LI a1, 0x94 //y
 	LI a1, 0x88 //y
 
+	LI a2, text_target_humans //Display "1P FULL SCREEN"
+	LBU a3, bots_target_humans
+	JAL menuDispOnOff
+	LI a1, 0x94 //y	
+
 
 	//Set max distance you can scroll down in y on menu
-	// LI a1, 8
-	LI a1, 7
+	LI a1, 8
 	SB a1, MENU_Y_MAX
 
 	LW ra, 0x0020 (sp)
@@ -6302,7 +6337,7 @@ menuToggleGame:
 	LI a0, game_mode //load status pointer
 	LI a2, 0 //menu index
 	JAL menuToggleByte
-	LI t0, 6 //max value
+	LI t0, 7 //max value
 
 
 
@@ -6370,6 +6405,17 @@ menuToggleGame:
 		jal menuToggleGameShellShooter
 		nop
 	@@branch_shell_shooter_mode:
+
+
+	//If mode is shell shooter
+	lbu a0, game_mode //load game mode
+	li a2, 7
+	bne a0, a2, @@branch_presents_mode
+		nop
+		//jal menuToggleGameShellShooter
+		nop
+	@@branch_presents_mode:
+
 
 	// //If mode is test
 	// lbu a0, game_mode //load game mode
@@ -6527,6 +6573,10 @@ menuToggleBots:
 		SW a0, 0x80001D20
 		@@branch_no_fix_camera_zoom_in_1_player_full_screen:
 
+	//If menu sleection is Target Humans
+	LI a0, bots_target_humans
+	JAL menuToggleOnoff
+	li a2, 7 //Load menu index
 
 
 	LW ra, 0x001C (sp)
@@ -8113,8 +8163,8 @@ gameCode:
 theModels:
 	// .import "BattleKartObjects/BattleKartObjects.raw" //OLD
 	// .import "BattleKartModel/Presents.raw"
-	//.import "BattleKartObjects/ModelData.raw" //2024 model data
-	.import "BattleKartObjects/ModelData2023.raw" //2023 model data backup
+	.import "BattleKartObjects/ModelData.raw" //2024 model data
+	//.import "BattleKartObjects/ModelData2023.raw" //2023 model data backup
 
 //Include binary file for flag and base minimap sprites for CTF mode
 .align 0x10
@@ -8175,6 +8225,8 @@ PaletteBowser:
 .importobj "BattleKartPaths/SkyscraperPaths.o"
 .importobj "BattleKartPaths/BigDonutPaths.o"
 .importobj "BattleKartPaths/RaceCoursePaths.o"
+.importobj "BattleKartPaths/SkyShroomsCoursePaths.o"
+
 
 
 // //Import battle kart custom weather code
