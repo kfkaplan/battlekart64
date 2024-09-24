@@ -12,6 +12,8 @@
 #include "../BattleKartPaths/SkyscraperPaths.h"
 #include "../BattleKartPaths/BigDonutPaths.h"
 #include "../BattleKartPaths/RaceCoursePaths.h"
+#include "../BattleKartPaths/SkyShroomsCoursePaths.h"
+
 
 
 
@@ -35,36 +37,59 @@ Bump bot_bump[4];
 
 
 //Arrays of path arrays
-Marker **CoursePaths[] = {BlockFortPaths_Paths, DoubleDeckerPaths_Paths, Skyscraper_Paths, BigDonut_Paths, 
-                        RacePaths_Paths};
+Marker **CoursePaths[] = {BlockFortPaths_Paths, DoubleDeckerPaths_Paths, Skyscraper_Paths, BigDonut_Paths, //stock battle courses
+                        RacePaths_Paths, //race courses
+                        SkyShroomsPaths_Paths}; //custom courses
 Marker **CourseRamps[] = {BlockFortPaths_Ramps, DoubleDeckerPaths_Ramps, Skyscraper_Ramps, BigDonut_Ramps,
-                         RacePaths_Ramps};
+                         RacePaths_Ramps,
+                        SkyShroomsPaths_Ramps};
 Marker **CourseDrops[] = {BlockFortPaths_Drops, DoubleDeckerPaths_Drops, Skyscraper_Drops, BigDonut_Drops,
-                         RacePaths_Drops};
+                         RacePaths_Drops,
+                        SkyShroomsPaths_Drops};
 short *CoursePathLengths[] = {BlockFortPaths_PathLengths, DoubleDeckerPaths_PathLengths, Skyscraper_PathLengths, BigDonut_PathLengths,
-                         RacePaths_PathLengths};
+                         RacePaths_PathLengths,
+                        SkyShroomsPaths_PathLengths};
 short *CourseRampLengths[] = {BlockFortPaths_RampLengths, DoubleDeckerPaths_RampLengths, Skyscraper_RampLengths, BigDonut_RampLengths,
-                         RacePaths_RampLengths};
+                         RacePaths_RampLengths,
+                        SkyShroomsPaths_RampLengths};
 short *CourseDropLengths[] = {BlockFortPaths_DropLengths, DoubleDeckerPaths_DropLengths, Skyscraper_DropLengths, BigDonut_DropLengths,
-                         RacePaths_DropLengths};
+                         RacePaths_DropLengths,
+                        SkyShroomsPaths_DropLengths};
 short *LineCounts[] = {BlockFortPaths_LineCounts, DoubleDeckerPaths_LineCounts, Skyscraper_LineCounts, BigDonut_LineCounts,
-                         RacePaths_LineCounts};
+                         RacePaths_LineCounts,
+                        SkyShroomsPaths_LineCounts};
 //short dummyPathLengths[2] = {0x258, 0x258};
 const float BattleLevelHeightChecks[] = {15.0, 9.0, 75.0, 75.0, 
+                                    150.0,
                                     150.0};
 const float BattleLevelHeightChecksSquared[] = {15.0*15.0, 9.0*9.0, 75.0*75.0, 75.0*75.0,
-                                                    150.0*150.0};
+                                                    150.0*150.0,
+                                                150.0*150.0};
 const short BattleLevelPathSearchRadius[] = {250, 350, 150, 400,
-                                                     400};
+                                                     400,
+                                            150};
 const float turn_towards_rival_radius[] = {90.0, 100, 70, 150, 
-                                                    200}; //Distance bot must get to rival to just start turning twoards them wholesale
+                                                    200,
+                                            80}; //Distance bot must get to rival to just start turning twoards them wholesale
 //Used to index above array of arrays based on course, indexed by g_courseID
-const char BattleLevelConverts[20] =     {4, 4, 4, 4, 4, 4, 4, 4, 4, 4 , 4, 4, 4, 4, 4, 0, 2, 1, 4, 3};
+const short BattleLevelConverts[20] =     {4, 4, 4, 4, 4, 4, 4, 4, 4, 4 , 4, 4, 4, 4, 4, 0, 2, 1, 4, 3};
 short RaceCoursePathLength;
 
 //(Marker **)GetRealAddress(PathTable[g_courseID])}
 //*(short *)(&g_pathLength)[g_courseID][0]}
 
+
+short getBattleCourseIndex()
+{
+    if (HotSwapID == 0) //For stock courses
+    {
+        return BattleLevelConverts[g_courseID];
+    }
+    else //For custom courses
+    {
+        return 5 + (courseValue-16);
+    }
+}
 
 
 float test_bot_sphere_position[4][3] = 
@@ -102,7 +127,7 @@ void ResetPathfinderBots() //Runs at beginning of game
 
 
     //Set bot paths if in race courses, copy race course mega path to chunked up paths defined by us
-    if (BattleLevelConverts[g_courseID] == 4)
+    if (getBattleCourseIndex() == 4)
     {
         //Marker *RaceCoursePath = (Marker *)GetRealAddress(PathTable[g_courseID+1][0]);
 
@@ -238,22 +263,18 @@ void ProSteeringPlus(int i, int ci, Marker* PathArray[], Marker* RampArray[], Ma
         //}
         // bot_pressed[i] = BTN_R | BTN_B;   //tap brake and jump
         // bot_buttons[i] |= BTN_B;
+
+        if (bot_x_stick[i] != 0)
+        {
+            bot_buttons[i] |= BTN_R;  //continue drifting, otherwise stop.    
+        }
+
         if (GlobalShortA > 0)
         {   
-            if (abs(bot_x_stick > 0))
-            {
-                bot_buttons[i] |= BTN_R;  //continue drifting, otherwise stop.    
-            }
-
             bot_x_stick[i] = 127;  
         }
         else
         {
-            if (bot_x_stick < 0)
-            {
-                bot_buttons[i] |= BTN_R;  //continue drifting, otherwise stop.    
-            }
-
             bot_x_stick[i] = -127;  
         }
     }                        
@@ -467,7 +488,7 @@ void SeekerBattleBot(int i)
 {
     float rival_x, rival_y, rival_z;
     //float turn_towards_rival_radius = 60.0; //Distance bot must get to rival to just start turning twoards them wholesale
-    short ci = BattleLevelConverts[g_courseID]; //Grab index for current course, used to index path arrays
+    short ci = getBattleCourseIndex(); //Grab index for current course, used to index path arrays
 
 
     float bot_x = GlobalPlayer[i].position[0]; //x,y,z coordinates of current bot
@@ -625,26 +646,26 @@ void SeekerBattleBot(int i)
         //     keepAwayBotRunAwayTimer = 0;    
         // }
     }
-    else if (game_mode == 7) //Battle Santa, bots will run away to the furthest node
-    {
-        keepAwayBotRunAwayTimer = decrementTimerWrapper(keepAwayBotRunAwayTimer);
-        if (keepAwayBotRunAwayTimer <= 0)
-        {
-            keepAwayBotRunAwayTimer = 350;
-            FindFurthestNode(GlobalPlayer[0].position, furthest_node[i], CoursePaths[ci], CoursePathLengths[ci], LineCounts[ci][0]);       
-            if (AIPathfinder[i].TargetPath == AIPathfinder[i].LastPath)
-            {
-                int use_this_path = MakeRandomLimmit(LineCounts[ci][0]);
-                furthest_node[i][0] = CoursePaths[ci][use_this_path][0].Position[0];
-                furthest_node[i][1] = CoursePaths[ci][use_this_path][0].Position[1];
-                furthest_node[i][2] = CoursePaths[ci][use_this_path][0].Position[2];
-            }
-        }        
-        rival_x = furthest_node[i][0];
-        rival_y = furthest_node[i][1];
-        rival_z = furthest_node[i][2];         
+    // else if (game_mode == 7) //Battle Santa, bots will run away to the furthest node
+    // {
+    //     keepAwayBotRunAwayTimer = decrementTimerWrapper(keepAwayBotRunAwayTimer);
+    //     if (keepAwayBotRunAwayTimer <= 0)
+    //     {
+    //         keepAwayBotRunAwayTimer = 350;
+    //         FindFurthestNode(GlobalPlayer[0].position, furthest_node[i], CoursePaths[ci], CoursePathLengths[ci], LineCounts[ci][0]);       
+    //         if (AIPathfinder[i].TargetPath == AIPathfinder[i].LastPath)
+    //         {
+    //             int use_this_path = MakeRandomLimmit(LineCounts[ci][0]);
+    //             furthest_node[i][0] = CoursePaths[ci][use_this_path][0].Position[0];
+    //             furthest_node[i][1] = CoursePaths[ci][use_this_path][0].Position[1];
+    //             furthest_node[i][2] = CoursePaths[ci][use_this_path][0].Position[2];
+    //         }
+    //     }        
+    //     rival_x = furthest_node[i][0];
+    //     rival_y = furthest_node[i][1];
+    //     rival_z = furthest_node[i][2];         
                 
-    }
+    // }
     else if (game_mode == 3 && ctf_game_mode == 1) //If game mode is CTF and multiflag
         if (isSomeoneHoldingPlayerFlag(i) )//If someone has the player's flag, go for the person carrying the flag
         {
@@ -1608,6 +1629,49 @@ void runBots()
 
 
 
+bool isPlayerHumanAndNotDead(int player) //Check if enemey is human and not dead
+{
+    return (bot_status_p1[player] == 0 && *(unsigned char*)(0x800F6991 + (0xDD8 * player)) != 0x50);
+}
+
+
+//Check if bots_target_humans is on and if so, try to see if a human can be found
+bool whenTargetingHumansIsRivalABotAndThereAreHumanTargetsAvailable(int enemy)
+{  
+    if (bots_target_humans == false || bot_status_p1[enemy] == 0) //If bots target humans not turned on, or if enemy already is a human, return false and ignore the rest of this function
+    {
+        return false;
+    }
+
+    if (ffa_or_teams == 0) //If FFA
+    {    
+        bool living_human_found = false;
+        for (int i=0; i<player_count; i++) //Loop through each bot
+        {
+            if (isPlayerHumanAndNotDead(i))
+            {
+                living_human_found = true;  //Found a living human
+            }
+        }
+        return living_human_found;
+    }
+    else //else if teams
+    {
+        if (enemy <= 1) //Team 1
+        {
+            return (isPlayerHumanAndNotDead(0) || isPlayerHumanAndNotDead(1)); //if enemy chosen is a bot and there's a living human on this team, return true
+        }
+        else //Team 2
+        {
+            if (player_count == 3) //If enemy is on team 2 and there it is only a 3 player game, it doesn't matter, there are no other possible targets
+            {
+                return false;
+            }
+            return (isPlayerHumanAndNotDead(2) || isPlayerHumanAndNotDead(3)); //if enemy chosen is a bot and there's a living human on this team, return true
+        }
+    }
+}
+
 
 //Function returns a bot rival if someone has picked up a flag, or their flag, or just runs the original find rival function if not
 int getRival(int currentPlayer) //Note current player is 1,2,3,4, NOT 0,1,2,3
@@ -1708,7 +1772,8 @@ int getRival(int currentPlayer) //Note current player is 1,2,3,4, NOT 0,1,2,3
 
             }
             count++;
-        }while(currentPlayer == enemy ||  *(unsigned char*)(0x800F6991 + (0xDD8 * enemy)) == 0x50 || count < 20); //If returned rival is the current player, dead or a bomb, reroll the dice until a living rival can be found
+        }while(currentPlayer == enemy ||  *(unsigned char*)(0x800F6991 + (0xDD8 * enemy)) == 0x50 || count < 20
+                || whenTargetingHumansIsRivalABotAndThereAreHumanTargetsAvailable(enemy)); //If returned rival is the current player, dead or a bomb, reroll the dice until a living rival can be found
         //return(getEnemy(currentPlayer)); //Run the old rival finding function that was written in assembly
 
         return(enemy);

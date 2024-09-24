@@ -17,7 +17,7 @@
 
 
 
-#define MaxBKObjectives 30
+#define MaxBKObjectives 1000
 Object BKObjectiveArray[MaxBKObjectives]; //internal array for Objective Items separate from Shells/Itemboxes
 
 #define BK_COIN 1
@@ -25,6 +25,44 @@ Object BKObjectiveArray[MaxBKObjectives]; //internal array for Objective Items s
 long PreviousKBGNumber, PreviousKBGNumberNext; //Global to store previous menu ID
 bool inBattleKartMenu = false;
 
+
+
+//The following variables and functions are for displaying coustom object textures/geometry (e.g. coins), needed to really expand the matrix array
+int TriclonMatrixCount = 0;
+const int TriclonsTotalMatrixSize = 5000;
+Mtx TriclonsSpecialMatrixArray[5000];
+
+int triclon_set_matrix(AffineMtx affine)
+{  
+    if(TriclonMatrixCount>TriclonsTotalMatrixSize)
+    {
+        return(FALSE);
+        //we did not have enough slots and so could not render our object.
+    }
+    
+    AffineToMtx(&TriclonsSpecialMatrixArray[TriclonMatrixCount],affine);
+      //convert our simple AffineMtx struct into the game's internal 16-bit Mtx stack
+
+    gSPMatrix(GraphPtrOffset++, K0_TO_PHYS((u32) &(TriclonsSpecialMatrixArray[TriclonMatrixCount++])),
+        G_MTX_MODELVIEW|G_MTX_LOAD|G_MTX_NOPUSH);
+      //apply the new matrix stack to draw the object at that offset space.
+
+    return(TRUE);
+      //there were still matrix slots available to draw the object
+}
+
+
+void TriclonDrawGeometryScale(float localPosition[], short localAngle[], int localAddress, float localScale)
+{
+    CreateModelingMatrix(AffineMatrix,localPosition,localAngle);
+    ScalingMatrix(AffineMatrix,localScale); 
+    if(triclon_set_matrix(AffineMatrix) == 0)
+    {
+        return;
+    }
+    gSPDisplayList(GraphPtrOffset++,localAddress);      
+    
+}
 
 
 
@@ -559,7 +597,7 @@ void DropCoins(int PlayerIndex)
     objectAngle[1] = 0;
     objectAngle[2] = 0;
 
-    for (int i=0; i<3; i++) 
+    for (int i=0; i<30; i++) 
     {        
         objectVelocity[0] = -3 + (MakeRandomLimmit(6));
         objectVelocity[1] = 4;
@@ -1958,63 +1996,88 @@ void DisplayBKObjectives()
     //This function needs to be called from DrawPerScreen so that the perspective has been set.
     
     
-    for (int ThisObjective = 0; ThisObjective < MaxBKObjectives; ThisObjective++)
-    {
-        if (BKObjectiveArray[ThisObjective].flag != 0)
-        {
-            switch(BKObjectiveArray[ThisObjective].category)
-            {
+    // for (int ThisObjective = 0; ThisObjective < MaxBKObjectives; ThisObjective++)
+    // {
+    //     if (BKObjectiveArray[ThisObjective].flag != 0)
+    //     {
+    //         switch(BKObjectiveArray[ThisObjective].category)
+    //         {
                 
-                case BK_COIN:
-                {
-                    //GlobalAddressB = (long)GoldCoin;
-                    //GlobalAddressB = (long)PresentBlue;
-                    //GlobalAddressB = (long)PresentModels[BKObjectiveArray[ThisObjective].bump.dummy]; //Set present color
-                    if (abs(BKObjectiveArray[ThisObjective].velocity[0]) > 0 || abs(BKObjectiveArray[ThisObjective].velocity[2]) > 0)
-                    {
-                        UpdateObjectGravity((Object*)&BKObjectiveArray[ThisObjective]);
-                        UpdateObjectVelocity((Object*)&BKObjectiveArray[ThisObjective]);
-                        UpdateObjectFrictionScale((Object*)&BKObjectiveArray[ThisObjective],0.5);
-                        UpdateObjectBump((Object*)&BKObjectiveArray[ThisObjective]);                        
-                    }
-                    if(BKObjectiveArray[ThisObjective].bump.distance_zx < 0)
-                    {
-                        BKObjectiveArray[ThisObjective].velocity[1] = 0;
-                    }
+    //             case BK_COIN:
+    //             {
+    //                 //GlobalAddressB = (long)GoldCoin;
+    //                 //GlobalAddressB = (long)PresentBlue;
+    //                 //GlobalAddressB = (long)PresentModels[BKObjectiveArray[ThisObjective].bump.dummy]; //Set present color
+    //                 if (abs(BKObjectiveArray[ThisObjective].velocity[0]) > 0 || abs(BKObjectiveArray[ThisObjective].velocity[2]) > 0)
+    //                 {
+    //                     UpdateObjectGravity((Object*)&BKObjectiveArray[ThisObjective]);
+    //                     UpdateObjectVelocity((Object*)&BKObjectiveArray[ThisObjective]);
+    //                     UpdateObjectFrictionScale((Object*)&BKObjectiveArray[ThisObjective],0.5);
+    //                     UpdateObjectBump((Object*)&BKObjectiveArray[ThisObjective]);                        
+    //                 }
+    //                 if(BKObjectiveArray[ThisObjective].bump.distance_zx < 0)
+    //                 {
+    //                     BKObjectiveArray[ThisObjective].velocity[1] = 0;
+    //                 }
                     
 
-                    BKObjectiveArray[ThisObjective].angle[1] += DEG1 * 3;
+    //                 BKObjectiveArray[ThisObjective].angle[1] += DEG1 * 3;
 
                     
-                    //DrawGeometryScale(objectPosition,objectAngle,GlobalAddressB, 0.05f);
-                    break;
-                }
-            }
-        }
-    }
+    //                 //DrawGeometryScale(objectPosition,objectAngle,GlobalAddressB, 0.05f);
+    //                 break;
+    //             }
+    //         }
+    //     }
+    // }
 
 
-
+    //BK_COIN physics and display loop
+    gSPDisplayList(GraphPtrOffset++, GoldCoin_texture); //Load coin texture
+    //gSPVertex(GraphPtrOffset++, 0x08019730, 32, 0);  //load verts
     for (int ThisObjective = 0; ThisObjective < MaxBKObjectives; ThisObjective++)
     {
-        gSPDisplayList(GraphPtrOffset++, GoldCoin_texture);
+
+
         if ( (BKObjectiveArray[ThisObjective].flag != 0) && (BKObjectiveArray[ThisObjective].category == BK_COIN) )
         {
+
+            // if (abs(BKObjectiveArray[ThisObjective].velocity[0]) > 0 || abs(BKObjectiveArray[ThisObjective].velocity[2]) > 0)
+            // {
+                
+            // }
+            if(BKObjectiveArray[ThisObjective].bump.distance_zx < 0)
+            {
+                BKObjectiveArray[ThisObjective].velocity[1] = 0;
+            }
+            else
+            {
+                UpdateObjectGravity((Object*)&BKObjectiveArray[ThisObjective]);
+                UpdateObjectVelocity((Object*)&BKObjectiveArray[ThisObjective]);
+                UpdateObjectFrictionScale((Object*)&BKObjectiveArray[ThisObjective],0.5);
+                UpdateObjectBump((Object*)&BKObjectiveArray[ThisObjective]);        
+            }
+            
+
+            BKObjectiveArray[ThisObjective].angle[1] += DEG1 * 3;
+
+
             for (int i=0; i<3; i++)
             {
                 objectPosition[i] = BKObjectiveArray[ThisObjective].position[i];
-                if (i == 1)
-                {
-                    objectPosition[i] = objectPosition[i] - 10.0; //Lower height of model slightly
-                }
+
                 objectAngle[i] = (short)BKObjectiveArray[ThisObjective].angle[i];
-                if (objectPosition[i] < -g_waterHeight || objectPosition[i] > 2000.0) //Catch presents that wander off too far and delete them, to get rid of that pesky error
+                //if (objectPosition[i] < -g_waterHeight || objectPosition[i] > 2000.0) //Catch presents that wander off too far and delete them, to get rid of that pesky error
+                if (abs(objectPosition[i]) > 2000.0) //Catch presents that wander off too far and delete them, to get rid of that pesky error
                 {
                     BKObjectiveArray[ThisObjective].flag = 0;
                     break;
                 }
             }
-            DrawGeometryScale(objectPosition,objectAngle,GoldCoin_geometry, 0.05f);
+            objectPosition[1] -= - 10.0; //Lower height of model slightly
+            //DrawGeometryScale(objectPosition,objectAngle,GoldCoin_geometry, 0.05f);
+            TriclonDrawGeometryScale(objectPosition,objectAngle,GoldCoin_geometry, 0.05f);
+            //TriclonDrawGeometryScale(objectPosition,objectAngle,0x08019938, 0.05f);
         }
     }
 }
@@ -2710,7 +2773,7 @@ void customCourseRunEveryFrame()
 {
 
 
-    loadFont();
+    //loadFont();
 
     //printStringUnsignedHex(10,10, "bot status", (*(unsigned char*)(0x800F6991 + 0xDD8)));
     // printStringNumber(10,10,"check spawn position load", (int)SpawnPoint[0][0]);
@@ -2724,8 +2787,8 @@ void customCourseRunEveryFrame()
     // SetWeather3D(OverKartHeader.SkyType == 3);
     // SetWaterType((char)OverKartHeader.WaterType);
 
-
-
+    //gMatrixCount = 0; //Needed so lots of textures for objects can be loaded and displayed.
+    TriclonMatrixCount = 0;//Needed so lots of textures for objects can be loaded and displayed.
 
 }
 

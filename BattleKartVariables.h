@@ -113,6 +113,7 @@ extern void controllerLoop();
 extern int getBaseNumber();
 extern bool isSomeoneHoldingPlayerFlag(int player);
 extern bool isPlayerHoldingFlag(int player);
+extern bool bots_target_humans;
 
 // extern bool bot_timer_p1;
 // extern bool bot_timer_p2;
