@@ -33,6 +33,8 @@ extern long text_null;
 //extern char bot_rival_p1[4]; //Array that stores bot rivals
 extern char BUTTON_ACTIVATOR_1_P1; //P1 Button Activator 1 (see http://www.bsfree.org/hack/hacking_n64.html#activators_button)
 extern void incrementScore(int player);
+extern void changeScore(int player, int value);
+extern int getScore(int player);
 extern int check_if_hit(int player);
 extern bool checkHitBomb(int player);
 extern int getEnemy(int player);
@@ -80,6 +82,8 @@ extern char who_hit_p1_last[];
 extern char who_was_hit_last;
 extern float inGameAffineMatrix[4][4];
 extern bool using_hle;
+extern short hit_coin_loss;
+
 
 extern int checkItems(int player);
 extern int getTempo();
@@ -95,6 +99,7 @@ extern void menuFunction();
 extern void drawTitleScreen();
 extern void TexBuffLoadP2(int address, int something);
 extern void KartPosControlFull();
+extern bool all_players_bombs();
 // extern void yokog(void* Car, Vector power_vec);
 // extern 
 // check_bump(BUMP *bump,float radius,float px,float py,float pz)
@@ -134,15 +139,15 @@ extern short BattleSantaCurrentScore;
 
 
 //Music stuff
-extern void NaSeqStart(u16); 
+//extern void NaSeqStart(u16); 
 
-//Balloon color stuff
-typedef struct BalloonColor{ //For changing balloon colors
-    char Blank;
-    char R,G,B;
-} BalloonColor;
+// //Balloon color stuff
+// typedef struct BalloonColor{ //For changing balloon colors
+//     char Blank;
+//     char R,G,B;
+// } BalloonColor;
 
-extern BalloonColor  BalloonColorArray[8]; //0x800E4934
-extern BalloonColor  BalloonAdjustArray[8]; //0x800E4954
-extern BalloonColor  BalloonColorArrayB[8]; //0x800E4974
-extern BalloonColor  BalloonAdjustArrayB[8]; //0x800E4994
+// extern BalloonColor  BalloonColorArray[8]; //0x800E4934
+// extern BalloonColor  BalloonAdjustArray[8]; //0x800E4954
+// extern BalloonColor  BalloonColorArrayB[8]; //0x800E4974
+// extern BalloonColor  BalloonAdjustArrayB[8]; //0x800E4994

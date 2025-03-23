@@ -17,7 +17,8 @@
 
 
 
-#define MaxBKObjectives 1000
+#define MaxBKObjectives 100
+#define TriclonsTotalMatrixSize 4*MaxBKObjectives
 Object BKObjectiveArray[MaxBKObjectives]; //internal array for Objective Items separate from Shells/Itemboxes
 
 #define BK_COIN 1
@@ -25,16 +26,16 @@ Object BKObjectiveArray[MaxBKObjectives]; //internal array for Objective Items s
 long PreviousKBGNumber, PreviousKBGNumberNext; //Global to store previous menu ID
 bool inBattleKartMenu = false;
 
-
+short coin_rotation_angle = 0x0000; //This tracks the rotation of ALL coins being displayed in coin mode, this is for efficiency
 
 //The following variables and functions are for displaying coustom object textures/geometry (e.g. coins), needed to really expand the matrix array
 int TriclonMatrixCount = 0;
-const int TriclonsTotalMatrixSize = 5000;
-Mtx TriclonsSpecialMatrixArray[5000];
+//const int TriclonsTotalMatrixSize = 4*MaxBKObjectives;
+Mtx TriclonsSpecialMatrixArray[TriclonsTotalMatrixSize];
 
 int triclon_set_matrix(AffineMtx affine)
 {  
-    if(TriclonMatrixCount>TriclonsTotalMatrixSize)
+    if(TriclonMatrixCount>=TriclonsTotalMatrixSize)
     {
         return(FALSE);
         //we did not have enough slots and so could not render our object.
@@ -52,7 +53,20 @@ int triclon_set_matrix(AffineMtx affine)
 }
 
 
-void TriclonDrawGeometryScale(float localPosition[], short localAngle[], int localAddress, float localScale)
+
+// __attribute__((aligned(16)))
+// Vtx CoinBounds[] ={
+//     {   {  { 40,  40,  70}, 0, {0,0}, {0xff, 0xff, 0xff, 0xff} } },
+//     {   {  { 40, -40,  70}, 0, {0,0}, {0xff, 0xff, 0xff, 0xff} } },
+//     {   {  {-40, -40,  70}, 0, {0,0}, {0xff, 0xff, 0xff, 0xff} } },
+//     {   {  {-40,  40,  70}, 0, {0,0}, {0xff, 0xff, 0xff, 0xff} } },
+
+//     {   {  { 40,  40, 150}, 0, {0,0}, {0xff, 0xff, 0xff, 0xff} } },
+//     {   {  { 40, -40, 150}, 0, {0,0}, {0xff, 0xff, 0xff, 0xff} } },
+//     {   {  {-40, -40, 150}, 0, {0,0}, {0xff, 0xff, 0xff, 0xff} } },
+//     {   {  {-40,  40, 150}, 0, {0,0}, {0xff, 0xff, 0xff, 0xff} } },
+// };
+void TriclonDrawGoldCoin(float localPosition[], short localAngle[], int localAddress, float localScale)
 {
     CreateModelingMatrix(AffineMatrix,localPosition,localAngle);
     ScalingMatrix(AffineMatrix,localScale); 
@@ -60,9 +74,23 @@ void TriclonDrawGeometryScale(float localPosition[], short localAngle[], int loc
     {
         return;
     }
+    // gSPVertex(GraphPtrOffset++, &CoinBounds, 8, 0);
+    // gSPCullDisplayList(GraphPtrOffset++, 0, 7);
     gSPDisplayList(GraphPtrOffset++,localAddress);      
     
 }
+
+// void TriclonDrawGeometryScale(float localPosition[], short localAngle[], int localAddress, float localScale)
+// {
+//     CreateModelingMatrix(AffineMatrix,localPosition,localAngle);
+//     ScalingMatrix(AffineMatrix,localScale); 
+//     if(triclon_set_matrix(AffineMatrix) == 0)
+//     {
+//         return;
+//     }
+//     gSPDisplayList(GraphPtrOffset++,localAddress);      
+    
+// }
 
 
 
@@ -80,24 +108,24 @@ void TriclonDrawGeometryScale(float localPosition[], short localAngle[], int loc
 // }
 
 
-void SetBalloonColor(int PlayerIndex, int R, int G, int B, int AdjR, int AdjG, int AdjB)
-{
+// void SetBalloonColor(int PlayerIndex, int R, int G, int B, int AdjR, int AdjG, int AdjB)
+// {
     
-    BalloonColorArray[GlobalPlayer[PlayerIndex].kart].R = R;
-    BalloonColorArray[GlobalPlayer[PlayerIndex].kart].G = G;
-    BalloonColorArray[GlobalPlayer[PlayerIndex].kart].B = B;
-    BalloonAdjustArray[GlobalPlayer[PlayerIndex].kart].R = AdjR;
-    BalloonAdjustArray[GlobalPlayer[PlayerIndex].kart].G = AdjG;
-    BalloonAdjustArray[GlobalPlayer[PlayerIndex].kart].B = AdjB;
+//     BalloonColorArray[GlobalPlayer[PlayerIndex].kart].R = R;
+//     BalloonColorArray[GlobalPlayer[PlayerIndex].kart].G = G;
+//     BalloonColorArray[GlobalPlayer[PlayerIndex].kart].B = B;
+//     BalloonAdjustArray[GlobalPlayer[PlayerIndex].kart].R = AdjR;
+//     BalloonAdjustArray[GlobalPlayer[PlayerIndex].kart].G = AdjG;
+//     BalloonAdjustArray[GlobalPlayer[PlayerIndex].kart].B = AdjB;
 
-    BalloonColorArrayB[GlobalPlayer[PlayerIndex].kart].R = R;
-    BalloonColorArrayB[GlobalPlayer[PlayerIndex].kart].G = G;
-    BalloonColorArrayB[GlobalPlayer[PlayerIndex].kart].B = B;
-    BalloonAdjustArrayB[GlobalPlayer[PlayerIndex].kart].R = AdjR;
-    BalloonAdjustArrayB[GlobalPlayer[PlayerIndex].kart].G = AdjG;
-    BalloonAdjustArrayB[GlobalPlayer[PlayerIndex].kart].B = AdjB;
+//     BalloonColorArrayB[GlobalPlayer[PlayerIndex].kart].R = R;
+//     BalloonColorArrayB[GlobalPlayer[PlayerIndex].kart].G = G;
+//     BalloonColorArrayB[GlobalPlayer[PlayerIndex].kart].B = B;
+//     BalloonAdjustArrayB[GlobalPlayer[PlayerIndex].kart].R = AdjR;
+//     BalloonAdjustArrayB[GlobalPlayer[PlayerIndex].kart].G = AdjG;
+//     BalloonAdjustArrayB[GlobalPlayer[PlayerIndex].kart].B = AdjB;
 
-}
+// }
 
 
 void setTeamBallonColorsRedVsBlue() //Set balloon colors to red and blue for teams
@@ -110,81 +138,15 @@ void setTeamBallonColorsRedVsBlue() //Set balloon colors to red and blue for tea
 }
 
 
-void BattleInit() //Initialize for positions of a course
+void beforeCourseLoadsInit() //For loading custom course stuff before course actually loads
 {
-
-
-
     if (HotSwapID > 0) //For custom courses
     {
-        CustomObjectivePoints = (BattleObjectivePoint*)(GetRealAddress(0x06000210));
-
-        for (int ThisObj = 0; ThisObj < 64; ThisObj++)
-        {
-            if (CustomObjectivePoints[ThisObj].Position[0] == (short)-32768)
-            {
-                ThisObj = 64;                    
-            }
-            else
-            {           
-                //if (CustomObjectivePoints[ThisObj].GameMode == BATTLE_GAMETYPE)
-                //{
-                    switch (CustomObjectivePoints[ThisObj].Type)
-                    {
-                        case (SPAWN_POINT):
-                        {
-                            SpawnPoint[CustomObjectivePoints[ThisObj].Player][0] = (float)CustomObjectivePoints[ThisObj].Position[0];//Set player spawns for a custom course
-                            SpawnPoint[CustomObjectivePoints[ThisObj].Player][1] = (float)CustomObjectivePoints[ThisObj].Position[1];//Set player spawns for a custom course
-                            SpawnPoint[CustomObjectivePoints[ThisObj].Player][2] = (float)CustomObjectivePoints[ThisObj].Position[2];//Set player spawns for a custom course
-                           
-                            break;
-                        }
-                        case (FLAG_POINT):
-                        {   
-                            for (int i = 0; i < 4; i++) //For now just make copies of each set so I don't have to modify my code much
-                            {
-                                multiFlagPositionsHolder[i][CustomObjectivePoints[ThisObj].Player][0] = CustomObjectivePoints[ThisObj].Position[0];
-                                multiFlagPositionsHolder[i][CustomObjectivePoints[ThisObj].Player][1] = CustomObjectivePoints[ThisObj].Position[1];
-                                multiFlagPositionsHolder[i][CustomObjectivePoints[ThisObj].Player][2] = CustomObjectivePoints[ThisObj].Position[2];
-                            }
-                            break;
-                        }                        
-                        case (BASE_POINT):
-                        {
-                            for (int i = 0; i < 4; i++) //For now just make copies of each set so I don't have to modify my code much
-                            {
-                                basePositionsHolder[i][CustomObjectivePoints[ThisObj].Player][0] = CustomObjectivePoints[ThisObj].Position[0];
-                                basePositionsHolder[i][CustomObjectivePoints[ThisObj].Player][1] = CustomObjectivePoints[ThisObj].Position[1];
-                                basePositionsHolder[i][CustomObjectivePoints[ThisObj].Player][2] = CustomObjectivePoints[ThisObj].Position[2];
-                            }
-                            break;
-                        }
-                    }
-                //}
-            }
-        }
-        
+        loadMinimap();
     }
-    else //For stock courses
-    {
-        singleFlagPositionsHolder[0] = singleFlagPositions[g_courseID][0];
-        singleFlagPositionsHolder[1] = singleFlagPositions[g_courseID][1];
-        singleFlagPositionsHolder[2] = singleFlagPositions[g_courseID][2];
-        for (int i = 0; i < 4; i++)
-        {
-            for (int player = 0; player < 4; player++)
-            {
-                multiFlagPositionsHolder[i][player][0] = multiFlagPositions[i][g_courseID][player][0];
-                multiFlagPositionsHolder[i][player][1] = multiFlagPositions[i][g_courseID][player][1];
-                multiFlagPositionsHolder[i][player][2] = multiFlagPositions[i][g_courseID][player][2];
-                basePositionsHolder[i][player][0] = basePositions[i][g_courseID][player][0];
-                basePositionsHolder[i][player][1] = basePositions[i][g_courseID][player][1];
-                basePositionsHolder[i][player][2] = basePositions[i][g_courseID][player][2];                
-            }
-        }
-    }
-
 }
+
+
 
 
 
@@ -342,6 +304,14 @@ static int AddBKObjective(Vector localPosition, SVector localRotation, Vector lo
     return -1;
 }
 
+void clearBKObjecives()  ///Clear custom objects before course (or for any other reason)
+{
+    for(int i = 0; i < MaxBKObjectives; i++)
+    {
+        BKObjectiveArray[i].flag = 0;
+    }
+}
+
 //Check collisions for BK Objectives.  Returns -1 if no collisions found, or the index of the BKObjective object in BKObjectiveArray if a collision is found 
 int checkBKObjectiveCollision(Vector localPosition)
 {
@@ -360,6 +330,9 @@ int checkBKObjectiveCollision(Vector localPosition)
     } 
     return -1;
 }
+
+
+//
 
 
 //Check collisions with presents for Battle Santa
@@ -431,6 +404,126 @@ void CopyBump(Camera* LocalCamera, Player LocalPlayer)
         LocalCamera->bump.bump_zx[ThisVector] = LocalPlayer.bump.bump_zx[ThisVector];
     }
     LocalCamera->bump.dummy = LocalPlayer.bump.dummy;
+}
+
+
+void BattleInit() //Initialize for positions of a course
+{
+
+    if (HotSwapID > 0) //For custom courses
+    {
+
+
+        setSky(); //Load various things for custom courses
+        setWater();
+
+        CustomObjectivePoints = (BattleObjectivePoint*)(GetRealAddress(0x06000210));
+
+        for (int ThisObj = 0; ThisObj < 64; ThisObj++)
+        {
+            if (CustomObjectivePoints[ThisObj].Position[0] == (short)-32768)
+            {
+                ThisObj = 64;                    
+            }
+            else
+            {           
+                //if (CustomObjectivePoints[ThisObj].GameMode == BATTLE_GAMETYPE)
+                //{
+                    switch (CustomObjectivePoints[ThisObj].Type)
+                    {
+                        case (SPAWN_POINT):
+                        {
+                            SpawnPoint[CustomObjectivePoints[ThisObj].Player][0] = (float)CustomObjectivePoints[ThisObj].Position[0];//Set player spawns for a custom course
+                            SpawnPoint[CustomObjectivePoints[ThisObj].Player][1] = (float)CustomObjectivePoints[ThisObj].Position[1];//Set player spawns for a custom course
+                            SpawnPoint[CustomObjectivePoints[ThisObj].Player][2] = (float)CustomObjectivePoints[ThisObj].Position[2];//Set player spawns for a custom course
+                           
+                            break;
+                        }
+                        case (FLAG_POINT):
+                        {   
+                            for (int i = 0; i < 4; i++) //For now just make copies of each set so I don't have to modify my code much
+                            {
+                                multiFlagPositionsHolder[i][CustomObjectivePoints[ThisObj].Player][0] = CustomObjectivePoints[ThisObj].Position[0];
+                                multiFlagPositionsHolder[i][CustomObjectivePoints[ThisObj].Player][1] = CustomObjectivePoints[ThisObj].Position[1];
+                                multiFlagPositionsHolder[i][CustomObjectivePoints[ThisObj].Player][2] = CustomObjectivePoints[ThisObj].Position[2];
+                            }
+                            break;
+                        }                        
+                        case (BASE_POINT):
+                        {
+                            for (int i = 0; i < 4; i++) //For now just make copies of each set so I don't have to modify my code much
+                            {
+                                basePositionsHolder[i][CustomObjectivePoints[ThisObj].Player][0] = CustomObjectivePoints[ThisObj].Position[0];
+                                basePositionsHolder[i][CustomObjectivePoints[ThisObj].Player][1] = CustomObjectivePoints[ThisObj].Position[1];
+                                basePositionsHolder[i][CustomObjectivePoints[ThisObj].Player][2] = CustomObjectivePoints[ThisObj].Position[2];
+                            }
+                            break;
+                        }
+                    }
+                //}
+            }
+        }
+
+
+        
+    }
+    else //For stock courses
+    {
+        singleFlagPositionsHolder[0] = singleFlagPositions[g_courseID][0];
+        singleFlagPositionsHolder[1] = singleFlagPositions[g_courseID][1];
+        singleFlagPositionsHolder[2] = singleFlagPositions[g_courseID][2];
+        for (int i = 0; i < 4; i++)
+        {
+            for (int player = 0; player < 4; player++)
+            {
+                multiFlagPositionsHolder[i][player][0] = multiFlagPositions[i][g_courseID][player][0];
+                multiFlagPositionsHolder[i][player][1] = multiFlagPositions[i][g_courseID][player][1];
+                multiFlagPositionsHolder[i][player][2] = multiFlagPositions[i][g_courseID][player][2];
+                basePositionsHolder[i][player][0] = basePositions[i][g_courseID][player][0];
+                basePositionsHolder[i][player][1] = basePositions[i][g_courseID][player][1];
+                basePositionsHolder[i][player][2] = basePositions[i][g_courseID][player][2];                
+            }
+        }
+    }
+
+
+    clearBKObjecives();
+
+
+}
+
+
+
+
+void spawnCoins(int n_coins)//If game mode is coins, spawn N coins at the beginning of the match
+{
+    // Notes from DeadHamster
+    // D_8015F6E8 - max X
+    // D_8015F6EA - min X
+    // D_8015F6F0  - max Z
+    // D_8015F6F2 - min Z
+    // sooo I'd guess that...
+    // D_8015F6EC - max Y
+    // D_8015F6EE - min Y
+    objectPosition[1] = 1000;
+    objectAngle[0] = 0;
+    objectAngle[1] = 0;
+    objectAngle[2] = 0;
+    objectVelocity[0] = 0;
+    objectVelocity[1] = 0;
+    objectVelocity[2] = 0;
+    short x_min = *(short*)0x8015F6EA + 10;
+    short x_max = *(short*)0x8015F6E8 - 10;
+    short z_min = *(short*)0x8015F6F2 + 10;
+    short z_max = *(short*)0x8015F6F0 - 10;
+
+    for (int i = 0; i < n_coins; i++)
+    {
+        objectPosition[0] = (float)(x_min + MakeRandomLimmit(x_max-x_min));
+        objectPosition[2] = (float)(z_min + MakeRandomLimmit(z_max-z_min));
+        AddBKObjective(objectPosition, objectAngle, objectVelocity, BK_COIN, 5.0);
+    }
+
 }
 
 
@@ -589,23 +682,37 @@ void DropCoins(int PlayerIndex)
 {
     //IFrames[PlayerIndex] = 90;
     //Hey do you want iframes eventually? 
+    
+    int score = getScore(PlayerIndex);
+    if (score > 0)
+    {   
+        objectPosition[0] = GlobalPlayer[PlayerIndex].position[0]; 
+        objectPosition[1] = GlobalPlayer[PlayerIndex].position[1]+12.0;
+        objectPosition[2] = GlobalPlayer[PlayerIndex].position[2];
+        objectAngle[0] = 0;
+        objectAngle[1] = 0;
+        objectAngle[2] = 0;
+        int n_coins_to_drop;
 
-    objectPosition[0] = GlobalPlayer[PlayerIndex].position[0]; 
-    objectPosition[1] = GlobalPlayer[PlayerIndex].position[1];
-    objectPosition[2] = GlobalPlayer[PlayerIndex].position[2];
-    objectAngle[0] = 0;
-    objectAngle[1] = 0;
-    objectAngle[2] = 0;
+        if (score > hit_coin_loss)
+        {
+            n_coins_to_drop = hit_coin_loss;
+        }
+        else{
+            n_coins_to_drop = score;
+        }
 
-    for (int i=0; i<30; i++) 
-    {        
-        objectVelocity[0] = -3 + (MakeRandomLimmit(6));
-        objectVelocity[1] = 4;
-        objectVelocity[2] = -4 + (MakeRandomLimmit(8));
-        MakeAlignVector(objectVelocity,(GlobalPlayer[PlayerIndex].direction[1]));
-        AddBKObjective(objectPosition, objectAngle, objectVelocity, BK_COIN, 3.0);
+        for (int i=0; i<n_coins_to_drop; i++) 
+        {        
+            objectVelocity[0] = -4 + (MakeRandomLimmit(8));
+            objectVelocity[1] = 4;
+            objectVelocity[2] = -4 + (MakeRandomLimmit(8));
+            MakeAlignVector(objectVelocity,(GlobalPlayer[PlayerIndex].direction[1]));
+            AddBKObjective(objectPosition, objectAngle, objectVelocity, BK_COIN, 5.0);
+            //p1_score[PlayerIndex] -= 1; //Decrement player's score 1 for each 
+            changeScore(PlayerIndex, -1);
+        }
     }
-
     
 }
 
@@ -667,7 +774,7 @@ void DisplayBattleKartTitle()
     PrintBigText(36,19, 0.85f," A T E  A T  4");
 
 
-    PrintBigText(272,13, 0.32f,"v3.0b4");
+    PrintBigText(272,13, 0.32f,"v3.0b8");
     PrintBigText(250,16, 0.5f,"by");
     PrintBigText(230,30, 0.5f,"Triclon");  
 
@@ -809,7 +916,7 @@ void getStartingPositions()
         for (int i=0; i < player_count; i++)
         {
             GlobalPlayer[i].position[0] = SpawnPoint[i][0];
-            GlobalPlayer[i].position[1] = SpawnPoint[i][1];
+            GlobalPlayer[i].position[1] = SpawnPoint[i][1] + 5;
             GlobalPlayer[i].position[2] = SpawnPoint[i][2];
             GlobalPlayer[i].direction[1] = (short)(CalcDirection(GlobalPlayer[i].position, Origin) * -1);
         }
@@ -1136,11 +1243,11 @@ void keep_away_minimap_display_flag()
 
 
 
-bool detectEmulatorOldVersion()
-{
-    ConsolePlatform = CheckPlatform(); 
-    return(ConsolePlatform);
-}
+// bool detectEmulatorOldVersion()
+// {
+//     ConsolePlatform = CheckPlatform(); 
+//     return(ConsolePlatform);
+// }
 
 
 //Set display to 1P only
@@ -1735,7 +1842,7 @@ void selectStartingPositions()
             }
 
             // //Freeze bots so they don't wander around
-            for (int i=0; i<4; i++)
+            for (int i=0; i<player_count; i++)
             {
                 if (bot_status_p1[i] > 0)
                 {
@@ -1990,6 +2097,51 @@ void dropFlagAfterHit()
     }
 }
 
+
+void PhysicsBKCoins()
+{
+
+    coin_rotation_angle += 8 * DEG1 * getTempo(); //Increment angle for all coins
+    
+    for (int ThisObjective = 0; ThisObjective < MaxBKObjectives; ThisObjective++)
+    {
+
+        if ( (BKObjectiveArray[ThisObjective].flag != 0) && (BKObjectiveArray[ThisObjective].category == BK_COIN) )
+        {
+
+            BKObjectiveArray[ThisObjective].angle[1] = coin_rotation_angle; //Set coin rotation angle
+            // if (abs(BKObjectiveArray[ThisObjective].velocity[0]) > 0 || abs(BKObjectiveArray[ThisObjective].velocity[2]) > 0)
+            // {
+                
+            // }
+            if(BKObjectiveArray[ThisObjective].bump.distance_zx < 0)
+            {
+                BKObjectiveArray[ThisObjective].velocity[1] = 0;
+            }
+            else
+            {
+                UpdateObjectGravity((Object*)&BKObjectiveArray[ThisObjective]);
+                UpdateObjectVelocity((Object*)&BKObjectiveArray[ThisObjective]);
+                UpdateObjectFrictionScale((Object*)&BKObjectiveArray[ThisObjective],0.5);
+                UpdateObjectBump((Object*)&BKObjectiveArray[ThisObjective]);        
+            }
+            
+
+            for (int i=0; i<3; i++) 
+            {
+                //if ((abs(BKObjectiveArray[ThisObjective].position[i]) > 2000.0) || (abs(BKObjectiveArray[ThisObjective].velocity[i]) > 2000.0)) //Catch presents that wander off too far and delete them, to get rid of that pesky error
+                if (abs(BKObjectiveArray[ThisObjective].position[i]) > 2000.0)
+                {
+                    BKObjectiveArray[ThisObjective].flag = 0;
+                    spawnCoins(1);
+                    break;
+                }                
+            }
+        }
+    }
+
+}
+
 void DisplayBKObjectives()
 {
     //This function will loop through all BKObjectives and if an object exists it will be drawn
@@ -2031,53 +2183,36 @@ void DisplayBKObjectives()
     //     }
     // }
 
-
-    //BK_COIN physics and display loop
-    gSPDisplayList(GraphPtrOffset++, GoldCoin_texture); //Load coin texture
-    //gSPVertex(GraphPtrOffset++, 0x08019730, 32, 0);  //load verts
-    for (int ThisObjective = 0; ThisObjective < MaxBKObjectives; ThisObjective++)
+    if (game_mode == 7) //Coin mode
     {
-
-
-        if ( (BKObjectiveArray[ThisObjective].flag != 0) && (BKObjectiveArray[ThisObjective].category == BK_COIN) )
+        //BK_COIN physics and display loop
+        gSPDisplayList(GraphPtrOffset++, GoldCoin_texture); //Load coin texture
+        //gSPVertex(GraphPtrOffset++, 0x08019730, 32, 0);  //load verts
+        for (int ThisObjective = 0; ThisObjective < MaxBKObjectives; ThisObjective++)
+        //for (int ThisObjective = g_DispFrame; ThisObjective < MaxBKObjectives; ThisObjective+=2) //flicker!
         {
 
-            // if (abs(BKObjectiveArray[ThisObjective].velocity[0]) > 0 || abs(BKObjectiveArray[ThisObjective].velocity[2]) > 0)
-            // {
-                
-            // }
-            if(BKObjectiveArray[ThisObjective].bump.distance_zx < 0)
+
+            if ( (BKObjectiveArray[ThisObjective].flag != 0) && (BKObjectiveArray[ThisObjective].category == BK_COIN) )
             {
-                BKObjectiveArray[ThisObjective].velocity[1] = 0;
+                //BKObjectiveArray[ThisObjective].angle[1] += delta_angle;
+                //BKObjectiveArray[ThisObjective].angle[1] = coin_rotation_angle;
+                // for (int i=0; i<3; i++)
+                // {
+                //     objectPosition[i] = BKObjectiveArray[ThisObjective].position[i];
+                //     //objectAngle[i] = (short)BKObjectiveArray[ThisObjective].angle[i];
+                //     //if (objectPosition[i] < -g_waterHeight || objectPosition[i] > 2000.0) //Catch presents that wander off too far and delete them, to get rid of that pesky error
+                // }
+                // objectPosition[1] -=  20.0; //Lower height of model slightly
+                objectPosition[0] = BKObjectiveArray[ThisObjective].position[0];
+                objectPosition[1] = BKObjectiveArray[ThisObjective].position[1] - 20.0;
+                objectPosition[2] = BKObjectiveArray[ThisObjective].position[2];
+                //DrawGeometryScale(objectPosition,objectAngle,GoldCoin_geometry, 0.05f);
+                //TriclonDrawGeometryScale(objectPosition,objectAngle,GoldCoin_geometry, 0.08f);
+                //TriclonDrawGeometryScale(objectPosition, BKObjectiveArray[ThisObjective].angle, GoldCoin_geometry, 0.08f);
+                TriclonDrawGoldCoin(objectPosition, BKObjectiveArray[ThisObjective].angle, GoldCoin_geometry, 0.08f);
+                //TriclonDrawGeometryScale(objectPosition,objectAngle,0x080 19938, 0.05f);
             }
-            else
-            {
-                UpdateObjectGravity((Object*)&BKObjectiveArray[ThisObjective]);
-                UpdateObjectVelocity((Object*)&BKObjectiveArray[ThisObjective]);
-                UpdateObjectFrictionScale((Object*)&BKObjectiveArray[ThisObjective],0.5);
-                UpdateObjectBump((Object*)&BKObjectiveArray[ThisObjective]);        
-            }
-            
-
-            BKObjectiveArray[ThisObjective].angle[1] += DEG1 * 3;
-
-
-            for (int i=0; i<3; i++)
-            {
-                objectPosition[i] = BKObjectiveArray[ThisObjective].position[i];
-
-                objectAngle[i] = (short)BKObjectiveArray[ThisObjective].angle[i];
-                //if (objectPosition[i] < -g_waterHeight || objectPosition[i] > 2000.0) //Catch presents that wander off too far and delete them, to get rid of that pesky error
-                if (abs(objectPosition[i]) > 2000.0) //Catch presents that wander off too far and delete them, to get rid of that pesky error
-                {
-                    BKObjectiveArray[ThisObjective].flag = 0;
-                    break;
-                }
-            }
-            objectPosition[1] -= - 10.0; //Lower height of model slightly
-            //DrawGeometryScale(objectPosition,objectAngle,GoldCoin_geometry, 0.05f);
-            TriclonDrawGeometryScale(objectPosition,objectAngle,GoldCoin_geometry, 0.05f);
-            //TriclonDrawGeometryScale(objectPosition,objectAngle,0x08019938, 0.05f);
         }
     }
 }
@@ -2145,8 +2280,11 @@ void DisplayBKObjectives()
 //void DrawLightBulb()
 void DrawPerScreen(Camera* LocalCamera)
 {  
-    //This function will draw the array of BKObjective Objects. 
-    DisplayBKObjectives();
+    
+    if (scrollLock){ //Only run after course loads
+        DisplayBKObjectives(); //This function will draw the array of BKObjective Objects. 
+    }
+    
 
 
     if (game_mode ==3 || game_mode==4) //If game is ctf or keep away
@@ -2400,7 +2538,7 @@ void DisplayFlag(void *Camera, void *Object)
     }
     else
     {
-        DrawGeometryScale(objectPosition,objectAngle,GlobalAddressB, 0.1);
+        // DrawGeometryScale(objectPosition,objectAngle,GlobalAddressB, 0.1);
     }
 
     
@@ -2456,7 +2594,8 @@ void BaseCollide(void *Car, void *Base)
     objectPosition[2] = *(float*)(Base + 32);
 
 
-    if (CollisionCylinder(Car,objectPosition,7.0f,5.0f,0.0f) == 1 && canHitBase)
+
+    if (CollisionCylinder(Car,objectPosition,7.5f,5.0f,0.0f) == 1 && canHitBase)
     {
         //*targetAddress = 0x353500FF;
         //deleteObjectBuffer(Flag);
@@ -2526,10 +2665,21 @@ void FlagCollide(void *Car, void *Flag)
             }
         }
 
-        objectPosition[0] = *(float*)(Flag + 24);
-        objectPosition[1] = *(float*)(Flag + 28);
-        objectPosition[2] = *(float*)(Flag + 32);
-        if ((CollisionCylinder(Car,objectPosition,3.5f,5.0f,0.0f) == 1))
+        // objectPosition[0] = *(float*)(Flag + 24);
+        // objectPosition[1] = *(float*)(Flag + 28);
+        // objectPosition[2] = *(float*)(Flag + 32);
+
+        // float distance = pow(objectPosition[0] - GlobalPlayer[carID].position[0], 2) + 
+        //                         pow(objectPosition[1] - GlobalPlayer[carID].position[1], 2) +
+        //                         pow(objectPosition[2] - GlobalPlayer[carID].position[2], 2);
+
+
+        float distance = pow(*(float*)(Flag + 24) - GlobalPlayer[carID].position[0], 2) + 
+                                pow(*(float*)(Flag + 28) - GlobalPlayer[carID].position[1], 2) +
+                                pow(*(float*)(Flag + 32) - GlobalPlayer[carID].position[2], 2);
+
+        //if ((CollisionCylinder(Car,objectPosition,3.5f,5.0f,0.0f) == 1))
+        if (distance <= pow(3.5 + GlobalPlayer[carID].radius, 2))
         {
             // //*targetAddress = 0x353500FF;
             // deleteObjectBuffer(Flag);
@@ -2746,6 +2896,10 @@ void menuStuff()
         }
         SpriteBtnCLeft(45,35,1.5,false);
         SpriteBtnCRight(279,35,1.5,false);
+        if (HotSwapID == 2) //Show only first set of custom courses since there are only 4 custom courses currently, if user tries to go to second, go back
+        {
+            swapHS(0); 
+        }
         
     }
 
@@ -2789,6 +2943,15 @@ void customCourseRunEveryFrame()
 
     //gMatrixCount = 0; //Needed so lots of textures for objects can be loaded and displayed.
     TriclonMatrixCount = 0;//Needed so lots of textures for objects can be loaded and displayed.
+    if (g_startingIndicator == 2) //Properly set scroll lock
+    {
+        scrollLock = true;
+    }
+    else if (g_startingIndicator == 7)
+    {
+        scrollLock = false;
+    }
+
 
 }
 
@@ -3005,6 +3168,15 @@ void CollideObject(Player* car, Object* Object)
 //     // }
     
 // }
+
+void runFPSCounter()
+{
+    ClockCycle[0] = osGetCount();
+    CycleCount[0] = (ClockCycle[0] - OldCycle[0]);
+    OldCycle[0] = ClockCycle[0];
+    GlobalFrameCount++;
+}
+
 
 
 

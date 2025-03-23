@@ -228,9 +228,8 @@ Marker BigDonut_OuterCircle00[9] =
 	{ {-830, 225, -51} , 1},
 	{ {-831, 225, -23} , 1},
 };
-Marker BigDonut_InnerCircle15[12] = 
+Marker BigDonut_InnerCircle15[10] = 
 {
-	{ {-227, 200, 538} , 1},
 	{ {-208, 200, 545} , 1},
 	{ {-189, 200, 552} , 1},
 	{ {-170, 200, 558} , 1},
@@ -241,11 +240,9 @@ Marker BigDonut_InnerCircle15[12] =
 	{ {-73, 200, 579} , 1},
 	{ {-53, 200, 581} , 1},
 	{ {-33, 200, 583} , 1},
-	{ {-13, 200, 584} , 1},
 };
-Marker BigDonut_InnerCircle14[12] = 
+Marker BigDonut_InnerCircle14[9] = 
 {
-	{ {-413, 200, 413} , 1},
 	{ {-398, 200, 426} , 1},
 	{ {-383, 200, 440} , 1},
 	{ {-368, 200, 453} , 1},
@@ -255,12 +252,9 @@ Marker BigDonut_InnerCircle14[12] =
 	{ {-303, 200, 499} , 1},
 	{ {-286, 200, 509} , 1},
 	{ {-268, 200, 519} , 1},
-	{ {-250, 200, 527} , 1},
-	{ {-232, 200, 536} , 1},
 };
-Marker BigDonut_InnerCircle13[12] = 
+Marker BigDonut_InnerCircle13[9] = 
 {
-	{ {-538, 200, 227} , 1},
 	{ {-530, 200, 245} , 1},
 	{ {-521, 200, 263} , 1},
 	{ {-512, 200, 281} , 1},
@@ -270,12 +264,9 @@ Marker BigDonut_InnerCircle13[12] =
 	{ {-468, 200, 348} , 1},
 	{ {-456, 200, 364} , 1},
 	{ {-443, 200, 379} , 1},
-	{ {-430, 200, 394} , 1},
-	{ {-416, 200, 409} , 1},
 };
-Marker BigDonut_InnerCircle12[12] = 
+Marker BigDonut_InnerCircle12[9] = 
 {
-	{ {-584, 200, 0} , 1},
 	{ {-584, 200, 19} , 1},
 	{ {-582, 200, 39} , 1},
 	{ {-581, 200, 59} , 1},
@@ -285,12 +276,9 @@ Marker BigDonut_InnerCircle12[12] =
 	{ {-567, 200, 138} , 1},
 	{ {-562, 200, 158} , 1},
 	{ {-556, 200, 177} , 1},
-	{ {-550, 200, 196} , 1},
-	{ {-543, 200, 214} , 1},
 };
-Marker BigDonut_InnerCircle11[12] = 
+Marker BigDonut_InnerCircle11[10] = 
 {
-	{ {0, 200, 584} , 1},
 	{ {19, 200, 584} , 1},
 	{ {39, 200, 582} , 1},
 	{ {59, 200, 581} , 1},
@@ -301,11 +289,9 @@ Marker BigDonut_InnerCircle11[12] =
 	{ {158, 200, 562} , 1},
 	{ {177, 200, 556} , 1},
 	{ {196, 200, 550} , 1},
-	{ {214, 200, 543} , 1},
 };
-Marker BigDonut_InnerCircle10[12] = 
+Marker BigDonut_InnerCircle10[9] = 
 {
-	{ {227, 200, 538} , 1},
 	{ {245, 200, 530} , 1},
 	{ {263, 200, 521} , 1},
 	{ {281, 200, 512} , 1},
@@ -315,12 +301,9 @@ Marker BigDonut_InnerCircle10[12] =
 	{ {348, 200, 468} , 1},
 	{ {364, 200, 456} , 1},
 	{ {379, 200, 443} , 1},
-	{ {394, 200, 430} , 1},
-	{ {409, 200, 416} , 1},
 };
-Marker BigDonut_InnerCircle09[12] = 
+Marker BigDonut_InnerCircle09[9] = 
 {
-	{ {413, 200, 413} , 1},
 	{ {426, 200, 398} , 1},
 	{ {440, 200, 383} , 1},
 	{ {453, 200, 368} , 1},
@@ -330,12 +313,9 @@ Marker BigDonut_InnerCircle09[12] =
 	{ {499, 200, 303} , 1},
 	{ {509, 200, 286} , 1},
 	{ {519, 200, 268} , 1},
-	{ {527, 200, 250} , 1},
-	{ {536, 200, 232} , 1},
 };
-Marker BigDonut_InnerCircle08[12] = 
+Marker BigDonut_InnerCircle08[10] = 
 {
-	{ {538, 200, 227} , 1},
 	{ {545, 200, 208} , 1},
 	{ {552, 200, 189} , 1},
 	{ {558, 200, 170} , 1},
@@ -346,14 +326,9 @@ Marker BigDonut_InnerCircle08[12] =
 	{ {579, 200, 73} , 1},
 	{ {581, 200, 53} , 1},
 	{ {583, 200, 33} , 1},
-	{ {584, 200, 13} , 1},
 };
-Marker BigDonut_InnerCircle07[12] = 
+Marker BigDonut_InnerCircle07[7] = 
 {
-	{ {227, 200, -538} , 1},
-	{ {208, 200, -545} , 1},
-	{ {189, 200, -552} , 1},
-	{ {170, 200, -558} , 1},
 	{ {151, 200, -564} , 1},
 	{ {132, 200, -569} , 1},
 	{ {112, 200, -573} , 1},
@@ -361,9 +336,8 @@ Marker BigDonut_InnerCircle07[12] =
 	{ {73, 200, -579} , 1},
 	{ {53, 200, -581} , 1},
 	{ {33, 200, -583} , 1},
-	{ {13, 200, -584} , 1},
 };
-Marker BigDonut_InnerCircle06[9] = 
+Marker BigDonut_InnerCircle06[13] = 
 {
 	{ {398, 200, -426} , 1},
 	{ {383, 200, -440} , 1},
@@ -374,10 +348,13 @@ Marker BigDonut_InnerCircle06[9] =
 	{ {303, 200, -499} , 1},
 	{ {286, 200, -509} , 1},
 	{ {268, 200, -519} , 1},
+	{ {250, 200, -527} , 1},
+	{ {235, 200, -534} , 1},
+	{ {217, 200, -542} , 1},
+	{ {198, 200, -549} , 1},
 };
-Marker BigDonut_InnerCircle05[12] = 
+Marker BigDonut_InnerCircle05[9] = 
 {
-	{ {538, 200, -227} , 1},
 	{ {530, 200, -245} , 1},
 	{ {521, 200, -263} , 1},
 	{ {512, 200, -281} , 1},
@@ -387,12 +364,9 @@ Marker BigDonut_InnerCircle05[12] =
 	{ {468, 200, -348} , 1},
 	{ {456, 200, -364} , 1},
 	{ {443, 200, -379} , 1},
-	{ {430, 200, -394} , 1},
-	{ {416, 200, -409} , 1},
 };
-Marker BigDonut_InnerCircle04[12] = 
+Marker BigDonut_InnerCircle04[9] = 
 {
-	{ {584, 200, 0} , 1},
 	{ {584, 200, -19} , 1},
 	{ {582, 200, -39} , 1},
 	{ {581, 200, -59} , 1},
@@ -402,12 +376,9 @@ Marker BigDonut_InnerCircle04[12] =
 	{ {567, 200, -138} , 1},
 	{ {562, 200, -158} , 1},
 	{ {556, 200, -177} , 1},
-	{ {550, 200, -196} , 1},
-	{ {543, 200, -214} , 1},
 };
-Marker BigDonut_InnerCircle03[12] = 
+Marker BigDonut_InnerCircle03[9] = 
 {
-	{ {0, 200, -584} , 1},
 	{ {-19, 200, -584} , 1},
 	{ {-39, 200, -582} , 1},
 	{ {-59, 200, -581} , 1},
@@ -417,12 +388,9 @@ Marker BigDonut_InnerCircle03[12] =
 	{ {-138, 200, -567} , 1},
 	{ {-158, 200, -562} , 1},
 	{ {-177, 200, -556} , 1},
-	{ {-196, 200, -550} , 1},
-	{ {-214, 200, -543} , 1},
 };
-Marker BigDonut_InnerCircle02[12] = 
+Marker BigDonut_InnerCircle02[9] = 
 {
-	{ {-227, 200, -538} , 1},
 	{ {-245, 200, -530} , 1},
 	{ {-263, 200, -521} , 1},
 	{ {-281, 200, -512} , 1},
@@ -432,12 +400,9 @@ Marker BigDonut_InnerCircle02[12] =
 	{ {-348, 200, -468} , 1},
 	{ {-364, 200, -456} , 1},
 	{ {-379, 200, -443} , 1},
-	{ {-394, 200, -430} , 1},
-	{ {-409, 200, -416} , 1},
 };
-Marker BigDonut_InnerCircle01[12] = 
+Marker BigDonut_InnerCircle01[9] = 
 {
-	{ {-413, 200, -413} , 1},
 	{ {-426, 200, -398} , 1},
 	{ {-440, 200, -383} , 1},
 	{ {-453, 200, -368} , 1},
@@ -447,12 +412,9 @@ Marker BigDonut_InnerCircle01[12] =
 	{ {-499, 200, -303} , 1},
 	{ {-509, 200, -286} , 1},
 	{ {-519, 200, -268} , 1},
-	{ {-527, 200, -250} , 1},
-	{ {-536, 200, -232} , 1},
 };
-Marker BigDonut_InnerCircle00[12] = 
+Marker BigDonut_InnerCircle00[10] = 
 {
-	{ {-538, 200, -227} , 1},
 	{ {-545, 200, -208} , 1},
 	{ {-552, 200, -189} , 1},
 	{ {-558, 200, -170} , 1},
@@ -463,7 +425,6 @@ Marker BigDonut_InnerCircle00[12] =
 	{ {-579, 200, -73} , 1},
 	{ {-581, 200, -53} , 1},
 	{ {-583, 200, -33} , 1},
-	{ {-584, 200, -13} , 1},
 };
 Marker BigDonut_Links03[9] = 
 {
@@ -710,7 +671,7 @@ Marker BigDonut_Links19[4] =
 Marker *BigDonut_Paths[] = 
 { BigDonut_OuterCircle15, BigDonut_OuterCircle14, BigDonut_OuterCircle13, BigDonut_OuterCircle12, BigDonut_OuterCircle11, BigDonut_OuterCircle10, BigDonut_OuterCircle09, BigDonut_OuterCircle08, BigDonut_OuterCircle07, BigDonut_OuterCircle06, BigDonut_OuterCircle05, BigDonut_OuterCircle04, BigDonut_OuterCircle03, BigDonut_OuterCircle02, BigDonut_OuterCircle01, BigDonut_OuterCircle00, BigDonut_InnerCircle15, BigDonut_InnerCircle14, BigDonut_InnerCircle13, BigDonut_InnerCircle12, BigDonut_InnerCircle11, BigDonut_InnerCircle10, BigDonut_InnerCircle09, BigDonut_InnerCircle08, BigDonut_InnerCircle07, BigDonut_InnerCircle06, BigDonut_InnerCircle05, BigDonut_InnerCircle04, BigDonut_InnerCircle03, BigDonut_InnerCircle02, BigDonut_InnerCircle01, BigDonut_InnerCircle00, BigDonut_Links03, BigDonut_Links00, BigDonut_Links09, BigDonut_Links07, BigDonut_Links01, BigDonut_Links14, BigDonut_Links18, BigDonut_Links16, BigDonut_Links13, BigDonut_Links20, BigDonut_Links11, BigDonut_Links04, BigDonut_Links24, BigDonut_Links25, BigDonut_Links12, BigDonut_Links10, BigDonut_Links05, BigDonut_Links06, BigDonut_Links08, BigDonut_Links02, BigDonut_Links22, BigDonut_Links23, BigDonut_Links17, BigDonut_Links15, BigDonut_Links21, BigDonut_Links19};
 short BigDonut_PathLengths[58] = 
-{ 11, 11, 11, 11, 11, 11, 11, 11, 8, 8, 11, 11, 11, 11, 8, 8, 11, 11, 11, 11, 11, 11, 11, 11, 11, 8, 11, 11, 11, 11, 11, 11, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3};
+{ 11, 11, 11, 11, 11, 11, 11, 11, 8, 8, 11, 11, 11, 11, 8, 8, 9, 8, 8, 8, 9, 8, 8, 9, 6, 12, 8, 8, 8, 8, 8, 9, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3};
 Marker *BigDonut_Ramps[] = 
 { };
 short BigDonut_RampLengths[0] = 

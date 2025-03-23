@@ -7,6 +7,10 @@ cd /Users/kfkaplan/Dropbox/battlekart64
 /Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "BattleKartPaths/SkyscraperPaths.c" -o "BattleKartPaths/SkyscraperPaths.o"
 /Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "BattleKartPaths/BigDonutPaths.c" -o "BattleKartPaths/BigDonutPaths.o"
 /Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "BattleKartPaths/RaceCoursePaths.c" -o "BattleKartPaths/RaceCoursePaths.o"
+/Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "BattleKartPaths/SkyShroomsCoursePaths.c" -o "BattleKartPaths/SkyShroomsCoursePaths.o"
+/Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "BattleKartPaths/BobombFortPaths.c" -o "BattleKartPaths/BobombFortPaths.o"
+/Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "BattleKartPaths/KoopaIslandPaths.c" -o "BattleKartPaths/KoopaIslandPaths.o"
+/Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "BattleKartPaths/ShellShockedPaths.c" -o "BattleKartPaths/ShellShockedPaths.o"
 /Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "Library/Player/Pathfinding.c" -S -o "Library/Player/Pathfinding.s"  -fverbose-asm #output assembly
 /Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "Library/Player/Pathfinding.c" -o "Library/Player/Pathfinding.o"
 #Files from Library

@@ -32,9 +32,19 @@ extern Marker BlockFortPaths_MiddlePath_03[9];
 extern Marker BlockFortPaths_MiddlePath_02[9];
 extern Marker BlockFortPaths_MiddlePath_01[10];
 
+extern Marker BlockFortPaths_MiddlePath_farcornerpath1[10];
+extern Marker BlockFortPaths_MiddlePath_farcornerpath2[10];
+extern Marker BlockFortPaths_MiddlePath_farcornerpath3[10];
+extern Marker BlockFortPaths_MiddlePath_farcornerpath4[10];
+extern Marker BlockFortPaths_MiddlePath_farcornerpath5[10];
+extern Marker BlockFortPaths_MiddlePath_farcornerpath6[10];
+extern Marker BlockFortPaths_MiddlePath_farcornerpath7[10];
+extern Marker BlockFortPaths_MiddlePath_farcornerpath8[10];
 
-extern Marker *BlockFortPaths_Paths[32];
-extern short BlockFortPaths_PathLengths[32];
+
+
+extern Marker *BlockFortPaths_Paths[40];
+extern short BlockFortPaths_PathLengths[40];
 extern Marker BlockFortPaths_YellowRampB[11];
 extern Marker BlockFortPaths_YellowRampA[11];
 extern Marker BlockFortPaths_RedRampB[11];

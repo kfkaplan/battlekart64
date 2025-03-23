@@ -4,15 +4,17 @@
 
 .ifdef BattleSanta
 	.open "BattleSantaBase.z64", "BattleKart64.z64", 0 //Path to MK64 rom with mario sprite replaced with santa sprite
-	.definelabel save_key, 0x432AB496 //Value (2 bytes) to check for if save exists or not, update every new version
+	.definelabel save_key, 0x8888999C //Value (2 bytes) to check for if save exists or not, update every new version
 .else
 	//.open "../Mario Kart 64.z64", "BattleKart64.z64", 0 //Path to the MK64 rom and output name of battle kart rom
 	//.open "Farm.z64", "BattleKart64.z64", 0 //Path to the MK64 rom and output name of battle kart rom
 	//.open "BattleFarm.z64", "BattleKart64.z64", 0 //Path to the MK64 rom and output name of battle kart rom
-	.open "BattleKart64Base.z64", "BattleKart64.z64", 0 //Path to the MK64 rom and output name of battle kart rom	
+	//.open "BattleKart64Base.z64", "BattleKart64.z64", 0 //Path to the MK64 rom and output name of battle kart rom	
+	// .open "BASE.z64", "BattleKart64.z64", 0 //Path to the MK64 rom and output name of battle kart rom	
 	//.open "OverKart64 V6.z64", "BattleKart64.z64", 0
-	//.open "battle.z64", "BattleKart64.z64", 0 //Path to the MK64 rom and output name of battle kart rom
-	.definelabel save_key, 0x432AB496 //Value (2 bytes) to check for if save exists or not, update every new version
+	// .open "battle.z64", "BattleKart64.z64", 0 //Path to the MK64 rom and output name of battle kart rom
+	.open "Test.z64", "BattleKart64.z64", 0 //Path to the MK64 rom and output name of battle kart rom
+	.definelabel save_key, 0x8888998C //Value (2 bytes) to check for if save exists or not, update every new version
 .endif
 
 //LibraryBUILD3 needs to be start of file
@@ -38,7 +40,7 @@
 
 //Overwrite name in rom header to be battle kart
 .org 0x20
-.asciiz "BATTLE KART 64 v3.0b4"
+.asciiz "BATTLE KART 64 v3.0b8"
 
 
 // //Bug check for collisionSphere
@@ -114,11 +116,11 @@
 .definelabel CheckTriangleXYV, 0x802AB288//Detect nearby walls
 .definelabel CheckTriangleYZV, 0x802AD278//Detect nearby walls
 
-//For changing balloon colors
-.definelabel BalloonColorArray, 0x800E4934
-.definelabel BalloonAdjustArray, 0x800E4954
-.definelabel BalloonColorArrayB, 0x800E4974
-.definelabel BalloonAdjustArrayB, 0x800E4994
+// //For changing balloon colors
+// .definelabel BalloonColorArray, 0x800E4934
+// .definelabel BalloonAdjustArray, 0x800E4954
+// .definelabel BalloonColorArrayB, 0x800E4974
+// .definelabel BalloonAdjustArrayB, 0x800E4994
 
 /* Game variables */
 .definelabel current_screen_state, 0x800DC513 //5 = results screen, 6 = force race to reset
@@ -285,6 +287,15 @@
 .definelabel startup_flag, VARIABLE_RAM_BASE+0xD5 //1 byte, flag to store if startup has run or not
 .definelabel high_score, VARIABLE_RAM_BASE+0xD6 //2 bytes, variable to store a high score
 .definelabel using_hle, VARIABLE_RAM_BASE+0xD8 //1 byte, flag to store if using emulator or not, to set render cull mode
+.definelabel lag_fix, VARIABLE_RAM_BASE+0xD9 //1 byte, flag to store if emualtor lag fix is on or not
+.definelabel max_coins, VARIABLE_RAM_BASE+0xDA //2 bytes, variable to store max number of coins (0 to 100)
+.definelabel hit_coin_loss, VARIABLE_RAM_BASE+0xDC //2 bytes, variable to store number of coins dropped when hit
+.definelabel status_first_person, VARIABLE_RAM_BASE+0xDE //1 byte, stores if first person camera mode is on or not
+.definelabel respawning_flag_p1, VARIABLE_RAM_BASE+0xE0 //1 byte, stores if player is respawning or not to avoid lakitu contiuously picking a player up when respawning
+.definelabel respawning_flag_p2, VARIABLE_RAM_BASE+0xE1 //1 byte, stores if player is respawning or not to avoid lakitu contiuously picking a player up when respawning
+.definelabel respawning_flag_p3, VARIABLE_RAM_BASE+0xE2 //1 byte, stores if player is respawning or not to avoid lakitu contiuously picking a player up when respawning
+.definelabel respawning_flag_p4, VARIABLE_RAM_BASE+0xE3 //1 byte, stores if player is respawning or not to avoid lakitu contiuously picking a player up when respawning
+
 
 //NOTE EVERYTHING ABOVE HERE IS SAVED TO THE EPPROM, EVERYTHING BELOW IS NOT, SAVE IS FIRST 512 OR 0x200 BYTES
 .definelabel bot_respawn_datastructure, VARIABLE_RAM_BASE+0x200 //3 x 4 bytes each = 12 bytes - Previous positions stored to teleport bots that fall off the map, a 3 element array 
@@ -467,7 +478,7 @@ start_label:
 .align 0x10
 
 text_title_1: .asciiz "BATTLE KART 64"
-text_title_2: .asciiz " v3.0b1 by Triclon"
+text_title_2: .asciiz " v3.0b8 by Triclon"
 text_Z: .asciiz "Z"
 text_L: .asciiz "L"
 text_R: .asciiz "R"
@@ -576,7 +587,8 @@ text_char_bowser: .asciiz "BOWSER"
 text_bombs_win: .asciiz "BOMBS WIN"
 text_survivors_win: .asciiz "SURVIVORS WIN"
 text_shell_shooter: .asciiz "Shell SHOOTER"
-text_presents: .asciiz "PRESENTS"
+//text_presents: .asciiz "PRESENTS"
+text_coins: .asciiz "COINS"
 text_minus_one_when_hit: .asciiz "-1 WHEN HIT"
 text_plus_one_hit_enemy: .asciiz "+1 HIT ENEMY"
 text_team_1_wins: .asciiz "TEAM 1 WINS"
@@ -585,7 +597,10 @@ text_max_health: .asciiz "MAX HEALTH      "
 text_max_ammo: .asciiz "MAX AMM0        "
 text_using_hle: .asciiz "USING HLE"
 text_target_humans: .asciiz "TARGET HUMANS"
-
+text_lag_fix: .asciiz "LAG FIX"
+text_max_coins: .asciiz "TOTAL COINS     "
+text_hit_coin_loss: .asciiz "HIT COIN LOSS   "
+text_first_person: .asciiz "FIRST PERSON"
 
 
 .align 0x10
@@ -615,10 +630,10 @@ setDefaults:
 	sw a1, 0x28 (sp)
 	sw a2, 0x2C (sp)
 	sw a3, 0x30 (sp)
-	//Run emulator check and store result in t9
-	JAL detectEmulatorOldVersion
-	NOP
-	MOVE t9, v0
+	// //Run emulator check and store result in t9
+	// JAL detectEmulatorOldVersion
+	// NOP
+	// MOVE t9, v0
 	//First blank the ram
 	LI a0, VARIABLE_RAM_BASE //Blank ram block start
 	LI a1, VARIABLE_RAM_BASE + VARIABLE_RAM_SIZE //Blank ram block end
@@ -656,12 +671,16 @@ setDefaults:
 	LI.s f1, 50.0 //Set default shell shooter ammo (float)
 	MFC1 a1, f1
 	SW a1, shooter_ammo_max
+	LI a1, 40 //Set default max coins for coin mode to be 40
+	SH a1, max_coins
+	LI a1, 5 //Set default coins lost on hit
+	SH a1, hit_coin_loss
 	LI a0, save_key //Store save key in the save flag, if game hasn't saved yet
 	SW a0, save_flag
-	BNE t9, zero, @@branch_set_fps 
-		LI a0, 3
-		SB a0, status_options_tempo
-		@@branch_set_fps:
+	// BNE t9, zero, @@branch_set_fps 
+	// 	LI a0, 3
+	// 	SB a0, status_options_tempo
+	// 	@@branch_set_fps:
 	LW ra, 0x20 (sp)
 	lw a0, 0x24 (sp)
 	lw a1, 0x28 (sp)
@@ -1929,6 +1948,45 @@ incrementScore:
 	JR RA //Jump back
 	SH v1, 0x0000 (v0) //Store player or team's score back to ram
 
+//This function changes the score (usually to subtract using negative numbers), either individual or teams, for use with certain game modes
+//a0 = player or team to incrementm, 0=P1, 1=P2, 2=P3, 3=P4
+//a1 = value to change score by
+changeScore:
+	LBU v1, ffa_or_teams
+	BNE v1, zero, @@branch_increment_individual_scores //Increment individual scores
+		NOP
+		LI v0, p1_score //Load P1 score memory address as base
+		@@branch_increment_individual_scores: //Increment team scores
+	BEQ v1, zero, @@branch_increment_team_scores
+		NOP
+		LI v0, team_1_score
+		SRA a0, a0, 1 //Divide a0 by two so P1 and P2 are team 1 and P3 and P4 are team 2
+		@@branch_increment_team_scores:
+	SLL a0, a0, 1  //Double player or team number to get offset for score
+	ADDU v0, v0, a0 //Add offset to base
+	LH v1, 0x0000 (v0) //Load player or team's score
+	ADD v1, v1, a1 //Change score by a1
+	JR RA //Jump back
+	SH v1, 0x0000 (v0) //Store player or team's score back to ram
+
+//This function gets the score, either individual or teams, for use with certain game modes
+//a0 = player or team to incrementm, 0=P1, 1=P2, 2=P3, 3=P4
+getScore:
+	LBU a1, ffa_or_teams
+	BNE a1, zero, @@branch_increment_individual_scores //Increment individual scores
+		NOP
+		LI v0, p1_score //Load P1 score memory address as base
+		@@branch_increment_individual_scores: //Increment team scores
+	BEQ a1, zero, @@branch_increment_team_scores
+		NOP
+		LI v0, team_1_score
+		SRA a0, a0, 1 //Divide a0 by two so P1 and P2 are team 1 and P3 and P4 are team 2
+		@@branch_increment_team_scores:
+	SLL a0, a0, 1  //Double player or team number to get offset for score
+	ADDU v0, v0, a0 //Add offset to base
+	JR RA //Jump back
+	LH v0, 0x0000 (v0) //Load player or team's score
+
 //This function checks if a player is hit, mostly for dropping the flag in CTF mode
 //See old Death Race code for details
 //a0 = player or team to incrementm, 0=P1, 1=P2, 2=P3, 3=P4
@@ -2297,14 +2355,33 @@ checkIfZeroHP:
 //This function processes respawning
 //$A0 = player to respawn H, P1 = 0, P2 = 1, P3 =2, P4 = 4
 processRespawn:
-	LI a1, player_state_offset //Get player state mem address for forcing lakitu to respawn player
-	MULT a0, a1
-	LUI a1, 0x800F
-	LI a3, 1 //Set bits for respawning
-	MFLO a2
-	ADD a1, a1, a2
+	LUI a1, hi(respawning_flag_p1) //Check if player already respawned
+	ADD a1, a1, a0
+	LBU a2, lo(respawning_flag_p1) (a1)
+	BEQ a2, zero, @@player_respawning
+		NOP
+		SB zero, lo(respawning_flag_p1) (a1) //Turn off respawn flag but don't yet respawn
+		@@player_respawning:
+
+
+
+	BNE a2, zero, @@player_not_respawned
+		LI a2, 0xFF
+		sb a2, lo(respawning_flag_p1) (a1) //Store true in respawn flag
+		LI a1, player_state_offset //Get player state mem address for forcing lakitu to respawn player
+		MULT a0, a1
+		LUI a1, 0x800F
+		LI a3, 1 //Set bits for respawning
+		MFLO a2
+		ADD a1, a1, a2
+		// BEQ zero, zero, @@processRespawn_skip_to_end
+		SB a3, 0x6A5B (a1)
+		@@player_not_respawned:
+	// SB zero, lo(respawning_flag_p1) (a1) //Set respawn flag to zero if already respawned
+	// @@processRespawn_skip_to_end:
 	JR RA
-	SB a3, 0x6A5B (a1)
+	NOP
+
 
 //This function processes hits and decrements 1 HP
 //$A0 = player to decrement HP for, P1 = 0, P2 = 1, P3 =2, P4 = 3
@@ -2315,14 +2392,15 @@ processHit:
 	SW a1, 0x24 (sp)
 	SW a2, 0x28 (sp)
 	//SW a3, 0x2C (sp)
-	//If respawn is on, respawn player who was just hit
-	LBU v0, status_respawn
-	BEQ v0, zero, @@branch_respawn_on //#If respawn is set to on
 	SW ra, 0x30 (sp)
-		JAL processRespawn
-		NOP
-		@@branch_respawn_on:
 
+
+	//Check if player is actively respawning and don't lose score if the they are
+	LUI a1, hi(respawning_flag_p1) 
+	ADD a1, a1, a0
+	LBU a1, lo(respawning_flag_p1) (a1)
+	BNE a1, zero, @@branch_subtract_one_hp
+		NOP
 
 	//Subtract 1 HP if being_hit_lowers_score is true
 	LBU v0, being_hit_lowers_score
@@ -2367,6 +2445,13 @@ processHit:
 	// SH a2, 0x0000 (a1) //Store HP or hits back to ram
 
 
+	//If respawn is on, respawn player who was just hit
+	LBU v0, status_respawn
+	BEQ v0, zero, @@branch_respawn_on //#If respawn is set to on
+		LW a0, 0x20 (sp) 
+		JAL processRespawn
+		NOP
+		@@branch_respawn_on:
 
 	//Load registers and jump back
 	//LW a3, 0x2C (sp)
@@ -2847,6 +2932,8 @@ resetGame:
 		SB a0, who_hit_p2_last
 		SB a0, who_hit_p3_last
 		SB a0, who_hit_p4_last
+		//Reset respawn flags
+		SW zero, respawning_flag_p1
 		//Fix item boxes on big donut
 		LBU a1, 0x800DC5A1 //Load current track from cup course index 0x8018EE0B
 		LI a0, 0x13 //Check if Big Donut, if it is, skip the rest of this
@@ -3026,12 +3113,16 @@ all_players_bombs:
 			@@branch_count_a_bomb:
 		BNE t0, a2, @@branch_bomb_counter_loop
 		ADDIU t0, t0, 1 //Increment loop counter
+	BNE a2, a0, @@branch_all_players_not_bombs
+	LI v0, 0 //not all players are bombs
+		LI v0, 0xFF //all players are bombs
+		@@branch_all_players_not_bombs:
 	JR RA
-	AND v0, a0, a2 //v0 = (a0 and a2)
+	NOP
 
 
-//Run the presents game mode
-runGameModePresents:
+//Run the coins game mode
+runGameModeCoins:
 	//store registers
 	ADDI sp, sp, -0x30
 	SW ra, 0x20 (sp)
@@ -3068,6 +3159,9 @@ runGameModePresents:
 		SB zero, who_was_hit_last //Blank who was hit last
 		@@branch_someone_was_hit:
 
+
+	JAL PhysicsBKCoins
+	NOP
 
 	JAL checkCoinCollision //Check if you collide with a present
 	NOP
@@ -3120,13 +3214,31 @@ runGameModePresents:
 	// 	@@branch_presents_endgame:
 
 
-	//Force pause menu to be continue
-	LBU a0, 0x8018DA5F
-	SLTI a1, a0, 0x2A
-	BNE a1, zero, @@branch_force_pause_to_continue
-		LI a0, 0x29
-		SB a0, 0x8018DA5F
-		@@branch_force_pause_to_continue:
+	// //Force pause menu to be continue
+	// LBU a0, 0x8018DA5F
+	// SLTI a1, a0, 0x2A
+	// BNE a1, zero, @@branch_force_pause_to_continue
+	// 	LI a0, 0x29
+	// 	SB a0, 0x8018DA5F
+	// 	@@branch_force_pause_to_continue:
+
+
+
+	//Test loading custom objects
+	LBU a1, course_start_flag
+	BNE a1, zero, @@run_at_start_of_course
+		LW a1, g_startingIndicator
+		LI a2, 3
+		BNE a1, a2, @@run_at_start_of_course
+		LBU a1, course_start_flag
+		BNE a1, zero, @@run_at_start_of_course
+			LH a0, max_coins //Spawn max coins
+			JAL spawnCoins
+			NOP
+			//Set course start flag so that the above code only runs once
+			LI a0, 1
+			SB a0, course_start_flag
+			@@run_at_start_of_course:
 
 	//Jump back
 	LW ra, 0x20 (sp)
@@ -3141,9 +3253,6 @@ runGameModeShellShooter:
 
 
 
-	// //Force first person perspective
-	JAL FirstPersonCamera
-	NOP
 
 	//c code for handling shell shooter hud + graphics stuff
 	JAL shell_shooter_hud_stuff
@@ -3259,9 +3368,21 @@ runGameModeZombombs:
 	NOP
 
 	//Bombs win if all players are bombs
-	JAL all_players_bombs
-	NOP
-	BEQ v0, zero, @@branch_bombs_win //If the number of bombs in play equals the number of players...
+	//Count number of players that are bombs
+	LI a0, 0 //Bomb counter
+	LI t0, 0 //loop counter
+	LI a1, 0x50 //Match to bomb
+	LBU a2, player_count //number of players
+	LI a3, 0x800F6991 //Base address for if a player is a bomb
+	@@branch_bomb_counter_loop:
+		LBU t1, 0x0000 (a3)
+		BNE t1, a1, @@branch_count_a_bomb //If player is a bomb....
+		ADDIU a3, a3, player_state_offset //Increment address to status if player is a bomb (in delay slot)
+			ADDIU a0, a0, 1 //Increment bomb counter
+			@@branch_count_a_bomb:
+		BNE t0, a2, @@branch_bomb_counter_loop
+		ADDIU t0, t0, 1 //Increment loop counter
+	BNE a2, a0, @@branch_bombs_win
 		LI a0, 1
 		SB a0, who_won_zombombs
 		JAL killAllPlayers
@@ -3809,12 +3930,27 @@ inRace:
 			SB zero, 0x0FE3 (k0)
 			// SB k1, 0x14CF (k0)
 			// LI k1, 0x24010001
-			// SW k1, 0x1890 (k0)
-			// SW k1, 0x1894 (k0)
+			LI k1, 0x24190001
+			SW k1, 0x1890 (k0)
+			SW k1, 0x1894 (k0)
+			LI k1, 0x1C
+			LUI k0, 0x8012
+			SB k1, 0x2CBB (k0)
 			// LUI k0, 0x800B
 			// LI k1, 0x24010006
 			// SW k1, 0xC5D4 (k0)
+			LI a0, 0x0001 //hazard fix
+			SH a0, 0x800DC55E
 	@@branch_tempo_on:	
+
+
+	//Lag fix (if on)
+	LBU a0, lag_fix
+	BEQ a0, zero, @@branch_lag_fix
+		LI a0, 0xD
+		SB a0, 0x800EA6D2
+		@@branch_lag_fix:
+
 
 	// JAL displayGameTempo
 	// NOP
@@ -4181,13 +4317,13 @@ inRace:
 		BEQ zero, zero, @@branch_finished_running_game_mode
 		NOP
 		@@branch_game_mode_shell_shooter:
-	BNE a0, a1, @@branch_game_mode_presents
+	BNE a0, a1, @@branch_game_mode_coins
 		NOP
-		JAL runGameModePresents
+		JAL runGameModeCoins
 		NOP
 		BEQ zero, zero, @@branch_finished_running_game_mode
 		NOP
-		@@branch_game_mode_presents:
+		@@branch_game_mode_coins:
 	@@branch_finished_running_game_mode:
 
 
@@ -4200,7 +4336,13 @@ inRace:
 	// 	NOP
 	// 	@@branch_game_mode_test:
 
-
+	//Run first person mode if that setting is on
+	LBU a0, status_first_person
+	BEQ a0, zero, @@branch_first_person
+		NOP
+		JAL FirstPersonCamera //Force first person perspective	
+		NOP
+		@@branch_first_person:
 
 	//Display results if on results screen
 	LBU a0, in_results
@@ -4304,6 +4446,37 @@ menuDispMaxPoints:
 
 	LH a3, max_points
 	li a2, text_max_points //text pointer
+	jal FUNCTION_DISPLAY_TEXT_AND_INT
+	li a0, 0x8
+
+	lw ra, 0x20 (sp)
+	jr ra
+	addi sp, sp, 0x24
+
+
+//Function to display coins in menu
+//A1 = y position
+menuDispMaxCoins:
+	addi sp, sp, -0x24
+	sw ra, 0x20 (sp)
+
+	LH a3, max_coins
+	li a2, text_max_coins //text pointer
+	jal FUNCTION_DISPLAY_TEXT_AND_INT
+	li a0, 0x8
+
+	lw ra, 0x20 (sp)
+	jr ra
+	addi sp, sp, 0x24
+
+
+//A1 = y position
+menuDispHitCoinLoss:
+	addi sp, sp, -0x24
+	sw ra, 0x20 (sp)
+
+	LH a3, hit_coin_loss
+	li a2, text_hit_coin_loss //text pointer
 	jal FUNCTION_DISPLAY_TEXT_AND_INT
 	li a0, 0x8
 
@@ -4595,6 +4768,55 @@ menuDispFFAOrTeams:
 	LW ra, 0x0020 (sp)
 	JR ra
 	ADDI sp, sp, 0x0024
+
+
+
+//Function displays options for coin mode on the "GAME" page of menu
+menuDispModeCoins:
+	ADDI sp, sp, 0xFFDC
+	SW ra, 0x0020 (sp)
+
+	//Display FFA or teams menu option
+	JAL menuDispFFAOrTeams
+	LI a1, 0x4C
+
+	//Display scoring menu option
+	JAL menuDispScoring
+	LI a1, 0x58 //y
+
+	//If scoring is set to Stock, display HP or POINTS depending on if in FFA or teams
+	lbu v0, score_mode
+	LI v1, 2
+	bne v0, v1, @@branch_selection_points
+		NOP
+		jal menuDispMaxPoints
+		li a1, 0x64 //y
+		@@branch_selection_points:
+	//If scoring is set to TIME
+	LI v1, 1
+	BNE v1, v0, @@branch_selection_time
+	LI v1, 2		
+		jal menuDispTime
+		li a1, 0x64 //y
+		@@branch_selection_time:
+
+
+	//Display max coins menu option
+	JAL menuDispMaxCoins
+	LI a1, 0x70 //y
+
+	//Display hit coin loss menu option
+	JAL menuDispHitCoinLoss
+	LI a1, 0x7C //y
+
+	//Set max distance you can scroll down in y on menu
+	LI a1, 6
+	SB a1, MENU_Y_MAX
+
+	LW ra, 0x0020 (sp)
+	JR ra
+	ADDI sp, sp, 0x0024
+
 
 
 
@@ -5043,7 +5265,7 @@ menuDispModeTraditional:
 
 
 	//Set max distance you can scroll down in y on menu
-	LI a1, 7
+	LI a1, 6
 	SB a1, MENU_Y_MAX
 
 	// //Set variable for this mode to be hit based (not objective based)
@@ -5110,10 +5332,10 @@ menuDispPageGame:
 		LI a2, text_shell_shooter
 		@@BRANCH_MODE_SELECT_FPS:
 	LI t1, 7
-	BNE t0, t1, @@BRANCH_MODE_SELECT_PRESENTS
+	BNE t0, t1, @@BRANCH_MODE_SELECT_COINS
 		NOP
-		LI a2, text_presents
-		@@BRANCH_MODE_SELECT_PRESENTS:
+		LI a2, text_coins
+		@@BRANCH_MODE_SELECT_COINS:
 
 
 	//Actually show the selected option
@@ -5199,13 +5421,14 @@ menuDispPageGame:
 		SW a0, 0x802B3870
 		@@BRANCH_MODE_NOT_SHELL_SHOOTER:
 
-	//Display presents
+	//Display coins
 	LBU a0, game_mode	
 	LI a1, 7
-	BNE a0, a1, @@BRANCH_MODE_DISPLAY_PRESENTS
+	BNE a0, a1, @@BRANCH_MODE_DISPLAY_COINS
 		NOP
-		//Stuff will go here
-		@@BRANCH_MODE_DISPLAY_PRESENTS:
+		JAL menuDispModeCoins
+		NOP
+		@@BRANCH_MODE_DISPLAY_COINS:
 
 	LW ra, 0x0020 (sp)
 	JR ra
@@ -5358,23 +5581,29 @@ menuDispPageGraphics:
 	ADDI sp, sp, 0xFFDC
 	SW ra, 0x0020 (sp)
 
+	//Display "FIRST PERSON"
+	LI a2, text_first_person
+	LBU a3, status_first_person
+	JAL menuDispOnOff
+	LI a1, 0x40 //y
+
 	//Display "WIDESCREEN"
 	LI a2, text_options_widescreen
 	LBU a3, status_options_widescreen
 	JAL menuDispOnOff
-	LI a1, 0x40 //y
+	LI a1, 0x4C //y
 
 	//Display "ANTIALIASING"
 	LI a2, text_options_antialiasing
 	LBU a3, status_options_antialiasing
 	JAL menuDispOnOff
-	LI a1, 0x4C //y
+	LI a1, 0x58 //y
 
 	//Display Game Temp
 	LI a2, text_options_gametempo
 	LI a0, 0x8 //x pos
 	JAL FUNCTION_DISPLAY_TEXT //display text
-	LI a1, 0x58 //y pos
+	LI a1, 0x64 //y pos
 	//Display selected option
 	LBU a0, status_options_tempo
 	//Set to default
@@ -5409,24 +5638,30 @@ menuDispPageGraphics:
 	//Show the selected option
 	LI a0, 0x90 //x pos
 	JAL FUNCTION_DISPLAY_TEXT //display text
-	LI a1, 0x58 //y pos
+	LI a1, 0x64 //y pos
+
+	//Display lag fix
+	li a2, text_lag_fix
+	lbu a3, lag_fix
+	JAL menuDispOnOff
+	li a1, 0x70	
 
 	//Display emulator cull mode
 	li a2, text_using_hle
 	lbu a3, using_hle
 	JAL menuDispOnOff
-	li a1, 0x64
+	li a1, 0x7C
 
 
 	//Display "MINIMAP"
 	LI a2, text_options_mimimap
 	LBU a3, status_options_minimap
 	JAL menuDispOnOff
-	LI a1, 0x70 //y
+	LI a1, 0x88 //y
 
 
 	//Set max distance you can scroll down in y on menu
-	LI a1, 5
+	LI a1, 7
 	SB a1, MENU_Y_MAX
 
 	LW ra, 0x0020 (sp)
@@ -5591,6 +5826,7 @@ menuToggleTimer:
 //A3 = Current menu index selected
 //t0 = number max
 //t1 = number value
+//t2 = number min
 menuToggleNumber:
 	//if menu selection is HP
 	bne a2, a3, @@branch_menu_selection_is_it
@@ -5607,7 +5843,7 @@ menuToggleNumber:
 			li a1, 4 //Set menu selection in progress byte to state indicating the selection has finished
 		@@branch_joystick_right:
 		//if number is too low, reset to max
-		li a2, -1
+		ADDI a2, t2, -1
 		bne t1, a2, @@branch_number_too_low
 			nop
 			MOVE t1, t0 //Set to max
@@ -5617,7 +5853,7 @@ menuToggleNumber:
 		ADDI a2, a2, 1
 		bne t1, a2, @@branch_number_too_high
 			nop
-			li t1, 0
+			MOVE t1, t2 //set to min
 		@@branch_number_too_high:
 	@@branch_menu_selection_is_it:
 	jr ra
@@ -5779,15 +6015,17 @@ menuToggleGameTraditional:
 	//If menu selection is FFA or Teams
 	LI a0, ffa_or_teams //Load status pointer
 	LI a2, 1 //menu index
+	LI t2, 0 //min number
 	JAL menuToggleByte
-	LI t0, 1
+	LI t0, 1 //max number
 
 
 	//if menu selection is scoring
 	LI a0, score_mode //load status pointer
 	LI a2, 2 //menu index
+	LI t2, 0 //min number
 	JAL menuToggleByte
-	LI t0, 2
+	LI t0, 2 //max number
 	
 
 	//if scoring is set to stock
@@ -5797,6 +6035,7 @@ menuToggleGameTraditional:
 		// LBU t9, ffa_or_teams
 		// BNE t9, zero, @@branch_selection_stock_hp
 		LI a0, max_hp
+		LI t2, 1 //min number
 		JAL menuToggleHalf
 		LI t0, 9999 //How high can the HP go'
 
@@ -5826,6 +6065,7 @@ menuToggleGameTraditional:
 	LI v1, 2
 	BNE v1, v0, @@branch_selection_points
 		LI a0, max_points
+		LI t2, 1 //min number
 		JAL menuToggleHalf
 		LI t0, 9999 //How high can the HP go
 
@@ -5856,8 +6096,9 @@ menuToggleGameHotpotato:
 	//If menu selection is FFA or Teams
 	LI a0, ffa_or_teams //Load status pointer
 	LI a2, 1 //menu index
+	LI t2, 0 //min number
 	JAL menuToggleByte
-	LI t0, 1
+	LI t0, 1 //max number
 
 	//if scoring is set to stock
 	lbu v0, score_mode
@@ -5871,23 +6112,37 @@ menuToggleGameHotpotato:
 	//if menu selection is scoring
 	LI a0, score_mode //load status pointer
 	LI a2, 2 //menu index
+	LI t2, 0 //min number
 	JAL menuToggleByte
-	LI t0, 1
+	LI t0, 1 //max number
 
 
+
+
+	//if scoring is set to stock
+	li a2, 3 //menu index
+	lbu v0, score_mode
 	bne v0, zero, @@branch_selection_stock
-	LI v1, 1
-		LI a0, max_hp //Control starting HP
+		// LBU t9, ffa_or_teams
+		// BNE t9, zero, @@branch_selection_stock_hp
+		LI a0, max_hp
+		LI t2, 1 //min number
 		JAL menuToggleHalf
 		LI t0, 9999 //How high can the HP go'
 
+		LI a0, 0xFF //Turn being hit will lower your score on for HP mode
+		SB a0, being_hit_lowers_score
+
+		LI a0, 0 //Turn hitting someone will raise your score off for HP mode
+		SB a0, hitting_someone_raises_score
 		@@branch_selection_stock:
-	bne v0, v1, @@branch_selection_time
+	//If scoring is set to TIME
+	LI v1, 1
+	BNE v1, v0, @@branch_selection_time
 		nop
 		jal menuToggleTimer
 		nop
 		@@branch_selection_time:
-
 	// 		LI a0, max_hp
 	// 		JAL menuToggleHalf
 	// 		LI t0, 9999 //How high can the HP go
@@ -5935,15 +6190,17 @@ menuToggleGameSquish:
 	//If menu selection is FFA or Teams
 	LI a0, ffa_or_teams //Load status pointer
 	LI a2, 1 //menu index
+	LI t2, 0 //min number
 	JAL menuToggleByte
-	LI t0, 1
+	LI t0, 1 //max number
 
 
 	//if menu selection is scoring
 	LI a0, score_mode //load status pointer
 	LI a2, 2 //menu index
+	LI t2, 0 //min number
 	JAL menuToggleByte
-	LI t0, 2
+	LI t0, 2 //max number
 	
 
 	//if scoring is set to stock
@@ -5953,6 +6210,7 @@ menuToggleGameSquish:
 		// LBU t9, ffa_or_teams
 		// BNE t9, zero, @@branch_selection_stock_hp
 		LI a0, max_hp
+		LI t2, 1 //min number
 		JAL menuToggleHalf
 		LI t0, 9999 //How high can the HP go'
 
@@ -5982,6 +6240,7 @@ menuToggleGameSquish:
 	LI v1, 2
 	BNE v1, v0, @@branch_selection_points
 		LI a0, max_points
+		LI t2, 1 //min number
 		JAL menuToggleHalf
 		LI t0, 9999 //How high can the HP go
 
@@ -6058,8 +6317,9 @@ menuToggleGameCaptureTheFlag:
 	//If menu selection is FFA or Teams
 	LI a0, ffa_or_teams //Load status pointer
 	LI a2, 1 //menu index
+	LI t2, 0 //min number
 	JAL menuToggleByte
-	LI t0, 1
+	LI t0, 1 //max number
 
 
 
@@ -6081,6 +6341,7 @@ menuToggleGameCaptureTheFlag:
 	LI v1, 2
 	BNE v0, v1, @@branch_selection_points //if menu selection is team points
 		LI a0, max_points
+		LI t2, 1 //min number
 		JAL menuToggleHalf
 		LI t0, 9999 //How high can the points go
 		@@branch_selection_points:
@@ -6099,8 +6360,9 @@ menuToggleGameCaptureTheFlag:
 	//if menu selection is ctf scoring
 	LI a0, ctf_game_mode //load status pointer
 	LI a2, 4 //menu index
+	LI t2, 0 //min number
 	JAL menuToggleByte
-	LI t0, 1
+	LI t0, 1 //max number
 
 
 	//if menu selection is no items when holding flag
@@ -6133,8 +6395,9 @@ menuToggleGameKeepAway:
 	//If menu selection is FFA or Teams
 	LI a0, ffa_or_teams //Load status pointer
 	LI a2, 1 //menu index
+	LI t2, 0 //min number
 	JAL menuToggleByte
-	LI t0, 1
+	LI t0, 1 //max number
 
 
 
@@ -6154,6 +6417,7 @@ menuToggleGameKeepAway:
 	LI v1, 2
 	BNE v0, v1, @@branch_selection_points //if menu selection is team points
 		LI a0, max_points
+		LI t2, 1 //min number
 		JAL menuToggleHalf
 		LI t0, 9999 //How high can the points go
 		@@branch_selection_points:
@@ -6216,14 +6480,16 @@ menuToggleGameShellShooter:
 	//If menu selection is FFA or Teams
 	LI a0, ffa_or_teams //Load status pointer
 	LI a2, 1 //menu index
+	LI t2, 0 //min number
 	JAL menuToggleByte
-	LI t0, 1
+	LI t0, 1 //max number
 
 	//if menu selection is scoring
 	LI a0, score_mode //load status pointer
 	LI a2, 2 //menu index
+	LI t2, 0 //min number
 	JAL menuToggleByte
-	LI t0, 2
+	LI t0, 2 //max number
 
 	//if scoring is set to stock
 	li a2, 3 //menu index
@@ -6232,6 +6498,7 @@ menuToggleGameShellShooter:
 		// LBU t9, ffa_or_teams
 		// BNE t9, zero, @@branch_selection_stock_hp
 		LI a0, max_hp
+		LI t2, 1 //min number
 		JAL menuToggleHalf
 		LI t0, 9999 //How high can the HP go'
 
@@ -6284,6 +6551,7 @@ menuToggleGameShellShooter:
 	LI v1, 2
 	BNE v1, v0, @@branch_selection_points
 		LI a0, max_points
+		LI t2, 1 //min number
 		JAL menuToggleHalf
 		LI t0, 9999 //How high can the HP go
 
@@ -6318,6 +6586,77 @@ menuToggleGameShellShooter:
 
 
 //Menu toggling on game page for test battle
+menuToggleGameCoins:
+	addi sp, sp, -0x24
+	sw ra, 0x1C (sp)
+
+
+	LI a0, 0 //Turn being hit will lower your score off for CTF
+	SB a0, being_hit_lowers_score
+	LI a0, 0 //Turn hitting someone will raise your score off for CTF
+	SB a0, hitting_someone_raises_score
+
+	//If menu selection is FFA or Teams
+	LI a0, ffa_or_teams //Load status pointer
+	LI a2, 1 //menu index
+	LI t2, 0 //min number
+	JAL menuToggleByte
+	LI t0, 1 //max number
+
+
+	JAL menuTogglePointOrTimeScoreMode
+	LI a2, 2 //menu index
+
+	//if scoring is set to stock
+	lbu v0, score_mode
+	BNE v0, zero, @@branch_hotpotato_points_to_stock //If score mode is stock, change back to point
+		LI a0, 2
+		SB a0, score_mode
+		@@branch_hotpotato_points_to_stock:
+
+
+
+	LI a2, 3 //menu index
+	lbu v0, score_mode
+	LI v1, 2
+	BNE v0, v1, @@branch_selection_points //if menu selection is team points
+		LI a0, max_points
+		LI t2, 1 //min number
+		JAL menuToggleHalf
+		LI t0, 9999 //How high can the points go
+		@@branch_selection_points:
+	//If scoring is set to time or team time
+	LI v1, 1
+	BNE v0, v1, @@branch_selection_time //if menu selection is timer
+		nop
+		jal menuToggleTimer
+		nop
+		@@branch_selection_time:
+
+
+	LI a0, max_coins //Load status pointer
+	LI a2, 4 //menu index
+	LI t2, 1 //min number
+	JAL menuToggleHalf
+	LI t0, 100
+
+	LI a0, hit_coin_loss //Load status pointer
+	LI a2, 5 //menu index
+	LI t2, 1 //min number
+	LI t0, 100
+	JAL menuToggleHalf
+	NOP
+	
+
+
+
+	lw ra, 0x1C (sp)
+	jr ra
+	addi sp, sp, 0x24
+
+
+
+//Menu toggling on game page for test battle
 menuToggleGameTest:
 	addi sp, sp, -0x24
 	sw ra, 0x1C (sp)
@@ -6336,6 +6675,7 @@ menuToggleGame:
 	//If menu selection is mode
 	LI a0, game_mode //load status pointer
 	LI a2, 0 //menu index
+	LI t2, 0 //min number
 	JAL menuToggleByte
 	LI t0, 7 //max value
 
@@ -6410,11 +6750,11 @@ menuToggleGame:
 	//If mode is shell shooter
 	lbu a0, game_mode //load game mode
 	li a2, 7
-	bne a0, a2, @@branch_presents_mode
+	bne a0, a2, @@branch_coin_mode
 		nop
-		//jal menuToggleGameShellShooter
+		jal menuToggleGameCoins
 		nop
-	@@branch_presents_mode:
+	@@branch_coin_mode:
 
 
 	// //If mode is test
@@ -6500,24 +6840,28 @@ menuToggleBots:
 	//If menu selection is Player 1 on/off
 	li a0, bot_status_p1 //Load status pointer
 	li a2, 0 //Load menu index
+	LI t2, 0 //min number
 	JAL menuToggleByte
 	LI t0, 8 //max value
 
 	//If menu selection is Player 2 on/off
 	li a0, bot_status_p2 //Load status pointer
 	li a2, 1 //Load menu index
+	LI t2, 0 //min number
 	JAL menuToggleByte
 	LI t0, 8 //max value
 
 	//If menu selection is Player 3 on/off
 	li a0, bot_status_p3//Load status pointer
 	li a2, 2 //Load menu index
+	LI t2, 0 //min number
 	JAL menuToggleByte
 	LI t0, 8 //max value
 
 	//If menu selection is Player 4 on/off
 	li a0, bot_status_p4 //Load status pointer
 	li a2, 3 //Load menu index
+	LI t2, 0 //min number
 	JAL menuToggleByte
 	LI t0, 8 //max value
 
@@ -6525,6 +6869,7 @@ menuToggleBots:
 	//If menu selection is bot AI type
 	li a0, bot_ai_type //Load status pointer
 	LI a2, 4 //menu index
+	LI t2, 0 //min number
 	JAL menuToggleByte
 	LI t0, 1 //max value
 
@@ -6589,33 +6934,50 @@ menuToggleGraphics:
 	ADDI sp, sp, 0xFFDC
 	SW ra, 0x001C (sp)
 
+
+
+	//If menu selection is first person
+	LI a0, status_first_person //Load status pointer
+	JAL menuToggleOnoff
+	LI a2, 0 //Load menu index
+
 	//If menu selection is widescreen
 	LI a0, status_options_widescreen //Load status pointer
 	JAL menuToggleOnoff
-	LI a2, 0 //Load menu index
+	LI a2, 1 //Load menu index
 
 
 	//If menu selection is antialiasing
 	LI a0, status_options_antialiasing //Load status pointer
 	JAL menuToggleOnoff
-	LI a2, 1 //Load menu index
+	LI a2, 2 //Load menu index
 
 	//If menu selection is game tempo
-	LI a2, 2 //menu index
+	LI a2, 3 //menu index
 	LI a0, status_options_tempo //status pointer
+	LI t2, 0 //min number
 	JAL menuToggleByte
 	LI t0, 4 //max value
+
+
+	//If menu selection is using HLE
+	LI a0, lag_fix //Load status pointer
+	JAL menuToggleOnoff
+	LI a2, 4 //Load menu index
+
+
+
 
 	//If menu selection is using HLE
 	LI a0, using_hle //Load status pointer
 	JAL menuToggleOnoff
-	LI a2, 3 //Load menu index
+	LI a2, 5 //Load menu index
 
 
 	//If menu selection is minimap
 	LI a0, status_options_minimap //Load status pointer
 	JAL menuToggleOnoff
-	LI a2, 4 //Load menu index
+	LI a2, 6 //Load menu index
 
 	//Control if minimap is on or off
 	LB v0, status_options_minimap
@@ -6675,6 +7037,7 @@ menuToggleOptions:
 	//If menu is restore defaults
 	LI a0, status_restore_defaults
 	LI a2, 5 //menu index 
+	LI t2, 0 //min number
 	JAL menuToggleByte
 	LI t0, 3 //max value
 
@@ -6758,7 +7121,7 @@ menuPlaySound:
 			LI a0, 8
 			SB a0, bot_status_p4 //Set P4 to Bowser
 			LI a0, 7
-			SB a0, game_mode //Set game mode to "Presents"
+			SB a0, game_mode //Set game mode to "coins"
 			SB zero, bot_ai_type //Set bot AI type to 'seeker'
 
 			li a1, 0x8CBC/2 //Set default time limit to 5 minutes
@@ -7903,6 +8266,39 @@ runAtCourseInitialization:
 	// JAL setCullDLParameters
 	// NOP
 
+	//For some game modes when in time scoring mode, this checks for if hitting someone and being hit doesn't affect the score, this fixes a bug for when both of those settings are off by turning on being hit means you lose a point
+	lbu a0, score_mode //If score mode is timer
+	LI a1, 1
+	BNE a0, a1, @@skip_time_score_check //and if both hitting someone or being hit doesn't change the score
+	LBU a0, hitting_someone_raises_score
+	BNE a0, zero, @@skip_time_score_check
+	LBU a0, being_hit_lowers_score
+	BNE a0, zero, @@skip_time_score_check
+	LBU a0, game_mode //If game mode is traditional, squish, or shell shooter
+	BEQ a0, zero, @@time_score_check
+	LI a1, 2
+	BEQ a0, a1, @@time_score_check
+	LI a1, 6
+	BEQ a0, a1, @@time_score_check
+	NOP
+	BEQ zero, zero, @@skip_time_score_check
+		@@time_score_check:
+		LI a0, 0xFF
+		SB a0, being_hit_lowers_score //set being hit lowers score to 1
+	@@skip_time_score_check:
+
+
+	//Error catch, if playing two player and teams scoring is on, turn off teams scoring
+	LBU a0, player_count  //Grab number of players
+	LI a1, 2 //If 2 players
+	BNE a0, a1, @@branch_in_2p_mode_with_teams_on
+	LBU a0, ffa_or_teams
+	BEQ a0, zero, @@branch_in_2p_mode_with_teams_on //If game mode is not teams
+		NOP
+		SB zero, ffa_or_teams //Set to FFA mode if 2P and teams is on
+		@@branch_in_2p_mode_with_teams_on:
+
+
 
 	//Set zombombs score mode to be timed, if zombombs is loaded
 	LBU a0, game_mode
@@ -7911,6 +8307,19 @@ runAtCourseInitialization:
 		LI a1, 1
 		SB a1, score_mode
 		@@branch_set_zombombs_score_mode:
+
+
+	//For hot potato always have hits decrement your HP or score
+	LBU a0, game_mode
+	LI a1, 1
+	BNE a0, a1, @@branch_set_hot_potato_to_always_decrement_score
+		LI a0, 0xFF //Turn being hit will lower your score on for HP mode
+		SB a0, being_hit_lowers_score
+		LI a0, 0 //Turn hitting someone will raise your score off for HP mode
+		SB a0, hitting_someone_raises_score
+		@@branch_set_hot_potato_to_always_decrement_score:
+
+
 
 
 	//Set course start flag to zero so that we know the course is in the middle of loading
@@ -8055,6 +8464,9 @@ runAtCourseInitialization:
 	// SB zero, 0x800f860b
 	// SB zero, 0x800f93e3
 
+	JAL beforeCourseLoadsInit
+	NOP
+
 
 
 
@@ -8120,7 +8532,12 @@ afterMapDataLoads:
 		JAL setTeamBallonColorsRedVsBlue
 		NOP
 		@@branch_set_team_ballon_colors:
-
+	LBU a0, ffa_or_teams
+	BNE a0, zero, @@branch_set_ffa_ballon_colors
+		NOP
+		JAL SetBalloonDefaults
+		NOP
+		@@branch_set_ffa_ballon_colors:
 	
 	J 0x8003D0BC //Jump back
 	NOP
@@ -8226,7 +8643,9 @@ PaletteBowser:
 .importobj "BattleKartPaths/BigDonutPaths.o"
 .importobj "BattleKartPaths/RaceCoursePaths.o"
 .importobj "BattleKartPaths/SkyShroomsCoursePaths.o"
-
+.importobj "BattleKartPaths/BobombFortPaths.o"
+.importobj "BattleKartPaths/KoopaIslandPaths.o"
+.importobj "BattleKartPaths/ShellShockedPaths.o"
 
 
 // //Import battle kart custom weather code
@@ -8559,10 +8978,12 @@ incrementScoreOnHit:
 		MULT a3, t0
 		MFLO a3
 		ADDU a2, a2, a3
-		LBU a2, lo(0x800F6A4E) (a2) //Star status, bit 0x02
-		ANDI a3, a2, 0x02 //Is player using a star?
+		LBU a1, lo(0x800F6A4E) (a2) //Star status, bit 0x02
+		ANDI a3, a1, 0x02 //Is player using a star?
 		BNE a3, zero, @@branch_skip_score_increment
-
+		LBU a1, lo(0x800F6A4C) (a2) //Ghost status, bit 0x80
+		ANDI a3, a1, 0x80 //Is player using a ghost?
+		BNE a3, zero, @@branch_skip_score_increment
 		LBU a2, ffa_or_teams
 		BNE a2, zero, @@branch_ffa_item_hit_scoring //Increment individual scores
 			NOP
@@ -8839,6 +9260,9 @@ allRun:
 		LI a0, 35
 		SH a0, startupSwitch
 		@@branch_run_only_at_startup:
+
+	// JAL runFPSCounter
+	// NOP
 
 	LW ra, 0x14 (sp)
 	JR ra
