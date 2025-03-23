@@ -2538,7 +2538,7 @@ void DisplayFlag(void *Camera, void *Object)
     }
     else
     {
-        // DrawGeometryScale(objectPosition,objectAngle,GlobalAddressB, 0.1);
+        DrawGeometryScale(objectPosition,objectAngle,GlobalAddressB, 0.1);
     }
 
     
