@@ -27,6 +27,7 @@ cd /Users/kfkaplan/Dropbox/battlekart64
 /Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "library/CustomObjects/OKBehaviors.c" -o "library/CustomObjects/OKBehaviors.o" 
 /Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "library/Player/PlayerChecks.c" -o "library/Player/PlayerChecks.o" 
 /Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "library/CustomObjects/OKCustomObjects.c" -o "library/CustomObjects/OKCustomObjects.o"
+/Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "library/CustomObjects/OKAnime.c" -o "library/CustomObjects/OKAnime.o"
 /Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "library/MarioKartMenu.c" -o "library/MarioKartMenu.o" 
 /Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "library/MusicSound/CustomSounds.c" -o "library/MusicSound/CustomSounds.o"
 /Users/kfkaplan/Desktop/N64/n64chain/tools/bin/mips64-elf-gcc  -Wall -O1 -mtune=vr4300 -march=vr4300 -mabi=32 -fomit-frame-pointer -G0 -c "library/MusicSound/MusicControl.c" -o "library/MusicSound/MusicControl.o"
