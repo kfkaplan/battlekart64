@@ -83,6 +83,8 @@ extern char who_was_hit_last;
 extern float inGameAffineMatrix[4][4];
 extern bool using_hle;
 extern short hit_coin_loss;
+extern bool status_respawn_immunity;
+extern bool status_first_person;
 
 
 extern int checkItems(int player);
@@ -119,6 +121,11 @@ extern int getBaseNumber();
 extern bool isSomeoneHoldingPlayerFlag(int player);
 extern bool isPlayerHoldingFlag(int player);
 extern bool bots_target_humans;
+extern uint battlePathsStart;
+extern uint battlePathsEnd;
+extern uint battlePathsLength;
+extern uint battlePathsRomStart;
+
 
 // extern bool bot_timer_p1;
 // extern bool bot_timer_p2;
@@ -136,6 +143,8 @@ extern int BattleSantaCutsceneIndex;
 extern bool BattleSantaCutsceneBeginning;
 extern bool BattleSantaEndgameFlag;
 extern short BattleSantaCurrentScore;
+
+extern void giveItem(int player);
 
 
 //Music stuff

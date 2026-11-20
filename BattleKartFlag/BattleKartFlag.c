@@ -12,9 +12,6 @@
 #include <stdlib.h>
 #include <math.h>
 
-// #include "../USB/usb.c"
-// #include "../USB/usb.h"
-
 
 
 #define MaxBKObjectives 100
@@ -30,7 +27,6 @@ short coin_rotation_angle = 0x0000; //This tracks the rotation of ALL coins bein
 
 //The following variables and functions are for displaying coustom object textures/geometry (e.g. coins), needed to really expand the matrix array
 int TriclonMatrixCount = 0;
-//const int TriclonsTotalMatrixSize = 4*MaxBKObjectives;
 Mtx TriclonsSpecialMatrixArray[TriclonsTotalMatrixSize];
 
 int triclon_set_matrix(AffineMtx affine)
@@ -144,27 +140,37 @@ void beforeCourseLoadsInit() //For loading custom course stuff before course act
     {
         loadMinimap();
     }
-}
-
-
-
-
-
-//Needed to run custom courses in emulator or on console
-//See 
-void setCullDLParameters()
-{
-    if (using_hle == true)
+    //if (status_options_flatcourses) //fix water height if courses are set to flat so we don't go underwater or fall super far
+    if (ScaleYMode == 0) //fix water height if courses are set to flat so we don't go underwater or fall super far
     {
-        //Emulator
-        CullDL_Parameters = 0x0000000E;
+        g_waterHeight = - 50;
     }
-    else
+    if (g_courseID == 0x13) //Remove bad item boxes on big donut so they don't interfere with the bots path finding
     {
-        //Console
-        CullDL_Parameters = 0x00000140;
+        *(short*)(0x801602E8) = 0x0000; //Scale in height
+        *(short*)(0x80160358) = 0x0000;
     }
 }
+
+
+
+
+
+// //Needed to run custom courses in emulator or on console
+// //See 
+// void setCullDLParameters()
+// {
+//     if (using_hle == true)
+//     {
+//         //Emulator
+//         CullDL_Parameters = 0x0000000E;
+//     }
+//     else
+//     {
+//         //Console
+//         CullDL_Parameters = 0x00000140;
+//     }
+// }
 
 
 
@@ -214,7 +220,11 @@ void ItemboxCollideCheck(Player* Car, Object* Target)
             }
             else
             {
-                RouletteStart(PlayerID, Target->bump.dummy);
+
+                //RouletteStart(PlayerID, Target->bump.dummy);
+                //KWAnmStart(PlayerID, Target->bump.dummy);
+                giveItem(PlayerID);
+                
             }
             
         }
@@ -407,15 +417,40 @@ void CopyBump(Camera* LocalCamera, Player LocalPlayer)
 }
 
 
+void disableCameraZoom() //Disable the camera zoom using the c button, used for first person mode
+{
+    *(long long*)(0x8001A588) = 0x03E0000800000000;
+    *(long long*)(0x80019890) = 0x03E0000800000000;
+    *(long long*)(0x8001A0DC) = 0x03E0000800000000;
+    *(long long*)(0x8001E45C) = 0x03E0000800000000;    
+}
+
+void enableCameraZoom()  //(Re)enable the camera zoom using the c button, when first person mode is off
+{
+    *(long long*)(0x8001A588) = 0x27BDFFB03C0F800E;
+    *(long long*)(0x80019890) = 0x3C0E800E0005C080;
+    *(long long*)(0x8001A0DC) = 0x27BDFFE08FB80030;
+    *(long long*)(0x8001E45C) = 0x27BDFF50AFBF0034;
+}
+
+
+
 void BattleInit() //Initialize for positions of a course
 {
+    // //For christmas version
+    // NaSeqStart(8); //Set music, in this case, to the "snow" music
+
+    setSky(); //Needed to run before every course load
+    setWater();
+
 
     if (HotSwapID > 0) //For custom courses
     {
 
+        //Load various things for custom courses
+        MenuChanged = -1; //Set menu changed to -1 to force the course select menu to go back to stock courses when you reload it
 
-        setSky(); //Load various things for custom courses
-        setWater();
+        int ci = 5 + (courseValue-16); //Get course index for custom courses
 
         CustomObjectivePoints = (BattleObjectivePoint*)(GetRealAddress(0x06000210));
 
@@ -433,9 +468,20 @@ void BattleInit() //Initialize for positions of a course
                     {
                         case (SPAWN_POINT):
                         {
-                            SpawnPoint[CustomObjectivePoints[ThisObj].Player][0] = (float)CustomObjectivePoints[ThisObj].Position[0];//Set player spawns for a custom course
-                            SpawnPoint[CustomObjectivePoints[ThisObj].Player][1] = (float)CustomObjectivePoints[ThisObj].Position[1];//Set player spawns for a custom course
-                            SpawnPoint[CustomObjectivePoints[ThisObj].Player][2] = (float)CustomObjectivePoints[ThisObj].Position[2];//Set player spawns for a custom course
+                            SpawnPoint[CustomObjectivePoints[ThisObj].Player][0] = (float)CustomObjectivePoints[ThisObj].Position[0] * LevelScales[ScaleXMode];//Set player spawns for a custom course
+                            if (ci == 5) //Hard coded fix for Sky Shrooms scale heights
+                            {
+                                SpawnPoint[CustomObjectivePoints[ThisObj].Player][1] = (float)(CustomObjectivePoints[ThisObj].Position[1] - 2) * LevelScales[ScaleYMode];//Set player spawns for a custom course
+                            }
+                            else if (ci == 7) //Hard coded fix for Koopa Island scale heights
+                            {
+                                SpawnPoint[CustomObjectivePoints[ThisObj].Player][1] = (float)(CustomObjectivePoints[ThisObj].Position[1] + 3) * LevelScales[ScaleYMode];//Set player spawns for a custom course
+                            }
+                            else //All otehr custom courses
+                            {
+                                SpawnPoint[CustomObjectivePoints[ThisObj].Player][1] = (float)CustomObjectivePoints[ThisObj].Position[1] * LevelScales[ScaleYMode];//Set player spawns for a custom course
+                            }
+                            SpawnPoint[CustomObjectivePoints[ThisObj].Player][2] = (float)CustomObjectivePoints[ThisObj].Position[2] * LevelScales[ScaleZMode];//Set player spawns for a custom course
                            
                             break;
                         }
@@ -443,9 +489,9 @@ void BattleInit() //Initialize for positions of a course
                         {   
                             for (int i = 0; i < 4; i++) //For now just make copies of each set so I don't have to modify my code much
                             {
-                                multiFlagPositionsHolder[i][CustomObjectivePoints[ThisObj].Player][0] = CustomObjectivePoints[ThisObj].Position[0];
-                                multiFlagPositionsHolder[i][CustomObjectivePoints[ThisObj].Player][1] = CustomObjectivePoints[ThisObj].Position[1];
-                                multiFlagPositionsHolder[i][CustomObjectivePoints[ThisObj].Player][2] = CustomObjectivePoints[ThisObj].Position[2];
+                                multiFlagPositionsHolder[i][CustomObjectivePoints[ThisObj].Player][0] = (short)((float)CustomObjectivePoints[ThisObj].Position[0] * LevelScales[ScaleXMode]);
+                                multiFlagPositionsHolder[i][CustomObjectivePoints[ThisObj].Player][1] = (short)((float)CustomObjectivePoints[ThisObj].Position[1] * LevelScales[ScaleYMode]);
+                                multiFlagPositionsHolder[i][CustomObjectivePoints[ThisObj].Player][2] = (short)((float)CustomObjectivePoints[ThisObj].Position[2] * LevelScales[ScaleZMode]);
                             }
                             break;
                         }                        
@@ -453,9 +499,9 @@ void BattleInit() //Initialize for positions of a course
                         {
                             for (int i = 0; i < 4; i++) //For now just make copies of each set so I don't have to modify my code much
                             {
-                                basePositionsHolder[i][CustomObjectivePoints[ThisObj].Player][0] = CustomObjectivePoints[ThisObj].Position[0];
-                                basePositionsHolder[i][CustomObjectivePoints[ThisObj].Player][1] = CustomObjectivePoints[ThisObj].Position[1];
-                                basePositionsHolder[i][CustomObjectivePoints[ThisObj].Player][2] = CustomObjectivePoints[ThisObj].Position[2];
+                                basePositionsHolder[i][CustomObjectivePoints[ThisObj].Player][0] = (short)((float)CustomObjectivePoints[ThisObj].Position[0] * LevelScales[ScaleXMode]);
+                                basePositionsHolder[i][CustomObjectivePoints[ThisObj].Player][1] = (short)((float)CustomObjectivePoints[ThisObj].Position[1] * LevelScales[ScaleYMode]);
+                                basePositionsHolder[i][CustomObjectivePoints[ThisObj].Player][2] = (short)((float)CustomObjectivePoints[ThisObj].Position[2] * LevelScales[ScaleZMode]);
                             }
                             break;
                         }
@@ -464,35 +510,89 @@ void BattleInit() //Initialize for positions of a course
             }
         }
 
+        if (ci == 7) //Lower water height a bit for Koopa Island to avoid errors when height is scaled to 0.5
+        {
+            g_waterHeight = g_waterHeight - 25; 
+        }
+
 
         
     }
     else //For stock courses
     {
-        singleFlagPositionsHolder[0] = singleFlagPositions[g_courseID][0];
-        singleFlagPositionsHolder[1] = singleFlagPositions[g_courseID][1];
-        singleFlagPositionsHolder[2] = singleFlagPositions[g_courseID][2];
+
+        singleFlagPositionsHolder[0] = (short)((float)singleFlagPositions[g_courseID][0] * LevelScales[ScaleXMode]);
+        singleFlagPositionsHolder[1] = (short)((float)singleFlagPositions[g_courseID][1] * LevelScales[ScaleYMode]);
+        singleFlagPositionsHolder[2] = (short)((float)singleFlagPositions[g_courseID][2] * LevelScales[ScaleZMode]);
         for (int i = 0; i < 4; i++)
         {
             for (int player = 0; player < 4; player++)
             {
-                multiFlagPositionsHolder[i][player][0] = multiFlagPositions[i][g_courseID][player][0];
-                multiFlagPositionsHolder[i][player][1] = multiFlagPositions[i][g_courseID][player][1];
-                multiFlagPositionsHolder[i][player][2] = multiFlagPositions[i][g_courseID][player][2];
-                basePositionsHolder[i][player][0] = basePositions[i][g_courseID][player][0];
-                basePositionsHolder[i][player][1] = basePositions[i][g_courseID][player][1];
-                basePositionsHolder[i][player][2] = basePositions[i][g_courseID][player][2];                
+                multiFlagPositionsHolder[i][player][0] = (short)((float)multiFlagPositions[i][g_courseID][player][0] * LevelScales[ScaleXMode]);
+                multiFlagPositionsHolder[i][player][1] = (short)((float)multiFlagPositions[i][g_courseID][player][1] * LevelScales[ScaleYMode]);
+                multiFlagPositionsHolder[i][player][2] = (short)((float)multiFlagPositions[i][g_courseID][player][2] * LevelScales[ScaleZMode]);
+                basePositionsHolder[i][player][0] = (short)((float)basePositions[i][g_courseID][player][0] * LevelScales[ScaleXMode]);
+                basePositionsHolder[i][player][1] = (short)((float)basePositions[i][g_courseID][player][1] * LevelScales[ScaleYMode]);
+                basePositionsHolder[i][player][2] = (short)((float)basePositions[i][g_courseID][player][2] * LevelScales[ScaleZMode]);                
             }
         }
+
+
+
+        // //Set respawn positions in stock battle courses, this is to fix a crash
+        // SVector LocalPosition;
+        // for (int ThisPlayer = 0; ThisPlayer < g_playerCount; ThisPlayer++)
+        // {
+        //     LocalPosition[0] = (short)(GlobalPlayer[ThisPlayer].position[0] * LevelScales[ScaleXMode]) - 1;
+        //     LocalPosition[1] = 0; //(short)GlobalPlayer[ThisPlayer].position[1] - 1;
+        //     LocalPosition[2] = (short)(GlobalPlayer[ThisPlayer].position[2]*LevelScales[ScaleZMode])- 1;
+
+        //     PlacePlayerSpawn(LocalPosition, ThisPlayer);
+        // }       
+
+
     }
 
 
+
     clearBKObjecives();
+
+    if (status_first_person) //Turn the camera zoom with the c button on or off depending on if in first person mode or not
+    {
+        disableCameraZoom();
+    }
+    else
+    {
+        enableCameraZoom();
+    }
 
 
 }
 
 
+// void setItemBoxHeights()
+// {
+//     // //Set item box heights
+//     // if (status_options_flatcourses) //If courses are flat, set y (height) to match the course height, which is set to player 1's height at course initialization
+//     // {
+//     //y = (int)course_height;
+//     for (int ThisObject = 0; ThisObject < MAX_OBJECT; ThisObject++)
+//     {
+//         if (g_SimpleObjectArray[ThisObject].category == IBOX)
+//         {
+
+//             g_SimpleObjectArray[ThisObject].position[0] *= LevelScales[ScaleXMode];
+//             g_SimpleObjectArray[ThisObject].position[1] *= LevelScales[ScaleYMode];
+//             g_SimpleObjectArray[ThisObject].position[2] *= LevelScales[ScaleZMode];
+//             // // g_SimpleObjectArray[ThisObject].position[1] *= scaleHeight; //course_height;
+//             // g_SimpleObjectArray[ThisObject].fparam = CheckHight(g_SimpleObjectArray[ThisObject].position[0], g_SimpleObjectArray[ThisObject].position[1] + 10, g_SimpleObjectArray[ThisObject].position[2]);
+//             //g_SimpleObjectArray[ThisObject].velocity[0] *= LevelScales[ScaleYMode];
+//             g_SimpleObjectArray[ThisObject].velocity[0] = g_SimpleObjectArray[ThisObject].position[1];
+//             // g_SimpleObjectArray[ThisObject].position[1] = g_SimpleObjectArray[ThisObject].fparam - 20;            
+//         }
+//     }
+//     // }
+// }
 
 
 void spawnCoins(int n_coins)//If game mode is coins, spawn N coins at the beginning of the match
@@ -527,18 +627,19 @@ void spawnCoins(int n_coins)//If game mode is coins, spawn N coins at the beginn
 }
 
 
+
 void FirstPersonCamera()
 {
 
 
 
 
-    *(long long*)(0x8001A588) = 0x03E0000800000000;
-    *(long long*)(0x80019890) = 0x03E0000800000000;
-    *(long long*)(0x8001A0DC) = 0x03E0000800000000;
-    *(long long*)(0x8001E45C) = 0x03E0000800000000;
-    //func_8001E45C
-    //*(long long*)(0x8001EE98) = 0x03E0000800000000;
+    // *(long long*)(0x8001A588) = 0x03E0000800000000;
+    // *(long long*)(0x80019890) = 0x03E0000800000000;
+    // *(long long*)(0x8001A0DC) = 0x03E0000800000000;
+    // *(long long*)(0x8001E45C) = 0x03E0000800000000;
+    // //func_8001E45C
+    // //*(long long*)(0x8001EE98) = 0x03E0000800000000;
     
     
     
@@ -770,11 +871,18 @@ void DisplayBattleKartTitle()
     // PrintBigText(128,18, 0.9f,"KART");
     // PrintBigText(190,21, 0.9f,"64");
 
+
     PrintBigText(36,17, 0.85f,"B T L  K R  6 ");
     PrintBigText(36,19, 0.85f," A T E  A T  4");
 
+    // //For christmas version
+    // PrintBigText(36,27, 0.85f,"B T L  K R  6 ");
+    // PrintBigText(36,29, 0.85f," A T E  A T  4");
+    // PrintBigText(70,9, 0.85f, "C R S M S");
+    // PrintBigText(70,11, 0.85f, " H I T A ");
 
-    PrintBigText(272,13, 0.32f,"v3.0b8");
+
+    PrintBigText(272,13, 0.32f,"v3.0");
     PrintBigText(250,16, 0.5f,"by");
     PrintBigText(230,30, 0.5f,"Triclon");  
 
@@ -889,12 +997,12 @@ void bombSlowdown()
 
 
 //Function used for testing, displays player 1's position on the screen
-void displayPlayerOnePosition()
+void displayPlayerPosition(int player)
 {
     loadFont();
-    printStringNumber(0x00, 0x00, "X", (int)GlobalPlayer[0].position[0]);
-    printStringNumber(0x00, 0x0C, "Y", (int)GlobalPlayer[0].position[1]);
-    printStringNumber(0x00, 0x18, "Z", (int)GlobalPlayer[0].position[2]);
+    printStringNumber(0x30, 0x10, "X", (int)GlobalPlayer[player].position[0]);
+    printStringNumber(0x30, 0x1C, "Y", (int)GlobalPlayer[player].position[1]);
+    printStringNumber(0x30, 0x28, "Z", (int)GlobalPlayer[player].position[2]);
 }
 
 //Function used for testing, displays game tempo
@@ -907,12 +1015,13 @@ void displayGameTempo()
 
 
 
+
+
 //Automatically set race course starting positions based off the 0th path marker (e.g. where the finish line is)
 void getStartingPositions()
 {
     if (HotSwapID > 0) //Set starting positions to the spawn points for a custom course   
     {
-        // FVector origin = {0., 0., 0.};
         for (int i=0; i < player_count; i++)
         {
             GlobalPlayer[i].position[0] = SpawnPoint[i][0];
@@ -939,34 +1048,26 @@ void getStartingPositions()
         // printStringNumber(0x20, 0x38, "P1 Z = ", (int)(GlobalPlayer[0].position[2]));
 
         //Player 1
-        GlobalPlayer[0].position[0] = extraModeScale * ((float)(PositionArray[0])+22.5);
-        GlobalPlayer[0].position[1] = (float)(PositionArray[1])*scaleHeight+5.0;
-        GlobalPlayer[0].position[2] = (float)(PositionArray[2]);
+        GlobalPlayer[0].position[0] = extraModeScale * ((float)(PositionArray[0])+22.5) * LevelScales[ScaleXMode];
+        GlobalPlayer[0].position[1] = (float)(PositionArray[1])* LevelScales[ScaleYMode]+5.0;
+        GlobalPlayer[0].position[2] = (float)(PositionArray[2])* LevelScales[ScaleZMode];
         GlobalPlayer[0].direction[1] = 0x8000;
         //Player 2
-        GlobalPlayer[1].position[0] = extraModeScale * ((float)(PositionArray[0])+7.5);
-        GlobalPlayer[1].position[1] = (float)(PositionArray[1])*scaleHeight+5.0;
-        GlobalPlayer[1].position[2] = (float)(PositionArray[2]);
+        GlobalPlayer[1].position[0] = extraModeScale * ((float)(PositionArray[0])+7.5) * LevelScales[ScaleXMode];
+        GlobalPlayer[1].position[1] = (float)(PositionArray[1])* LevelScales[ScaleYMode]+5.0;
+        GlobalPlayer[1].position[2] = (float)(PositionArray[2])* LevelScales[ScaleZMode];
         GlobalPlayer[1].direction[1] = 0x8000;
         //Player 3
-        GlobalPlayer[2].position[0] = extraModeScale * ((float)(PositionArray[0])-7.5);
-        GlobalPlayer[2].position[1] = (float)(PositionArray[1])*scaleHeight+5.0;
-        GlobalPlayer[2].position[2] = (float)(PositionArray[2]);
+        GlobalPlayer[2].position[0] = extraModeScale * ((float)(PositionArray[0])-7.5) * LevelScales[ScaleXMode];
+        GlobalPlayer[2].position[1] = (float)(PositionArray[1])* LevelScales[ScaleYMode]+5.0;
+        GlobalPlayer[2].position[2] = (float)(PositionArray[2])* LevelScales[ScaleZMode];
         GlobalPlayer[2].direction[1] = 0x8000;
         //Player 4
-        GlobalPlayer[3].position[0] = extraModeScale * ((float)(PositionArray[0])-22.5);
-        GlobalPlayer[3].position[1] = (float)(PositionArray[1])*scaleHeight+5.0;
-        GlobalPlayer[3].position[2] = (float)(PositionArray[2]);
+        GlobalPlayer[3].position[0] = extraModeScale * ((float)(PositionArray[0])-22.5) * LevelScales[ScaleXMode];
+        GlobalPlayer[3].position[1] = (float)(PositionArray[1])* LevelScales[ScaleYMode]+5.0;
+        GlobalPlayer[3].position[2] = (float)(PositionArray[2])* LevelScales[ScaleZMode];
         GlobalPlayer[3].direction[1] = 0x8000;
 
-        // //If course set to flat, set height to be just a bit above zero
-        // if (status_options_flatcourses)
-        // {
-        //     GlobalPlayer[0].position[1] = 5.0;
-        //     GlobalPlayer[1].position[1] = 5.0;
-        //     GlobalPlayer[2].position[1] = 5.0;
-        //     GlobalPlayer[3].position[1] = 5.0;
-        // }
         // GlobalLakitu[0] -> activeFlag = 0;
         // GlobalLakitu[0] -> pickupFlag = 0;
         // GlobalLakitu[1] -> activeFlag = 0;
@@ -975,6 +1076,101 @@ void getStartingPositions()
         // GlobalLakitu[2] -> pickupFlag = 0;
         // GlobalLakitu[3] -> activeFlag = 0;
         // GlobalLakitu[3] -> pickupFlag = 0;
+    }
+    else //If in a stock battle course
+    {
+        //Hard code stock courses with their spawn points but now we allow scaling
+        if (g_courseID == 0x13) //Big donut
+        {
+            GlobalPlayer[0].position[0] = 0;
+            GlobalPlayer[0].position[1] = 205;
+            GlobalPlayer[0].position[2] = 575;
+            GlobalPlayer[1].position[0] = 0;
+            GlobalPlayer[1].position[1] = 205;
+            GlobalPlayer[1].position[2] = -575;
+            GlobalPlayer[2].position[0] = -575;
+            GlobalPlayer[2].position[1] = 205;
+            GlobalPlayer[2].position[2] = 0;
+            GlobalPlayer[3].position[0] = 575;
+            GlobalPlayer[3].position[1] = 205;
+            GlobalPlayer[3].position[2] = 0;
+
+            // ////Fix misplaced item boxes on big donut (based on gameshark code)
+            // // *(unsigned int*)(0x80160304) = 0x43750000; //Set initial height values
+            // // *(unsigned int*)(0x80160374) = 0x43600000;
+            // *(float*)(0x80160304) = 245 * LevelScales[ScaleYMode]; //Scale in height
+            // *(float*)(0x80160374) = 224 * LevelScales[ScaleYMode];        
+
+        }
+        else if (g_courseID == 0xF) //Block Fort
+        {
+            GlobalPlayer[0].position[0] = 0;
+            GlobalPlayer[0].position[1] = 5;
+            GlobalPlayer[0].position[2] = 200;
+            GlobalPlayer[1].position[0] = 0;
+            GlobalPlayer[1].position[1] = 5;
+            GlobalPlayer[1].position[2] = -200;
+            GlobalPlayer[2].position[0] = -200;
+            GlobalPlayer[2].position[1] = 5;
+            GlobalPlayer[2].position[2] = 0;
+            GlobalPlayer[3].position[0] = 200;
+            GlobalPlayer[3].position[1] = 5;
+            GlobalPlayer[3].position[2] = 0;
+        }
+        else if (g_courseID == 0x11) //Double Deck
+        {
+            GlobalPlayer[0].position[0] = 0;
+            GlobalPlayer[0].position[1] = 55;
+            GlobalPlayer[0].position[2] = 160;
+            GlobalPlayer[1].position[0] = 0;
+            GlobalPlayer[1].position[1] = 55;
+            GlobalPlayer[1].position[2] = -160;
+            GlobalPlayer[2].position[0] = -160;
+            GlobalPlayer[2].position[1] = 55;
+            GlobalPlayer[2].position[2] = 0;
+            GlobalPlayer[3].position[0] = 160;
+            GlobalPlayer[3].position[1] = 55;
+            GlobalPlayer[3].position[2] = 0;
+        }
+        else if (g_courseID == 0x10) //Skyscraper
+        {
+            GlobalPlayer[0].position[0] = 0;
+            GlobalPlayer[0].position[1] = 485;
+            GlobalPlayer[0].position[2] = 400;
+            GlobalPlayer[1].position[0] = 0;
+            GlobalPlayer[1].position[1] = 485;
+            GlobalPlayer[1].position[2] = -400;
+            GlobalPlayer[2].position[0] = -400;
+            GlobalPlayer[2].position[1] = 485;
+            GlobalPlayer[2].position[2] = 0;
+            GlobalPlayer[3].position[0] = 400;
+            GlobalPlayer[3].position[1] = 485;
+            GlobalPlayer[3].position[2] = 0;
+        }
+
+
+        //scaling on stock battle courses and setting spawn point
+        for (int player = 0; player < 4; player++)
+        {
+            GlobalPlayer[player].position[0] *= LevelScales[ScaleXMode];
+            if (LevelScales[ScaleYMode] > 1.0) //Fix weird issue where height of spawns is too high when course is scaled up
+            {
+                GlobalPlayer[player].position[1] = (GlobalPlayer[player].position[1]*LevelScales[ScaleYMode] - 4.75*(LevelScales[ScaleYMode]-1));
+            }
+            else if (LevelScales[ScaleYMode] == 0.5)
+            {
+                GlobalPlayer[player].position[1] = (GlobalPlayer[player].position[1]*LevelScales[ScaleYMode] + 3);
+            }
+            else //Default behavior
+            {
+                GlobalPlayer[player].position[1] *= LevelScales[ScaleYMode];
+            }
+            GlobalPlayer[player].position[2] *= LevelScales[ScaleZMode];
+            SpawnPoint[player][0] = GlobalPlayer[player].position[0];
+            SpawnPoint[player][1] = GlobalPlayer[player].position[1];
+            SpawnPoint[player][2] = GlobalPlayer[player].position[2];
+        }
+
     }
 }
 
@@ -1163,6 +1359,14 @@ void minimap_display_sprite(int input_x, int input_y, int spriteAddress)
     // objectPosition[2] = *(float*)(Object + 32);
     float fx = (float)(input_x) * g_mapScale; //Scale object positions down to map size
     float fz = (float)(input_y) * g_mapScale;
+    if (ScaleXMode != 2) //Scale where sprites on minimap if course is scaled
+    {
+        fx /= LevelScales[ScaleXMode];
+    }
+    if (ScaleYMode != 2)
+    {
+        fz /= LevelScales[ScaleZMode];
+    }
 
     //GlobalAddressA = marioDotSprite + 8*8*8;
 
@@ -1370,6 +1574,10 @@ void hijackExecuteItem(void *Car)
 
             //Decrement ammo
             shooter_ammo_p1[carID] -= 1.0;            
+        }
+        else
+        {
+            NAPlyTrgStart(carID, 0x1900a41d); //hit hand rail //Play sound for out of ammo
         }
 
 
@@ -1641,10 +1849,7 @@ void setFlag(int flagNumber)
         }
     }
     
-    if (status_options_flatcourses) //If courses are flat, set y (height) to match the course height, which is set to player 1's height at course initialization
-    {
-        y = (int)course_height;
-    }
+
 
     GlobalShortA = CreateObjectSimple(x, y, z, 0x0000, 50);  //Spawn or regenerate flag at it's spawn point (x, y, z, angle, objid)    
     GlobalAddressA = (long)(&g_SimpleObjectArray);
@@ -1660,10 +1865,6 @@ void setBase(int posNumber, int baseNumber)
     short x = basePositionsHolder[basePositionSelection][posNumber][0];
     short y = basePositionsHolder[basePositionSelection][posNumber][1];
     short z = basePositionsHolder[basePositionSelection][posNumber][2];
-    if (status_options_flatcourses) //If courses are flat, set y (height) to match the course height, which is set to player 1's height at course initialization
-    {
-        y = (int)course_height - 5;
-    }
     //GlobalShortA = CreateObjectSimple(basePositionsHolder[basePositionSelection][posNumber][0], basePositionsHolder[basePositionSelection][posNumber][1], basePositionsHolder[basePositionSelection][posNumber][2], 0x0000, 51);  //Spawn or flag the flag at it's spawn point (x, y, z, angle, objid)
     GlobalShortA = CreateObjectSimple(x, y, z, 0x0000, 51);  //Spawn or flag the flag at it's spawn point (x, y, z, angle, objid)
     GlobalAddressA = (long)(&g_SimpleObjectArray);
@@ -1708,14 +1909,7 @@ void selectStartingPositions()
                 for (int i=0; i < player_count; i++) //Set player starting positions for FFA
                 {
                     *(float*)((&g_player1LocationX) + (i*0xDD8/4)) = (float)multiFlagPositionsHolder[basePositionSelection][i][0] + 5;
-                    if (status_options_flatcourses) 
-                    {
-                        *(float*)((&g_player1LocationY) + (i*0xDD8/4)) = course_height;
-                    }
-                    else
-                    {
-                        *(float*)((&g_player1LocationY) + (i*0xDD8/4)) = (float)multiFlagPositionsHolder[basePositionSelection][i][1] + 5;
-                    }                    
+                    *(float*)((&g_player1LocationY) + (i*0xDD8/4)) = (float)multiFlagPositionsHolder[basePositionSelection][i][1] + 5;
                     *(float*)((&g_player1LocationZ) + (i*0xDD8/4)) = (float)multiFlagPositionsHolder[basePositionSelection][i][2] + 5;
                 }
             }
@@ -1723,48 +1917,19 @@ void selectStartingPositions()
             {
                 //Set player 1
                 *(float*)((&g_player1LocationX)) = (float)multiFlagPositionsHolder[basePositionSelection][0][0] + 5;
-                if (status_options_flatcourses) 
-                {
-                    *(float*)((&g_player1LocationY)) = course_height;
-                }
-                else
-                {
-                    *(float*)((&g_player1LocationY)) = (float)multiFlagPositionsHolder[basePositionSelection][0][1] + 5;
-                }
+                *(float*)((&g_player1LocationY)) = (float)multiFlagPositionsHolder[basePositionSelection][0][1] + 5;
                 *(float*)((&g_player1LocationZ)) = (float)multiFlagPositionsHolder[basePositionSelection][0][2] + 5;
                 //Set player 2
                 *(float*)((&g_player1LocationX) + (1*0xDD8/4)) = (float)multiFlagPositionsHolder[basePositionSelection][0][0] - 5;
-                if (status_options_flatcourses) 
-                {
-                    *(float*)((&g_player1LocationY) + (1*0xDD8/4)) = course_height;
-                }
-                else
-                {
-                    *(float*)((&g_player1LocationY) + (1*0xDD8/4)) = (float)multiFlagPositionsHolder[basePositionSelection][0][1] + 5;
-                }
-                
+                *(float*)((&g_player1LocationY) + (1*0xDD8/4)) = (float)multiFlagPositionsHolder[basePositionSelection][0][1] + 5;
                 *(float*)((&g_player1LocationZ) + (1*0xDD8/4)) = (float)multiFlagPositionsHolder[basePositionSelection][0][2] - 5;
                 //Set player 3
                 *(float*)((&g_player1LocationX) + (2*0xDD8/4)) = (float)multiFlagPositionsHolder[basePositionSelection][1][0] + 5;
-                if (status_options_flatcourses) 
-                {
-                    *(float*)((&g_player1LocationY) + (2*0xDD8/4)) = course_height;
-                }
-                else
-                {
-                    *(float*)((&g_player1LocationY) + (2*0xDD8/4)) = (float)multiFlagPositionsHolder[basePositionSelection][1][1] + 5;
-                }
+                *(float*)((&g_player1LocationY) + (2*0xDD8/4)) = (float)multiFlagPositionsHolder[basePositionSelection][1][1] + 5;
                 *(float*)((&g_player1LocationZ) + (2*0xDD8/4)) = (float)multiFlagPositionsHolder[basePositionSelection][1][2] + 5;
                 //Set player 4
                 *(float*)((&g_player1LocationX) + (3*0xDD8/4)) = (float)multiFlagPositionsHolder[basePositionSelection][1][0] - 5;
-                if (status_options_flatcourses) 
-                {
-                    *(float*)((&g_player1LocationY) + (3*0xDD8/4)) = course_height;
-                }
-                else
-                {
-                    *(float*)((&g_player1LocationY) + (3*0xDD8/4)) = (float)multiFlagPositionsHolder[basePositionSelection][1][1] + 5;
-                } 
+                *(float*)((&g_player1LocationY) + (3*0xDD8/4)) = (float)multiFlagPositionsHolder[basePositionSelection][1][1] + 5;
                 *(float*)((&g_player1LocationZ) + (3*0xDD8/4)) = (float)multiFlagPositionsHolder[basePositionSelection][1][2] - 5;
             }
 
@@ -2312,7 +2477,7 @@ void DrawPerScreen(Camera* LocalCamera)
                 addTurn = *(short*)(GlobalAddressA + 192);
 
                 objectPosition[0] = *(float*)(GlobalAddressA + 20);
-                objectPosition[1] = *(float*)(GlobalAddressA + 24)-3.0;
+                objectPosition[1] = *(float*)(GlobalAddressA + 24) - 3.0;
                 objectPosition[2] = *(float*)(GlobalAddressA + 28);
 
                 
@@ -2491,6 +2656,7 @@ void DisplayFlag(void *Camera, void *Object)
 
     //minimap_test();
     currentFlagPositionsX[flagNumber] = objectPosition[0];
+    currentFlagPositionsHeight[flagNumber] = objectPosition[1];
     currentFlagPositionsY[flagNumber] = objectPosition[2];
 
     objectAngle[0] = *(short*)(Object + 16);
@@ -2701,7 +2867,8 @@ void FlagCollide(void *Car, void *Flag)
                 {
 
                     SetStarMan(carID, false);
-                    SetVSGhost((Player*)&GlobalPlayer[carID], (char)carID);
+                    //SetVSGhost((Player*)&GlobalPlayer[carID], (char)carID);
+                    SetGhostEffect(carID, false, 0);
 
                 }
                 if (game_mode == 4) //If game mode is keep away
@@ -2853,6 +3020,7 @@ void menuStuff()
 
         case 13:
         {
+            MapSelectMenuDefault();
             scrollLock = false;
             g_startingIndicator = 0;
             if (MenuChanged != 13)
@@ -2862,11 +3030,14 @@ void menuStuff()
                 MenuIndex = 0;            
                 HotSwapID = 0;
                 stockASM();
+                copyCourseTable(0);
+                setPreviews();
+                setBanners();
+                previewRefresh();
                 hsLabel = -1;
                 courseValue = -1;
             }        
             //PlayerSelectMenuAfter();        
-            MapSelectMenuDefault();
             break;
         }
 
@@ -2925,14 +3096,6 @@ void menuStuff()
 //Run every frame while in game, needed for custom courses to work
 void customCourseRunEveryFrame()
 {
-
-
-    //loadFont();
-
-    //printStringUnsignedHex(10,10, "bot status", (*(unsigned char*)(0x800F6991 + 0xDD8)));
-    // printStringNumber(10,10,"check spawn position load", (int)SpawnPoint[0][0]);
-    // printStringNumber(10,20,"check spawn position load", (int)SpawnPoint[0][1]);
-    // printStringNumber(10,30,"check spawn position load", (int)SpawnPoint[0][2]);
 
 
     //Needed for custom courses
@@ -3006,6 +3169,10 @@ void bootCustomCourseStuff()
     // OverKartHeader.WeatherType = 0;
     // HotSwapID = 1;
 
+    // //Testing scale mode
+    // ScaleXMode = 4;
+    // ScaleYMode = 4;
+    // ScaleZMode = 4;
 
 }    
 
@@ -3222,6 +3389,13 @@ void setBKCheckAddress()
 //     GlobalShortA = g_courseID;
 //     g_courseID = CloudCourseID;
 //     KWKumo_Alloc();
+// }
+
+
+// //For christmas version
+// void playSnowMusic()
+// {
+//     NaSeqStart(8); //Set music for title screen in this case, to the "snow" music
 // }
 
 
@@ -3443,6 +3617,36 @@ void BattleSantaEndgame()
 
 }
 
+
+//Check if respawn immunity option status is set, if it does, everytime a player respawns (Lakitu drops them off) they become a ghost like using the ghost item
+void run_respawn_immunity()
+{
+    if (status_respawn_immunity == true)
+    {
+        for (int ThisPlayer = 0; ThisPlayer < player_count; ThisPlayer++)
+        {
+            if (GlobalLakitu[ThisPlayer] -> pickupFlag)
+            {
+
+                GlobalPlayer[ThisPlayer].weapon |= USE_BOO;
+            }
+        }
+    }
+}
+
+
+//Make shrunk payers in Shrink mode immune to weapons, you must squish them
+void squish_mode_make_shrunk_players_not_resquish()
+{
+    for (int ThisPlayer = 0; ThisPlayer < player_count; ThisPlayer++)
+    {
+        if (GlobalPlayer[ThisPlayer].slip_flag & THUNDER)
+        {
+            GlobalPlayer[ThisPlayer].weapon = 0;
+        }
+
+    }
+}
 
 
 

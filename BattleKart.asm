@@ -2,19 +2,23 @@
 
 //.definelabel BattleSanta, 0 //Sets if Battlekart will be BattleSanta or regular BattleKart, commented=OFF, uncommented=ON
 
+
 .ifdef BattleSanta
 	.open "BattleSantaBase.z64", "BattleKart64.z64", 0 //Path to MK64 rom with mario sprite replaced with santa sprite
-	.definelabel save_key, 0x8888999C //Value (2 bytes) to check for if save exists or not, update every new version
+	.definelabel save_key, 0x998999C //Value (2 bytes) to check for if save exists or not, update every new version
 .else
 	//.open "../Mario Kart 64.z64", "BattleKart64.z64", 0 //Path to the MK64 rom and output name of battle kart rom
 	//.open "Farm.z64", "BattleKart64.z64", 0 //Path to the MK64 rom and output name of battle kart rom
 	//.open "BattleFarm.z64", "BattleKart64.z64", 0 //Path to the MK64 rom and output name of battle kart rom
-	//.open "BattleKart64Base.z64", "BattleKart64.z64", 0 //Path to the MK64 rom and output name of battle kart rom	
+
+	.open "BattleKart64Base.z64", "BattleKart64.z64", 0 //Path to the MK64 rom and output name of battle kart rom	
+	
+	// .open "BattleSantaBase.z64", "BattleKart64.z64", 0 //Path to MK64 rom with mario sprite replaced with santa sprite
 	// .open "BASE.z64", "BattleKart64.z64", 0 //Path to the MK64 rom and output name of battle kart rom	
 	//.open "OverKart64 V6.z64", "BattleKart64.z64", 0
 	// .open "battle.z64", "BattleKart64.z64", 0 //Path to the MK64 rom and output name of battle kart rom
-	.open "Test.z64", "BattleKart64.z64", 0 //Path to the MK64 rom and output name of battle kart rom
-	.definelabel save_key, 0x8888998C //Value (2 bytes) to check for if save exists or not, update every new version
+	//.open "Test.z64", "BattleKart64.z64", 0 //Path to the MK64 rom and output name of battle kart rom
+	.definelabel save_key, 0xDBA1298D //Value (2 bytes) to check for if save exists or not, update every new version
 .endif
 
 //LibraryBUILD3 needs to be start of file
@@ -40,7 +44,7 @@
 
 //Overwrite name in rom header to be battle kart
 .org 0x20
-.asciiz "BATTLE KART 64 v3.0b8"
+.asciiz "BATTLE KART 64 v3.0"
 
 
 // //Bug check for collisionSphere
@@ -51,6 +55,10 @@
 // .org 0x10A40C
 // JAL MakeBKTest
 
+
+//This is to fix a bug where falling into the water on Sherbert Land and being incased in ice turns you into a bomb
+.org 0x07AA04
+	NOP
 
 
 
@@ -195,7 +203,7 @@
 .definelabel bot_controller_input_p2, VARIABLE_RAM_BASE+0x24
 .definelabel bot_controller_input_p3, VARIABLE_RAM_BASE+0x28
 .definelabel bot_controller_input_p4, VARIABLE_RAM_BASE+0x2C
-.definelabel status_options_flatcourses, VARIABLE_RAM_BASE+0x30 //Options toggle  (1=ON, 0=OFF)
+// .definelabel status_options_flatcourses, VARIABLE_RAM_BASE+0x30 //Options toggle  (1=ON, 0=OFF)
 .definelabel status_options_widescreen, VARIABLE_RAM_BASE+0x31
 .definelabel status_options_antialiasing, VARIABLE_RAM_BASE+0x32
 .definelabel status_options_3P4Pmusic, VARIABLE_RAM_BASE+0x33
@@ -286,19 +294,28 @@
 .definelabel who_hit_p4_last, VARIABLE_RAM_BASE+0xD4
 .definelabel startup_flag, VARIABLE_RAM_BASE+0xD5 //1 byte, flag to store if startup has run or not
 .definelabel high_score, VARIABLE_RAM_BASE+0xD6 //2 bytes, variable to store a high score
-.definelabel using_hle, VARIABLE_RAM_BASE+0xD8 //1 byte, flag to store if using emulator or not, to set render cull mode
+// .definelabel using_hle, VARIABLE_RAM_BASE+0xD8 //1 byte, flag to store if using emulator or not, to set render cull mode
 .definelabel lag_fix, VARIABLE_RAM_BASE+0xD9 //1 byte, flag to store if emualtor lag fix is on or not
 .definelabel max_coins, VARIABLE_RAM_BASE+0xDA //2 bytes, variable to store max number of coins (0 to 100)
 .definelabel hit_coin_loss, VARIABLE_RAM_BASE+0xDC //2 bytes, variable to store number of coins dropped when hit
 .definelabel status_first_person, VARIABLE_RAM_BASE+0xDE //1 byte, stores if first person camera mode is on or not
-.definelabel respawning_flag_p1, VARIABLE_RAM_BASE+0xE0 //1 byte, stores if player is respawning or not to avoid lakitu contiuously picking a player up when respawning
-.definelabel respawning_flag_p2, VARIABLE_RAM_BASE+0xE1 //1 byte, stores if player is respawning or not to avoid lakitu contiuously picking a player up when respawning
-.definelabel respawning_flag_p3, VARIABLE_RAM_BASE+0xE2 //1 byte, stores if player is respawning or not to avoid lakitu contiuously picking a player up when respawning
-.definelabel respawning_flag_p4, VARIABLE_RAM_BASE+0xE3 //1 byte, stores if player is respawning or not to avoid lakitu contiuously picking a player up when respawning
+.definelabel status_respawn_immunity, VARIABLE_RAM_BASE+0xDF //1 byte, stores if you turn into a ghost after laktiu drops you off or not
+.definelabel saved_ScaleXMode, VARIABLE_RAM_BASE+0xE0 //1 byte, store course scaling in X
+.definelabel saved_ScaleYMode, VARIABLE_RAM_BASE+0xE1 //1 byte, store course scaling in X
+.definelabel saved_ScaleZMode, VARIABLE_RAM_BASE+0xE2 //1 byte, store course scaling in X
+.definelabel menu_being_hit_lowers_score, VARIABLE_RAM_BASE+0xE3 //1 byte, stores if being hit lowers your score in the menu
+.definelabel menu_hitting_someone_raises_score, VARIABLE_RAM_BASE+0xE4 //1 byte, stores if being hit lowers your score in the menu
+
+
+
+// .definelabel respawning_flag_p1, VARIABLE_RAM_BASE+0xE0 //1 byte, stores if player is respawning or not to avoid lakitu contiuously picking a player up when respawning
+// .definelabel respawning_flag_p2, VARIABLE_RAM_BASE+0xE1 //1 byte, stores if player is respawning or not to avoid lakitu contiuously picking a player up when respawning
+// .definelabel respawning_flag_p3, VARIABLE_RAM_BASE+0xE2 //1 byte, stores if player is respawning or not to avoid lakitu contiuously picking a player up when respawning
+// .definelabel respawning_flag_p4, VARIABLE_RAM_BASE+0xE3 //1 byte, stores if player is respawning or not to avoid lakitu contiuously picking a player up when respawning
 
 
 //NOTE EVERYTHING ABOVE HERE IS SAVED TO THE EPPROM, EVERYTHING BELOW IS NOT, SAVE IS FIRST 512 OR 0x200 BYTES
-.definelabel bot_respawn_datastructure, VARIABLE_RAM_BASE+0x200 //3 x 4 bytes each = 12 bytes - Previous positions stored to teleport bots that fall off the map, a 3 element array 
+// .definelabel bot_respawn_datastructure, VARIABLE_RAM_BASE+0x200 //3 x 4 bytes each = 12 bytes - Previous positions stored to teleport bots that fall off the map, a 3 element array 
 
 
 /* Hooks */
@@ -328,15 +345,17 @@
 
 
 //Item reroll
-.org 0x7BAD4
+//.org 0x7BAD4
+.org 0x7BB2C
 	J itemReroll
+	NOP
 
-//Raise big donut to be higher when flat courses are on 
-//Set up the hook inside scale height multiplier code
-//.org 0x111D4C
-.org 0x111DB0
-	J raiseBigDonut
-	//note there is no nop because we want the delay slot to run
+// //Raise big donut to be higher when flat courses are on 
+// //Set up the hook inside scale height multiplier code
+// //.org 0x111D4C
+// .org 0x111DB0
+// 	J raiseBigDonut
+// 	//note there is no nop because we want the delay slot to run
 
 //Set up hook inside player initializaiotn code for battle mode
 .org 0x3D970
@@ -445,6 +464,9 @@ NOP
 .org 0x0B385E
 .halfword 0x0080
 
+
+
+
 // // overwrite boot function
 // .org 0x17EC //RAM address 0x80000BEC
 // 	LUI a0, hi(PAYLOAD_RAM) //RAM address
@@ -478,7 +500,7 @@ start_label:
 .align 0x10
 
 text_title_1: .asciiz "BATTLE KART 64"
-text_title_2: .asciiz " v3.0b8 by Triclon"
+text_title_2: .asciiz " v3.0 by Triclon"
 text_Z: .asciiz "Z"
 text_L: .asciiz "L"
 text_R: .asciiz "R"
@@ -525,7 +547,7 @@ text_game_testmode: .asciiz "TEST MODE"
 text_scoring: .asciiz "SCORING"
 text_stock: .asciiz "STOCK"
 text_time: .asciiz "TIME      "
-text_respawn: .asciiz "RESPAWN"
+text_respawn: .asciiz "RESPAWN ON HIT"
 text_hp: .asciiz "HP"
 text_hp_long: .asciiz "HP              "
 text_timer: .asciiz "TIMER (MIN)     "
@@ -595,12 +617,23 @@ text_team_1_wins: .asciiz "TEAM 1 WINS"
 text_team_2_wins: .asciiz "TEAM 2 WINS"
 text_max_health: .asciiz "MAX HEALTH      "
 text_max_ammo: .asciiz "MAX AMM0        "
-text_using_hle: .asciiz "USING HLE"
+// text_using_hle: .asciiz "USING HLE"
 text_target_humans: .asciiz "TARGET HUMANS"
 text_lag_fix: .asciiz "LAG FIX"
 text_max_coins: .asciiz "TOTAL COINS     "
 text_hit_coin_loss: .asciiz "HIT COIN LOSS   "
 text_first_person: .asciiz "FIRST PERSON"
+text_respawn_immunity: .asciiz "RESPAWN IMMUNITY"
+text_scale_x: .asciiz "SCALE X"
+text_scale_y: .asciiz "SCALE Y (HEIGHT)"
+text_scale_Z: .asciiz "SCALE Z"
+text_0p0: .asciiz "0.0"
+text_0p5: .asciiz "0.5"
+text_1p0: .asciiz "1.0"
+text_1p5: .asciiz "1.5"
+text_2p0: .asciiz "2.0"
+text_2p5: .asciiz "2.5"
+text_3p0: .asciiz "3.0"
 
 
 .align 0x10
@@ -639,7 +672,7 @@ setDefaults:
 	LI a1, VARIABLE_RAM_BASE + VARIABLE_RAM_SIZE //Blank ram block end
 	JAL blankRam
 	NOP
-	//Set default variables
+	//Set defaultg variables
 	li a0, 1 //Set to be on
 	NOR a0, zero, zero //Set to be on
 	SB a0, status_item_banana
@@ -655,7 +688,11 @@ setDefaults:
 	sb a0, bot_respawn_flag
 	sb a0, bot_use_items
 	sb a0, ctf_game_started
-	sb a0, using_hle
+	sb a0, being_hit_lowers_score
+	sb a0, hitting_someone_raises_score
+	sb a0, menu_being_hit_lowers_score
+	sb a0, menu_hitting_someone_raises_score
+	// sb a0, using_hle
 	SB zero, bot_ai_type //Set bot default AI to be seeker
 	li a1, 3
 	SH a1, max_hp
@@ -675,6 +712,13 @@ setDefaults:
 	SH a1, max_coins
 	LI a1, 5 //Set default coins lost on hit
 	SH a1, hit_coin_loss
+	LI a1, 2 //Set default scales
+	SB a1, ScaleXMode
+	SB a1, ScaleYMode
+	SB a1, ScaleZMode
+	SB a1, saved_ScaleXMode
+	SB a1, saved_ScaleYMode
+	SB a1, saved_ScaleZMode
 	LI a0, save_key //Store save key in the save flag, if game hasn't saved yet
 	SW a0, save_flag
 	// BNE t9, zero, @@branch_set_fps 
@@ -745,19 +789,19 @@ setRaceCourseStartingPositions:
 	.word 0x27BD0060
 
 
-//Set big donut to be higher when flat courses are on so we are above the water level in order to avoid the terrible camera issues
-raiseBigDonut:
-	LBU a0, status_options_flatcourses
-	BEQ a0, zero, @@branch_check_if_flat_courses_on
-		LBU a0, 0x800DC5A1 //Check if course is Big donut, Grab current course from 0x800DC5A0
-		LI a3, 0x13
-		BNE a0, a3, @@branch_check_if_flat_courses_on
-			NOP
-			ADDI t3, t3, 0x80 //Set course height to be higher to get it above the water level
-	@@branch_check_if_flat_courses_on:
-	//J 0x802A8740
-	JR RA
-	NOP
+// //Set big donut to be higher when flat courses are on so we are above the water level in order to avoid the terrible camera issues
+// raiseBigDonut:
+// 	LBU a0, status_options_flatcourses
+// 	BEQ a0, zero, @@branch_check_if_flat_courses_on
+// 		LBU a0, 0x800DC5A1 //Check if course is Big donut, Grab current course from 0x800DC5A0
+// 		LI a3, 0x13
+// 		BNE a0, a3, @@branch_check_if_flat_courses_on
+// 			NOP
+// 			ADDI t3, t3, 0x80 //Set course height to be higher to get it above the water level
+// 	@@branch_check_if_flat_courses_on:
+// 	//J 0x802A8740
+// 	JR RA
+// 	NOP
 
 
 
@@ -772,9 +816,8 @@ itemReroll:
 	LI a1, 6
 	BEQ a0, a0, @@branch_check_if_shell_shooter
 		NOP
+		BEQ zero, zero, @@branch_end_item_reroll
 		LI v1, 0 //Zero out item
-		j 0x8007AF2C //resume code
-		nop
 		@@branch_check_if_shell_shooter:
 	//If all items are off, get ready for a suprise!
 	li v0, 0
@@ -873,8 +916,12 @@ itemReroll:
 		@@branch_ghost_status_disabled:
 	@@branch_ghost_rolled:
 	//otherwise resume code
-	j 0x8007AF2C
-	nop
+	@@branch_end_item_reroll:
+	LW ra, 0x14 (sp) //Stuff that runs at end of get random item function
+	ADDIU sp, sp, 0x20
+	JR RA
+	// j 0x8007AF2C
+	MOVE v0, v1
 
 
 
@@ -1074,6 +1121,27 @@ getAngle:
 	ADDI sp, sp, 0x40
 
 
+//Function gives a player an item, to work around
+//a0, player to give item to
+giveItem:
+	LI a1, player_item_offset //#Calculate and add offset for current player
+	MULT a1, a0
+	LI a0, player_item_base //Load base for player has an item memory loc.
+	MFLO a1
+	ADDU a0, a0, a1 //Store total offset for player for item memory location
+	LBU v1, player_count_2 //IF player count is 3 or 4, add 0x1C0 to their item mem location
+	LI a2, 3
+	BNE v1, a2, @@branch_add_3or4player_offset
+		NOP
+		ADDIU a0, a0, 0x1C0
+		@@branch_add_3or4player_offset:
+	LBU a1, 0x0000 (a0)
+	BNE a1, zero, @@branch_skip_give_item //Check if player already has item, if not...
+		LI v0, 1
+		SB v0, 0x0000 (a0) //give player item
+	@@branch_skip_give_item:
+	JR RA
+	NOP
 
 //Function processes running the battle bot for a single player
 //A0 = Current player (0=P1, 1=P2, 2=P3, 3=P4)
@@ -2355,28 +2423,32 @@ checkIfZeroHP:
 //This function processes respawning
 //$A0 = player to respawn H, P1 = 0, P2 = 1, P3 =2, P4 = 4
 processRespawn:
-	LUI a1, hi(respawning_flag_p1) //Check if player already respawned
-	ADD a1, a1, a0
-	LBU a2, lo(respawning_flag_p1) (a1)
-	BEQ a2, zero, @@player_respawning
-		NOP
-		SB zero, lo(respawning_flag_p1) (a1) //Turn off respawn flag but don't yet respawn
-		@@player_respawning:
+	// LUI a1, hi(respawning_flag_p1) //Check if player already respawned
+	// ADD a1, a1, a0
+	// LBU a2, lo(respawning_flag_p1) (a1)
+	// BEQ a2, zero, @@player_respawning
+	// 	NOP
+	// 	SB zero, lo(respawning_flag_p1) (a1) //Turn off respawn flag but don't yet respawn
+	// 	@@player_respawning:
 
 
 
-	BNE a2, zero, @@player_not_respawned
-		LI a2, 0xFF
-		sb a2, lo(respawning_flag_p1) (a1) //Store true in respawn flag
+	// BNE a2, zero, @@player_not_respawned
+		// LI a2, 0xFF
+		// sb a2, lo(respawning_flag_p1) (a1) //Store true in respawn flag
 		LI a1, player_state_offset //Get player state mem address for forcing lakitu to respawn player
 		MULT a0, a1
 		LUI a1, 0x800F
 		LI a3, 1 //Set bits for respawning
+		//LI t7, 0x8 //Set bits for making respawned player a ghost
+		// LI t6, 0x80 //Set bit for forcing ghost status to be on
 		MFLO a2
 		ADD a1, a1, a2
 		// BEQ zero, zero, @@processRespawn_skip_to_end
 		SB a3, 0x6A5B (a1)
-		@@player_not_respawned:
+		//SB t7, 0x699E (a1)
+		// SB t6, 0x6A4C (a1)
+		// @@player_not_respawned:
 	// SB zero, lo(respawning_flag_p1) (a1) //Set respawn flag to zero if already respawned
 	// @@processRespawn_skip_to_end:
 	JR RA
@@ -2395,12 +2467,12 @@ processHit:
 	SW ra, 0x30 (sp)
 
 
-	//Check if player is actively respawning and don't lose score if the they are
-	LUI a1, hi(respawning_flag_p1) 
-	ADD a1, a1, a0
-	LBU a1, lo(respawning_flag_p1) (a1)
-	BNE a1, zero, @@branch_subtract_one_hp
-		NOP
+	// //Check if player is actively respawning and don't lose score if the they are
+	// LUI a1, hi(respawning_flag_p1) 
+	// ADD a1, a1, a0
+	// LBU a1, lo(respawning_flag_p1) (a1)
+	// BNE a1, zero, @@branch_subtract_one_hp
+	// 	NOP
 
 	//Subtract 1 HP if being_hit_lowers_score is true
 	LBU v0, being_hit_lowers_score
@@ -2932,21 +3004,22 @@ resetGame:
 		SB a0, who_hit_p2_last
 		SB a0, who_hit_p3_last
 		SB a0, who_hit_p4_last
-		//Reset respawn flags
-		SW zero, respawning_flag_p1
+		// //Reset respawn flags
+		// SW zero, respawning_flag_p1
 		//Fix item boxes on big donut
-		LBU a1, 0x800DC5A1 //Load current track from cup course index 0x8018EE0B
-		LI a0, 0x13 //Check if Big Donut, if it is, skip the rest of this
-		BNE a0, a1, @@branch_course_big_donut		
-			LI a0, 0x4375
-			SH a0, 0x80160304
-			LI a0, 0x4360
-			SH a0, 0x80160374
-			@@branch_course_big_donut:
-		//Find nearest item boxes
+		// LBU a1, 0x800DC5A1 //Load current track from cup course index 0x8018EE0B
+		// LI a0, 0x13 //Check if Big Donut, if it is, skip the rest of this
+		// BNE a0, a1, @@branch_course_big_donut		
+		// 	LI a0, 0x4375
+		// 	SH a0, 0x80160304
+		// 	LI a0, 0x4360
+		// 	SH a0, 0x80160374
+		// 	@@branch_course_big_donut:
+		// //Find nearest item boxes
 		ADDI sp, sp, -0x30
 		SW RA, 0x20 (sp)
 		JAL GetItemBoxIndexes
+		// JAL setItemBoxHeights
 		NOP
 		LW RA, 0x20 (sp)
 		ADDI sp, sp, 0x30
@@ -3254,9 +3327,7 @@ runGameModeShellShooter:
 
 
 
-	//c code for handling shell shooter hud + graphics stuff
-	JAL shell_shooter_hud_stuff
-	NOP
+
 
 	//Infinite green shells
 	lui a0, 0x8016
@@ -3343,6 +3414,8 @@ runGameModeShellShooter:
 	XOR a1, a2, a1 //Check if game is not paused or in the results screen
 	BEQ a1, zero, @@branch_run_counter_and_display_hp
 		NOP
+		JAL shell_shooter_hud_stuff //c code for handling shell shooter hud + graphics stuff
+		NOP
 		JAL FUNCTION_LOAD_FONT //Load font
 		NOP
 		JAL displayScore //Display HP
@@ -3351,6 +3424,7 @@ runGameModeShellShooter:
 		NOP
 		JAL winConditions //If in team points scoring mode, check if a team has won
 		NOP
+
 		@@branch_run_counter_and_display_hp:
 
 	//Jump back
@@ -3696,6 +3770,9 @@ runGameModeSquish:
 		JAL winConditions
 		NOP
 		@@branch_display_hp_and_process_time:
+	//Make sure shrun players cannot be attacked, they must be squished
+	JAL squish_mode_make_shrunk_players_not_resquish
+	NOP
 
 	//Jump back
 	LW ra, 0x20 (sp)
@@ -3848,8 +3925,9 @@ inRace:
 	sw ra, 0x001C (sp)
 
 
-	JAL setCullDLParameters
-	NOP
+	// JAL setCullDLParameters
+	// NOP
+
 
 
 	//Fix for 3 player mode minimap togging on and off since the fix for the crash caused hte minimap to be untogglable
@@ -3947,9 +4025,10 @@ inRace:
 	//Lag fix (if on)
 	LBU a0, lag_fix
 	BEQ a0, zero, @@branch_lag_fix
-		LI a0, 0xD
-		SB a0, 0x800EA6D2
+	LI a1, 0x2 //Default value
+		LI a1, 0xD //lag fix value
 		@@branch_lag_fix:
+	SB a1, 0x800EA6D2
 
 
 	// JAL displayGameTempo
@@ -4004,7 +4083,9 @@ inRace:
 	JAL runBots //Test running battle bots in c
 	NOP
 
-	// //Run battle bots (
+	JAL run_respawn_immunity //If respawn immunity option status is true, turn players who respawn (get dropped off by lakitu) into ghosts
+	NOP
+	// //Run battle bots 
 	// LI a0, 0x800F6990 //Only run if two or more players are alive
 	// LI a1, 0xDD8
 	// LI a2, 0xC0
@@ -4183,34 +4264,32 @@ inRace:
 	
 	@@branch_shell_shooter_on:
 
-	// If courses are set to flat, make all item boxes the same height off the ground
-	LBU a0, status_options_flatcourses
-	BEQ a0, zero, @@branch_flat_courses_set_on //If set to on
-
-
-		LUI a0, hi(course_height)
-		L.s f2, lo(course_height) (a0) //Set height of item boxes to be the course_height plus some small amount
-		LI.s f4, 4.0
-		ADD.s f2, f4, f2
-		LI a0, 0x8015F9B8 //load beginning of item array
-		LI a1, 0x80162508 //load end of item array
-		mfc1 t0, f2
-		LI t1, 0xC //Item box identifier
-		LI t2, 0x2 //Flag for if item box is initialized
-		//LW t0, course_height //Load item box height from course_height
-		@@branch_item_box_height_DO: //DO while thorugh entire item array
-			LHU a2, 0x0000 (a0)
-			bne a2, t1, @@branch_object_is_item_box //If object is an item box
-				LHU a2, 0x0006 (a0) //Load item box state to check if it is inialized
-				BNE a2, t2, @@branch_item_box_initalized //If item box is initialized
-					NOP
-					SW t0, 0x001C (a0)
-				@@branch_item_box_initalized:
-			@@branch_object_is_item_box:
-			SLT a3, a0, a1
-			BNE a3, zero, @@branch_item_box_height_DO  //WHILE still in the item array
-			ADDIU a0, a0, 0x70
-	@@branch_flat_courses_set_on:
+	// // If courses are set to flat, make all item boxes the same height off the ground
+	// LBU a0, status_options_flatcourses
+	// BEQ a0, zero, @@branch_flat_courses_set_on //If set to on
+	// 	LUI a0, hi(course_height)
+	// 	L.s f2, lo(course_height) (a0) //Set height of item boxes to be the course_height plus some small amount
+	// 	LI.s f4, 4.0
+	// 	ADD.s f2, f4, f2
+	// 	LI a0, 0x8015F9B8 //load beginning of item array
+	// 	LI a1, 0x80162508 //load end of item array
+	// 	mfc1 t0, f2
+	// 	LI t1, 0xC //Item box identifier
+	// 	LI t2, 0x2 //Flag for if item box is initialized
+	// 	//LW t0, course_height //Load item box height from course_height
+	// 	@@branch_item_box_height_DO: //DO while thorugh entire item array
+	// 		LHU a2, 0x0000 (a0)
+	// 		bne a2, t1, @@branch_object_is_item_box //If object is an item box
+	// 			LHU a2, 0x0006 (a0) //Load item box state to check if it is inialized
+	// 			BNE a2, t2, @@branch_item_box_initalized //If item box is initialized
+	// 				NOP
+	// 				SW t0, 0x001C (a0)
+	// 			@@branch_item_box_initalized:
+	// 		@@branch_object_is_item_box:
+	// 		SLT a3, a0, a1
+	// 		BNE a3, zero, @@branch_item_box_height_DO  //WHILE still in the item array
+	// 		ADDIU a0, a0, 0x70
+	// @@branch_flat_courses_set_on:
 
 
 	//If any player has a blue shell, replace it with triple red shells, for those rare instances someone picks one up from a course item box
@@ -4397,6 +4476,56 @@ menuDispOnOff:
 	@@BRANCH_MOVE_POINTER_TO_ON:
 	JAL FUNCTION_DISPLAY_TEXT
 	//addi a0, a0, 0x80 //X position (same as input + 0x88)
+	LI a0, 0x90 //x position
+	LW ra, 0x001C (sp)
+	JR ra
+	ADDI sp, sp, 0x20
+
+//Function to display course scaling
+//A1 = y position
+//a2 = text pointer
+//a3 = Status byte
+menuDispScale:
+	LI a0, 0x8 //x position
+	ADDI sp, sp, 0xFFE0 //Store registers in stack so I can save them while running disp text function
+	SW a0, 0x0010 (sp)
+	SW a1, 0x0014 (sp)
+	SW ra, 0x001C (sp)
+	JAL FUNCTION_DISPLAY_TEXT //Display text for menu option
+	SW a3, 0x0018 (sp)
+	LW a0, 0x0010 (sp) //Load the registers back out of the stack
+	LW a1, 0x0014 (sp)
+	LW a3, 0x0018 (sp)
+	LI t0, 0
+	BNE a3, t0, @@branch_0p0
+	LI t0, 1
+		LI a2, text_0p0
+		@@branch_0p0:
+	BNE a3, t0, @@branch_0p5
+	LI t0, 2
+		LI a2, text_0p5
+		@@branch_0p5:
+	BNE a3, t0, @@branch_1p0
+	LI t0, 3
+		LI a2, text_1p0
+		@@branch_1p0:
+	BNE a3, t0, @@branch_1p5
+	LI t0, 4
+		LI a2, text_1p5
+		@@branch_1p5:
+	BNE a3, t0, @@branch_2p0
+	LI t0, 5
+		LI a2, text_2p0
+		@@branch_2p0:
+	BNE a3, t0, @@branch_2p5
+	LI t0, 6
+		LI a2, text_2p5
+		@@branch_2p5:
+	BNE a3, t0, @@branch_3p0
+		NOP
+		LI a2, text_3p0
+		@@branch_3p0:
+	JAL FUNCTION_DISPLAY_TEXT
 	LI a0, 0x90 //x position
 	LW ra, 0x001C (sp)
 	JR ra
@@ -4852,11 +4981,11 @@ menuDispModeShellShooter:
 		jal menuDispTime
 		li a1, 0x64 //y
 		li a2, text_minus_one_when_hit
-		LBU a3, being_hit_lowers_score
+		LBU a3, menu_being_hit_lowers_score
 		jal menuDispOnOff
 		li a1, 0x70 //y
 		li a2, text_plus_one_hit_enemy
-		LBU a3, hitting_someone_raises_score
+		LBU a3, menu_hitting_someone_raises_score
 		jal menuDispOnOff
 		li a1, 0x7C //y
 		jal menuDispMaxAmmo
@@ -4871,7 +5000,7 @@ menuDispModeShellShooter:
 		JAL menuDispMaxPoints
 		li a1, 0x64 //y
 		li a2, text_minus_one_when_hit
-		LBU a3, being_hit_lowers_score
+		LBU a3, menu_being_hit_lowers_score
 		jal menuDispOnOff
 		li a1, 0x70 //y
 		jal menuDispMaxAmmo
@@ -5086,11 +5215,11 @@ menuDispModeSquish:
 		jal menuDispTime
 		li a1, 0x64 //y
 		li a2, text_minus_one_when_hit
-		LBU a3, being_hit_lowers_score
+		LBU a3, menu_being_hit_lowers_score
 		jal menuDispOnOff
 		li a1, 0x70 //y
 		li a2, text_plus_one_hit_enemy
-		LBU a3, hitting_someone_raises_score
+		LBU a3, menu_hitting_someone_raises_score
 		jal menuDispOnOff
 		li a1, 0x7C //y
 
@@ -5101,7 +5230,7 @@ menuDispModeSquish:
 		JAL menuDispMaxPoints
 		li a1, 0x64 //y
 		li a2, text_minus_one_when_hit
-		LBU a3, being_hit_lowers_score
+		LBU a3, menu_being_hit_lowers_score
 		jal menuDispOnOff
 		li a1, 0x70 //y
 		@@branch_selection_points:
@@ -5243,11 +5372,11 @@ menuDispModeTraditional:
 		jal menuDispTime
 		li a1, 0x64 //y
 		li a2, text_minus_one_when_hit
-		LBU a3, being_hit_lowers_score
+		LBU a3, menu_being_hit_lowers_score
 		jal menuDispOnOff
 		li a1, 0x70 //y
 		li a2, text_plus_one_hit_enemy
-		LBU a3, hitting_someone_raises_score
+		LBU a3, menu_hitting_someone_raises_score
 		jal menuDispOnOff
 		li a1, 0x7C //y
 
@@ -5258,7 +5387,7 @@ menuDispModeTraditional:
 		JAL menuDispMaxPoints
 		li a1, 0x64 //y
 		li a2, text_minus_one_when_hit
-		LBU a3, being_hit_lowers_score
+		LBU a3, menu_being_hit_lowers_score
 		jal menuDispOnOff
 		li a1, 0x70 //y
 		@@branch_selection_points:
@@ -5646,22 +5775,24 @@ menuDispPageGraphics:
 	JAL menuDispOnOff
 	li a1, 0x70	
 
-	//Display emulator cull mode
-	li a2, text_using_hle
-	lbu a3, using_hle
-	JAL menuDispOnOff
-	li a1, 0x7C
+	// //Display emulator cull mode
+	// li a2, text_using_hle
+	// lbu a3, using_hle
+	// JAL menuDispOnOff
+	// li a1, 0x7C
 
 
 	//Display "MINIMAP"
 	LI a2, text_options_mimimap
 	LBU a3, status_options_minimap
 	JAL menuDispOnOff
-	LI a1, 0x88 //y
+	li a1, 0x7C
+	// LI a1, 0x88 //y
 
 
 	//Set max distance you can scroll down in y on menu
-	LI a1, 7
+	// LI a1, 7
+	LI a1, 6
 	SB a1, MENU_Y_MAX
 
 	LW ra, 0x0020 (sp)
@@ -5675,15 +5806,17 @@ menuDispPageOptions:
 	ADDI sp, sp, 0xFFDC
 	SW ra, 0x0020 (sp)
 
-	//Display "Flat Courses"
-	LI a2, text_options_flatcourses
-	LBU a3, status_options_flatcourses
-	JAL menuDispOnOff
-	LI a1, 0x40 //y
+	// //Display "Flat Courses"
+	// LI a2, text_options_flatcourses
+	// LBU a3, status_options_flatcourses
+	// JAL menuDispOnOff
+	// LI a1, 0x40 //y
 
 	//Restore regular course scaling if flat courses are turned back off
-	lbu a0, status_options_flatcourses //load status
-	BNE a0, 0, @@BRANCH_FLAT_COURSES_ON //If turned off, flatten the battle courses
+	// lbu a0, status_options_flatcourses //load status
+	// BNE a0, 0, @@BRANCH_FLAT_COURSES_ON //If turned off, flatten the battle courses
+	LBU a1, ScaleYMode//load status
+	BEQ a1, zero, @@branch_flatten_battle_courses//If turned off, flatten the battle courses
 		LUI a0, 0x3F80
 		SW a0, 0x800DC608
 		LI a0, 0x0C023D25 //jal   SetRolloverFall //Re-enable tumbling
@@ -5693,20 +5826,37 @@ menuDispPageOptions:
 		// SW a0, 0x8007A9D0
 		LI a0, 0x0D //re-enable Lakitu for out of bounds
 		SB a0, 0x800798E7
-	@@BRANCH_FLAT_COURSES_ON:
+		@@branch_flatten_battle_courses:
+	//@@BRANCH_FLAT_COURSES_ON:
 
+
+	//Display scaling for x, y, and z
+	LI a2, text_scale_x
+	LBU a3, ScaleXMode
+	JAL menuDispScale
+	LI a1, 0x40
+
+	LI a2, text_scale_y
+	LBU a3, ScaleYMode
+	JAL menuDispScale
+	LI a1, 0x4C
+
+	LI a2, text_scale_z
+	LBU a3, ScaleZMode
+	JAL menuDispScale
+	LI a1, 0x58
 
 	//Display "3P/4P MUSIC"
 	LI a2, text_options_3P4Pmusic
 	LBU a3, status_options_3P4Pmusic
 	JAL menuDispOnOff
-	LI a1, 0x4C //y
+	LI a1, 0x64 //y
 
 	//Display "SAME CHARS"
 	LI a2, text_options_samechars
 	LBU a3, status_options_samechars
 	JAL menuDispOnOff
-	LI a1, 0x58 //y
+	LI a1, 0x70 //y
 
 
 
@@ -5715,13 +5865,21 @@ menuDispPageOptions:
 	LI a2, text_options_ludicrousspeed
 	LBU a3, status_options_ludicrousspeed
 	JAL menuDispOnOff
-	LI a1, 0x64 //y
+	LI a1, 0x7C //y
 
 	//Display respawn
 	li a2, text_respawn //text pointer
 	lbu a3, status_respawn //status byte
 	jal menuDispOnOff
-	li a1, 0x70 //y
+	li a1, 0x88 //y
+
+
+	//Display respawn immunity
+	li a2, text_respawn_immunity //text pointer
+	lbu a3, status_respawn_immunity //status byte
+	jal menuDispOnOff
+	li a1, 0x94 //y
+
 
 
 
@@ -5750,10 +5908,10 @@ menuDispPageOptions:
 		@@branch_display_restore_defaults_text_3:
 	LI a0, 0x8 //x pos
 	JAL FUNCTION_DISPLAY_TEXT //display text
-	LI a1, 0x7C //y pos
+	LI a1, 0xA0 //y pos
 
 	//Set max distance you can scroll down in y on the menu
-	LI a1, 6
+	LI a1, 9
 	SB a1, MENU_Y_MAX
 
 	LW ra, 0x0020 (sp)
@@ -6052,14 +6210,19 @@ menuToggleGameTraditional:
 		jal menuToggleTimer
 		nop
 
-		li a0, being_hit_lowers_score //load status pointer
+		li a0, menu_being_hit_lowers_score //load status pointer
 		jal menuToggleOnoff
 		li a2, 4 //menu index
 
-		li a0, hitting_someone_raises_score //load status pointer
+		LBU a0, menu_being_hit_lowers_score //Store options
+		SB a0, being_hit_lowers_score
+
+		li a0, menu_hitting_someone_raises_score //load status pointer
 		jal menuToggleOnoff
 		li a2, 5 //menu index
 
+		LBU a0, menu_hitting_someone_raises_score
+		SB a0, hitting_someone_raises_score
 
 		@@branch_selection_time:
 	LI v1, 2
@@ -6069,9 +6232,12 @@ menuToggleGameTraditional:
 		JAL menuToggleHalf
 		LI t0, 9999 //How high can the HP go
 
-		li a0, being_hit_lowers_score //load status pointer
+		li a0, menu_being_hit_lowers_score //load status pointer
 		jal menuToggleOnoff
 		li a2, 4 //menu index
+
+		LBU a0, menu_being_hit_lowers_score
+		SB a0, being_hit_lowers_score
 
 		LI a0, 0xFF //Turn hitting someone will raise your score on for points mode
 		SB a0, hitting_someone_raises_score
@@ -6227,13 +6393,19 @@ menuToggleGameSquish:
 		jal menuToggleTimer
 		nop
 
-		li a0, being_hit_lowers_score //load status pointer
+		li a0, menu_being_hit_lowers_score //load status pointer
 		jal menuToggleOnoff
 		li a2, 4 //menu index
 
-		li a0, hitting_someone_raises_score //load status pointer
+		LBU a0, menu_being_hit_lowers_score
+		SB a0, being_hit_lowers_score
+
+		li a0, menu_hitting_someone_raises_score //load status pointer
 		jal menuToggleOnoff
 		li a2, 5 //menu index
+
+		LBU a0, menu_hitting_someone_raises_score
+		SB a0, hitting_someone_raises_score
 
 
 		@@branch_selection_time:
@@ -6244,9 +6416,12 @@ menuToggleGameSquish:
 		JAL menuToggleHalf
 		LI t0, 9999 //How high can the HP go
 
-		li a0, being_hit_lowers_score //load status pointer
+		li a0, menu_being_hit_lowers_score //load status pointer
 		jal menuToggleOnoff
 		li a2, 4 //menu index
+
+		LBU a0, menu_being_hit_lowers_score
+		SB a0, being_hit_lowers_score		
 
 		LI a0, 0xFF //Turn hitting someone will raise your score on for points mode
 		SB a0, hitting_someone_raises_score
@@ -6528,13 +6703,19 @@ menuToggleGameShellShooter:
 		jal menuToggleTimer
 		nop
 
-		li a0, being_hit_lowers_score //load status pointer
+		li a0, menu_being_hit_lowers_score //load status pointer
 		jal menuToggleOnoff
 		li a2, 4 //menu index
 
-		li a0, hitting_someone_raises_score //load status pointer
+		LBU a0, menu_being_hit_lowers_score
+		SB a0, being_hit_lowers_score
+
+		li a0, menu_hitting_someone_raises_score //load status pointer
 		jal menuToggleOnoff
 		li a2, 5 //menu index
+
+		LBU a0, menu_hitting_someone_raises_score
+		SB a0, hitting_someone_raises_score
 
 		//if menu selection is scoring
 		LI a0, shooter_ammo_max //load status pointer
@@ -6555,9 +6736,12 @@ menuToggleGameShellShooter:
 		JAL menuToggleHalf
 		LI t0, 9999 //How high can the HP go
 
-		li a0, being_hit_lowers_score //load status pointer
+		li a0, menu_being_hit_lowers_score //load status pointer
 		jal menuToggleOnoff
 		li a2, 4 //menu index
+
+		LBU a0, menu_being_hit_lowers_score
+		SB a0, being_hit_lowers_score
 
 		LI a0, 0xFF //Turn hitting someone will raise your score on for points mode
 		SB a0, hitting_someone_raises_score
@@ -6968,16 +7152,17 @@ menuToggleGraphics:
 
 
 
-	//If menu selection is using HLE
-	LI a0, using_hle //Load status pointer
-	JAL menuToggleOnoff
-	LI a2, 5 //Load menu index
+	// //If menu selection is using HLE
+	// LI a0, using_hle //Load status pointer
+	// JAL menuToggleOnoff
+	// LI a2, 5 //Load menu index
 
 
 	//If menu selection is minimap
 	LI a0, status_options_minimap //Load status pointer
 	JAL menuToggleOnoff
-	LI a2, 6 //Load menu index
+	LI a2, 5 //Load menu index
+	// LI a2, 6 //Load menu index
 
 	//Control if minimap is on or off
 	LB v0, status_options_minimap
@@ -6999,22 +7184,49 @@ menuToggleOptions:
 	ADDI sp, sp, 0xFFDC
 	SW ra, 0x001C (sp)
 
-	//If menu selection is flat courses
-	LI a0, status_options_flatcourses //Load status pointer
-	JAL menuToggleOnoff
+	// //If menu selection is flat courses
+	// LI a0, status_options_flatcourses //Load status pointer
+	// JAL menuToggleOnoff
+	// LI a2, 0 //Load menu index
+
+	//If menu selection is scaling x, y, or z...
+	LI a0, ScaleXMode //Load status pointer
+	LI t0, 6 //max value
+	LI t2, 1 //min value
+	JAL menuToggleByte
 	LI a2, 0 //Load menu index
 
+	//If menu selection is scaling x, y, or z...
+	LI a0, ScaleYMode //Load status pointer
+	LI t0, 6 //max value
+	LI t2, 0 //min value
+	JAL menuToggleByte
+	LI a2, 1 //Load menu index
 
+	//If menu selection is scaling x, y, or z...
+	LI a0, ScaleZMode //Load status pointer
+	LI t0, 6 //max value
+	LI t2, 1 //min value
+	JAL menuToggleByte
+	LI a2, 2 //Load menu index
+
+	//Save scale modes to EEPROM
+	LBU a0, ScaleXMode
+	SB a0, saved_ScaleXMode
+	LBU a0, ScaleYMode
+	SB a0, saved_ScaleYMode			
+	LBU a0, ScaleZMode
+	SB a0, saved_ScaleZMode
 
 	//If menu selection is 3P/4P music
 	LI a0, status_options_3P4Pmusic //Load status pointer
 	JAL menuToggleOnoff
-	LI a2, 1 //Load menu index
+	LI a2, 3 //Load menu index
 
 	//If menu selection is all chars select
 	LI a0, status_options_samechars //Load status pointer
 	JAL menuToggleOnoff
-	LI a2, 2 //Load menu index
+	LI a2, 4 //Load menu index
 
 
 
@@ -7022,21 +7234,25 @@ menuToggleOptions:
 	//If menu selection is ludicrious speed
 	LI a0, status_options_ludicrousspeed //Load status pointer
 	JAL menuToggleOnoff
-	LI a2, 3 //Load menu index
+	LI a2, 5 //Load menu index
 
 
 
 	//If menu selection is ludicrious speed
 	LI a0, status_respawn //Load status pointer
 	JAL menuToggleOnoff
-	LI a2, 4 //Load menu index
+	LI a2, 6 //Load menu index
 
 
+	//If menu selection is ludicrious speed
+	LI a0, status_respawn_immunity //Load status pointer
+	JAL menuToggleOnoff
+	LI a2, 7 //Load menu index
 
 
 	//If menu is restore defaults
 	LI a0, status_restore_defaults
-	LI a2, 5 //menu index 
+	LI a2, 8 //menu index 
 	LI t2, 0 //min number
 	JAL menuToggleByte
 	LI t0, 3 //max value
@@ -7203,6 +7419,14 @@ menuPlaySound:
 				NOP
 			@@run_if_no_good_save:
 
+			//Set scale modes
+			LBU a0, saved_ScaleXMode
+			SB a0, ScaleXMode
+			LBU a0, saved_ScaleYMode
+			SB a0, ScaleYMode			
+			LBU a0, saved_ScaleZMode
+			SB a0, ScaleZMode
+
 			JAL bootCustomCourseStuff
 			NOP
 
@@ -7232,8 +7456,8 @@ menuPlaySound:
 
 
 
-		JAL setCullDLParameters
-		NOP
+		// JAL setCullDLParameters
+		// NOP
 
 		JAL menuFunction
 		NOP
@@ -8266,6 +8490,19 @@ runAtCourseInitialization:
 	// JAL setCullDLParameters
 	// NOP
 
+	// LI a0, battlePathsRomStart
+	// LI a1, battlePathsStart
+	// LI a2, battlePathsEnd
+	// @@branch_copy_battle_paths_from_rom_to_ram: //do
+	// 	LW a3, 0x0000 (a0)
+	// 	ADDI a1, a1, 0x4
+	// 	ADDI a0, a0, 0x4
+	// 	BNE a1, a2, @@branch_copy_battle_paths_from_rom_to_ram //while
+	// 	SW a3, 0x0000 (a1)
+
+	// JAL dmaBattlePaths //Copy battle paths at course load in case I want to scale them later
+	// NOP
+
 	//For some game modes when in time scoring mode, this checks for if hitting someone and being hit doesn't affect the score, this fixes a bug for when both of those settings are off by turning on being hit means you lose a point
 	lbu a0, score_mode //If score mode is timer
 	LI a1, 1
@@ -8328,9 +8565,11 @@ runAtCourseInitialization:
 	//
 
 	//Flatten courses
-	LUI a0, hi(status_options_flatcourses)
-	LBU a1, lo(status_options_flatcourses) (a0)
-	BEQ a1, zero, @@branch_flatten_battle_courses
+	// LUI a0, hi(status_options_flatcourses)
+	// LBU a1, lo(status_options_flatcourses) (a0)
+	// BEQ a1, zero, @@branch_flatten_battle_courses
+	LBU a1, ScaleYMode
+	BNE a1, zero, @@branch_flatten_battle_courses
 		LUI a1, 0x800E
 		LUI a0, 0x3CCC
 		SW a0, 0xC608 (a1)
@@ -8538,6 +8777,13 @@ afterMapDataLoads:
 		JAL SetBalloonDefaults
 		NOP
 		@@branch_set_ffa_ballon_colors:
+	LBU a0, game_mode
+	LI a1, 5
+	BNE a0, a1, @@branch_set_zombombs_balloon_colors
+		NOP
+		JAL SetBalloonDefaults
+		NOP
+		@@branch_set_zombombs_balloon_colors:
 	
 	J 0x8003D0BC //Jump back
 	NOP
@@ -8636,7 +8882,11 @@ PaletteBowser:
 .importobj "BattleKartVariables.o"
 .align 0x10
 
+
 //Import paths for bot AI
+.align 0x100
+battlePathsStart:
+.align 0x100
 .importobj "BattleKartPaths/BlockFortPaths.o"
 .importobj "BattleKartPaths/DoubleDeckerPaths.o"
 .importobj "BattleKartPaths/SkyscraperPaths.o"
@@ -8646,7 +8896,27 @@ PaletteBowser:
 .importobj "BattleKartPaths/BobombFortPaths.o"
 .importobj "BattleKartPaths/KoopaIslandPaths.o"
 .importobj "BattleKartPaths/ShellShockedPaths.o"
+.align 0x100
+battlePathsEnd:
+.align 0x100
 
+
+.definelabel battlePathsLength, battlePathsEnd - battlePathsStart
+
+.definelabel battlePathsRomStart, PAYLOAD_ROM + (battlePathsStart - start_label)// + 0xB0000000
+.notice tohex(battlePathsStart)
+.notice tohex(battlePathsRomStart)
+.notice tohex(battlePathsLength)
+
+//DMA battle paths from rom to ram, to allow for scaling
+dmaBattlePaths:
+	LI a0, battlePathsStart //RAM address
+	LI a1, battlePathsRomStart //Rom address
+	LUI a2, hi(battlePathsLength)  //Length
+	JAL DMA_FUNC
+	ADDIU a2, a2, lo(battlePathsLength)
+	JR RA
+	NOP
 
 // //Import battle kart custom weather code
 // .importobj "BattleWeather/BattleKartWeather.o"
@@ -9238,10 +9508,6 @@ endSpawnPlayer: //Go back to battle mode when done running spawnplayer
 		SH t9, 0xC53E (t8)
 
 
-
-
-
-
 //Run every frame, useful for running things at boot like replacing the spinning Nintendo logo
 allRun:
 	ADDIU sp, sp, -0x40
@@ -9254,6 +9520,7 @@ allRun:
 		.ifdef BattleSanta
 			JAL loadChristmasLogo
 		.else
+			// JAL loadChristmasLogo //For christmas version
 			JAL loadLogo
 		.endif
 		NOP
@@ -9327,7 +9594,6 @@ end_label:
 
 
 
-
 .headersize 0
 
 
@@ -9368,6 +9634,7 @@ RAMCheckEnd:
  	.import "Data/ChristmasLogo.bin" ;; 0xD388
 .else
 	LogoROM:
+	// .import "Data/ChristmasLogo.bin" ;; 0xD388
  	.import "Data/Logo.bin" ;; 0xD388	
 .endif
 
@@ -9381,4 +9648,6 @@ RAMCheckEnd:
 .include "../Library/LibraryBUILD4.asm"
 .align 0x10
 
+
 .close
+

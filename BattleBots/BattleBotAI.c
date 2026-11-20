@@ -35,6 +35,8 @@ ushort bot_pressed[4] = {0, 0, 0, 0};
 char bot_x_stick[4] = {0, 0, 0, 0};
 float bot_topspeed[4] = {0,0,0,0};
 float nearest_item_box[4][3] = {{0.0, 0.0, 0.0,}, {0.0, 0.0, 0.0,}, {0.0, 0.0, 0.0,}, {0.0, 0.0, 0.0,}};
+static short fortress_item_box[4] = {-1, -1, -1, -1};
+static bool fortress_routes_ready;
 float furthest_node[4][3] = {{0.0, 0.0, 0.0,}, {0.0, 0.0, 0.0,}, {0.0, 0.0, 0.0,}, {0.0, 0.0, 0.0,}};
 char TripleTap = 0;
 Bump bot_bump[4];
@@ -62,25 +64,29 @@ short *CourseDropLengths[] = {BlockFortPaths_DropLengths, DoubleDeckerPaths_Drop
 short *LineCounts[] = {BlockFortPaths_LineCounts, DoubleDeckerPaths_LineCounts, Skyscraper_LineCounts, BigDonut_LineCounts,
                          RacePaths_LineCounts,
                         SkyShroomsPaths_LineCounts, ShellShocked_LineCounts, KoopaIsland2_LineCounts, BobFort4_LineCounts};
-//short dummyPathLengths[2] = {0x258, 0x258};
-const float BattleLevelHeightChecks[] = {15.0, 9.0, 75.0, 75.0, 
+const float DefaultBattleLevelHeightCheck[] = {15.0, 9.0, 75.0, 75.0,  //Default height checks stored as constants
                                     150.0,
                                     150.0, 150.0, 150.0, 30.0};
-const float BattleLevelHeightChecksSquared[] = {15.0*15.0, 9.0*9.0, 75.0*75.0, 75.0*75.0,
+const float DefaultBattleLevelHeightCheckSquared[] = {15.0*15.0, 9.0*9.0, 75.0*75.0, 75.0*75.0,
                                                     150.0*150.0,
                                                 150.0*150.0,  150.0*150.0,  150.0*150.0, 30.0*30.0};
-const short BattleLevelPathSearchRadius[] = {250, 350, 150, 400,
-                                                     400,
-                                            150, 200, 100, 100};
-const float turn_towards_rival_radius[] = {90.0, 100, 70, 150, 
+float BattleLevelHeightCheck = 0;
+float BattleLevelHeightCheckSquared = 0;         
+const short DefaultBattleLevelPathSearchRadius[] = {250, 350, 150, 400,
+                                                     600,
+                                            150, 200, 100, 225};
+short BattleLevelPathSearchRadius = 0;
+const float default_turn_towards_rival_radius[] = {90.0, 100, 70, 150, //Default radii stored as constants
                                                     200,
                                             80, 50, 150, 110}; //Distance bot must get to rival to just start turning twoards them wholesale
+float turn_towards_rival_radius = 0; //Distance bot must get to rival to just start turning twoards them wholesale
 const bool ignore_item_box_height_check[] = {false, false, true, true,
                                         true,
-                                        true, true, true, true}; //Check height for item boxes on this course?  usually no but for some courses like double deck and block fort it should be done
+                                        true, true, true, true}; //Bob-omb Fortress item boxes can be reached across levels via its ramps
 //Used to index above array of arrays based on course, indexed by g_courseID
 const short BattleLevelConverts[20] =     {4, 4, 4, 4, 4, 4, 4, 4, 4, 4 , 4, 4, 4, 4, 4, 0, 2, 1, 4, 3};
 short RaceCoursePathLength;
+float ScaledRampDistanceSquare;
 
 //(Marker **)GetRealAddress(PathTable[g_courseID])}
 //*(short *)(&g_pathLength)[g_courseID][0]}
@@ -121,10 +127,91 @@ float test_bot_sphere_position[4][3] =
 
 void ResetPathfinderBots() //Runs at beginning of game
 {
+
+    short ci = getBattleCourseIndex(); //Grab index for current course, used to index path arrays
+
+    //DMA Path data from rom to ram
+    *sourceAddress = (uint)(&battlePathsRomStart);
+    *targetAddress = (uint)(&battlePathsStart);
+    dataLength = (uint)&battlePathsEnd - (uint)&battlePathsStart;
+    
+    runDMA();
+
+    fortress_routes_ready = false;
+    if (ci == 8)
+    {
+        Marker **PathSets[] = {CoursePaths[ci], CourseRamps[ci], CourseDrops[ci]};
+        short *LengthSets[] = {CoursePathLengths[ci], CourseRampLengths[ci], CourseDropLengths[ci]};
+        // Build connectivity in authored coordinates so scaling cannot create false junctions.
+        fortress_routes_ready = InitBKRouteGraph(PathSets, LengthSets, LineCounts[ci]);
+    }
+
+    //Scale everything
+    if (ScaleYMode > 0) //For non-flat courses scale the height checks
+    {
+        BattleLevelHeightCheck = LevelScales[ScaleYMode] * DefaultBattleLevelHeightCheck[ci];
+        BattleLevelHeightCheckSquared = LevelScales[ScaleYMode] * LevelScales[ScaleYMode] * DefaultBattleLevelHeightCheckSquared[ci];        
+    }
+    else //For flat courses, we can ignore the height checks
+    {
+        BattleLevelHeightCheck = 10000.0;
+        BattleLevelHeightCheckSquared = 10000000.0;
+    }
+
+    if (LevelScales[ScaleXMode] > LevelScales[ScaleZMode]) //Scale to the largest x or z radius
+    {
+        turn_towards_rival_radius = default_turn_towards_rival_radius[ci] * LevelScales[ScaleXMode];
+        BattleLevelPathSearchRadius = (short)((float)DefaultBattleLevelPathSearchRadius[ci] * LevelScales[ScaleXMode]);
+        ScaledRampDistanceSquare = RAMPDISTANCESQUARE * LevelScales[ScaleXMode] * LevelScales[ScaleXMode];
+    }
+    else
+    {
+        turn_towards_rival_radius = default_turn_towards_rival_radius[ci] * LevelScales[ScaleZMode];
+        BattleLevelPathSearchRadius = (short)((float)DefaultBattleLevelPathSearchRadius[ci] * LevelScales[ScaleZMode]);
+        ScaledRampDistanceSquare = RAMPDISTANCESQUARE * LevelScales[ScaleZMode] * LevelScales[ScaleZMode];
+    }
+    for (int ThisPath = 0; ThisPath < LineCounts[ci][0]; ThisPath++)
+    {
+        for (int ThisMarker = 0; ThisMarker <= CoursePathLengths[ci][ThisPath]; ThisMarker++)
+        {
+            CoursePaths[ci][ThisPath][ThisMarker].Position[0] = (short)(LevelScales[ScaleXMode] * (float)CoursePaths[ci][ThisPath][ThisMarker].Position[0]);
+            CoursePaths[ci][ThisPath][ThisMarker].Position[1] = (short)(LevelScales[ScaleYMode] * (float)CoursePaths[ci][ThisPath][ThisMarker].Position[1]);
+            CoursePaths[ci][ThisPath][ThisMarker].Position[2] = (short)(LevelScales[ScaleZMode] * (float)CoursePaths[ci][ThisPath][ThisMarker].Position[2]);             
+        }
+
+    }
+    for (int ThisPath = 0; ThisPath < LineCounts[ci][1]; ThisPath++)
+    {
+        for (int ThisMarker = 0; ThisMarker <= CourseRampLengths[ci][ThisPath]; ThisMarker++)
+        {
+            CourseRamps[ci][ThisPath][ThisMarker].Position[0] = (short)(LevelScales[ScaleXMode] * (float)CourseRamps[ci][ThisPath][ThisMarker].Position[0]);
+            CourseRamps[ci][ThisPath][ThisMarker].Position[1] = (short)(LevelScales[ScaleYMode] * (float)CourseRamps[ci][ThisPath][ThisMarker].Position[1]);
+            CourseRamps[ci][ThisPath][ThisMarker].Position[2] = (short)(LevelScales[ScaleZMode] * (float)CourseRamps[ci][ThisPath][ThisMarker].Position[2]);
+        }
+    }
+    for (int ThisPath = 0; ThisPath < LineCounts[ci][2]; ThisPath++)
+    {
+        for (int ThisMarker = 0; ThisMarker <= CourseDropLengths[ci][ThisPath]; ThisMarker++)
+        {
+            CourseDrops[ci][ThisPath][ThisMarker].Position[0] = (short)(LevelScales[ScaleXMode] * (float)CourseDrops[ci][ThisPath][ThisMarker].Position[0]);
+            CourseDrops[ci][ThisPath][ThisMarker].Position[1] = (short)(LevelScales[ScaleYMode] * (float)CourseDrops[ci][ThisPath][ThisMarker].Position[1]);
+            CourseDrops[ci][ThisPath][ThisMarker].Position[2] = (short)(LevelScales[ScaleZMode] * (float)CourseDrops[ci][ThisPath][ThisMarker].Position[2]);
+        }
+    }
+
+
+    if (fortress_routes_ready)
+    {
+        RefreshBKRouteLengths();
+    }
+
     for (int i=0; i<player_count; i++)
     {
         //bot_rival_p1[i] = getRival(i); //commented out since this crashes game on boot if you selected bots for 3 or 4 player but only play 2 or 3 player
         AIPathfinder[i].TargetPath = -1;
+        AIPathfinder[i].LastPath = -1;
+        AIPathfinder[i].PathType = FLATPATH;
+        fortress_item_box[i] = -1;
         bot_initialization_flag[i] = true;
         for (int j=0; j<3; j++)
         {
@@ -138,7 +225,7 @@ void ResetPathfinderBots() //Runs at beginning of game
 
         randomBotTimers[i] = 0;
         randomBotTargetNodes[i] = 0;
-        botFiringTimers[4] = 0;
+        botFiringTimers[i] = 0;
 
 
     } 
@@ -146,7 +233,7 @@ void ResetPathfinderBots() //Runs at beginning of game
 
 
     //Set bot paths if in race courses, copy race course mega path to chunked up paths defined by us
-    if (getBattleCourseIndex() == 4)
+    if (ci == 4)
     {
         //Marker *RaceCoursePath = (Marker *)GetRealAddress(PathTable[g_courseID+1][0]);
 
@@ -175,7 +262,14 @@ void ResetPathfinderBots() //Runs at beginning of game
                 }
                 if(index < RaceCoursePathLength)
                 {
-                    CoursePaths[4][i][j].Position[0] = PositionArray[0];
+                    if (g_raceClass == 3) //extra mode
+                    {
+                        CoursePaths[4][i][j].Position[0] = -PositionArray[0]; //Mirrored
+                    }
+                    else
+                    {
+                         CoursePaths[4][i][j].Position[0] = PositionArray[0]; //Default
+                    }
                     CoursePaths[4][i][j].Position[1] = PositionArray[1];
                     CoursePaths[4][i][j].Position[2] = PositionArray[2];                    
                     // CoursePaths[4][i][j].Position[0] = RaceCoursePath[index].Position[0];
@@ -421,65 +515,49 @@ void ProSteeringPlus(int i, int ci, Marker* PathArray[], Marker* RampArray[], Ma
 
 void StandardBattleBot(int i)
 {
-    //Set bot controller
-    //AIPathfinder[i].TargetPath = -1;
-    // switch(bot_steering_p1[i])
-    // {
-    //     case 0: //follow rival
-            switch( ObjectSubBehaviorTurnTarget(GlobalPlayer[i].position, GlobalPlayer[i].direction[1], AIPathfinder[i].Target, 0x7) ) //Returns -1 or 1, to give direction to turn
-            {
-                case 0:              
-                    if (TestCollideSphere(GlobalPlayer[bot_rival_p1[i]].position, 40, GlobalPlayer[i].position, 40) && !TestCollideSphere(GlobalPlayer[bot_rival_p1[i]].position, 20, GlobalPlayer[i].position, 20))//&& ObjectSubBehaviorTurnTarget(GlobalPlayer[i].position, GlobalPlayer[i].direction[1], AIPathfinder[i].Target, 0x4)==0)  //If near rival, use weapon (note this is meant to only be when near a rival NOT necessarily another type of target)
-                    {
 
-                        bot_pressed[i] = BTN_Z;
-                        //bot_pressed[i] = 0;
-                        bot_buttons[i] = BTN_A + BTN_Z;
-                        // if (GlobalPlayer[i].item != 0)
-                        // {
-                        //     bot_timer_p1[i] = MakeRandomLimmit(160) +  400; //Once bot has used weapon, give them a few more seconds to chase their rival before finding a new rival
-                        //     // nearest_item_box[i][0] = 0.0; //Reset nearest item box
-                        //     // nearest_item_box[i][1] = 0.0;
-                        //     // nearest_item_box[i][2] = 0.0;
-                        // }
-                    }  
-                    else{  //Else just drive straight
-                        bot_pressed[i] = 0;
-                        bot_buttons[i] = BTN_A;
-                    }
-                    bot_x_stick[i] = 0x00;
-                    break;
-                case 1:
-                    bot_buttons[i] = BTN_A + BTN_B +BTN_R;
-                    bot_x_stick[i] = 0x50;
+    // if (botFiringTimers[i] <= 0)
+    //if (TestCollideSphere(GlobalPlayer[bot_rival_p1[i]].position, 40, GlobalPlayer[i].position, 40) && (botFiringTimers[i] <= 0))  //If near rival, use weapon (note this is meant to only be when near a rival NOT necessarily another type of target)
 
-                    #ifdef TURNASSIST //Toggle turn assist for bots to help debug pathfinding
-                    GlobalPlayer[i].direction[1] += 400 * getTempo();
-                    #endif
+    botFiringTimers[i] = decrementTimerWrapper(botFiringTimers[i]);
+    if ((botFiringTimers[i] <= 0)  && TestCollideSphere(GlobalPlayer[bot_rival_p1[i]].position, 40, GlobalPlayer[i].position, 40))// || (botFiringTimers[i] > 200))
+    {
+        bot_pressed[i] = BTN_Z;
+        bot_buttons[i] = BTN_A + BTN_Z;     
+        botFiringTimers[i] = (30 + MakeRandomLimmit(60));
+    }
+    else
+    {
+        switch( ObjectSubBehaviorTurnTarget(GlobalPlayer[i].position, GlobalPlayer[i].direction[1], AIPathfinder[i].Target, 0x7) ) //Returns -1 or 1, to give direction to turn
+        {
+            case 0:              
+                //if (TestCollideSphere(GlobalPlayer[bot_rival_p1[i]].position, 40, GlobalPlayer[i].position, 40) && !TestCollideSphere(GlobalPlayer[bot_rival_p1[i]].position, 20, GlobalPlayer[i].position, 20))//&& ObjectSubBehaviorTurnTarget(GlobalPlayer[i].position, GlobalPlayer[i].direction[1], AIPathfinder[i].Target, 0x4)==0)  //If near rival, use weapon (note this is meant to only be when near a rival NOT necessarily another type of target)
+                bot_x_stick[i] = 0x00;
+                bot_pressed[i] = 0;
+                bot_buttons[i] = BTN_A;
+                break;
+            case 1:
+                bot_pressed[i] = 0;
+                bot_buttons[i] = BTN_A + BTN_B +BTN_R;
+                bot_x_stick[i] = 0x50;
 
-                    break;
-                case -1:
-                    bot_buttons[i] = BTN_A + BTN_B + BTN_R;
-                    bot_x_stick[i] = -0x50;
+                #ifdef TURNASSIST //Toggle turn assist for bots to help debug pathfinding
+                GlobalPlayer[i].direction[1] += 400 * getTempo();
+                #endif
 
-                    #ifdef TURNASSIST //Toggle turn assist for bots to help debug pathfinding
-                    GlobalPlayer[i].direction[1] -= 400 * getTempo();
-                    #endif
+                break;
+            case -1:
+                bot_pressed[i] = 0;
+                bot_buttons[i] = BTN_A + BTN_B + BTN_R;
+                bot_x_stick[i] = -0x50;
 
-                    break;
-            }
-            // break;
-    //     case 1: //turn right
-    //         bot_buttons[i] = BTN_A + BTN_B;
-    //         bot_x_stick[i] = 0x50;
-    //         break;
-    //     case 2: //turn left
-    //         bot_buttons[i] = BTN_A + BTN_B;
-    //         bot_x_stick[i] = -0x50;
-    //         break;
-    // }
+                #ifdef TURNASSIST //Toggle turn assist for bots to help debug pathfinding
+                GlobalPlayer[i].direction[1] -= 400 * getTempo();
+                #endif
 
-
+                break;
+        }        
+    }
 }
 
 
@@ -514,8 +592,10 @@ void SeekerBattleBot(int i)
     float bot_y = GlobalPlayer[i].position[1];
     float bot_z = GlobalPlayer[i].position[2];
 
-
-    if  (*(unsigned char*)(0x800F6990 + (0xDD8 * bot_rival_p1[i])) != 0xC0 ||  *(unsigned char*)(0x800F6991 + (0xDD8 * bot_rival_p1[i])) == 0x50) //If rival is dead or a bomb, get a new rival
+    int rival_multiplier = 0xDD8 * bot_rival_p1[i];
+    if  (*(unsigned char*)(0x800F6990 + rival_multiplier) != 0xC0 ||  
+         *(unsigned char*)(0x800F6991 + rival_multiplier) == 0x50 ||  
+         *(unsigned char*)(0x800F6A5B + rival_multiplier) != 0x00  ) //If rival is dead, a bomb or respawning than get a new rival
     {
         bot_rival_p1[i] = getRival(i);
     }
@@ -596,13 +676,51 @@ void SeekerBattleBot(int i)
         rival_y = (float)basePositionsHolder[basePositionSelection][baseNumber][1];
         rival_z = (float)basePositionsHolder[basePositionSelection][baseNumber][2];
     }
+    else if (game_mode == 4 && playerHoldingFlag[0] == -1) //If game mode is Keep Away and flag has dropped, all bots target flag
+    {
+        rival_x = currentFlagPositionsX[0]; //x,y,z coords of rival
+        rival_y = currentFlagPositionsHeight[0] + 3;
+        rival_z = currentFlagPositionsY[0];  
+    }
+    else if (game_mode == 4 && playerHoldingFlag[0] == i)
+    {
+        keepAwayBotRunAwayTimer = decrementTimerWrapper(keepAwayBotRunAwayTimer); //Give bots holding the flag random nodes to run away too
+        if (keepAwayBotRunAwayTimer <= 0)
+        {
+            keepAwayBotRunAwayTimer = 300 + MakeRandomLimmit(800);    
+            keepAwayBotRunAwayNode =  MakeRandomLimmit(LineCounts[ci][0]);
+        }    
+        rival_x = CoursePaths[ci][keepAwayBotRunAwayNode][0].Position[0];
+        rival_y = CoursePaths[ci][keepAwayBotRunAwayNode][0].Position[1];
+        rival_z = CoursePaths[ci][keepAwayBotRunAwayNode][0].Position[2];
+    }
     else if (((checkItems(i) == 0) && !(GlobalPlayer[i].slip_flag & STAR) && (game_mode != 6))  || (bot_shell_shooter_get_ammo_flag[i]==true))// || hitting_wall)
     {
 
-        if ((nearest_item_box[i][0] == 0.0))
+        if (ci == 8)
+        {
+            if (!GetItemBoxNavigationTarget(fortress_item_box[i], nearest_item_box[i]))
+            {
+                fortress_item_box[i] = FindNearestItemBox(GlobalPlayer[i].position, nearest_item_box[i],
+                    BattleLevelHeightCheckSquared, true, ci);
+            }
+            if (fortress_item_box[i] != -1)
+            {
+                rival_x = nearest_item_box[i][0];
+                rival_y = nearest_item_box[i][1];
+                rival_z = nearest_item_box[i][2];
+            }
+            else
+            {
+                rival_x = GlobalPlayer[bot_rival_p1[i]].position[0];
+                rival_y = GlobalPlayer[bot_rival_p1[i]].position[1];
+                rival_z = GlobalPlayer[bot_rival_p1[i]].position[2];
+            }
+        }
+        else if ((nearest_item_box[i][0] == 0.0))
         {
             //float item_box_position[3] = {0.0, 0.0, 0.0};
-            if (FindNearestItemBox(GlobalPlayer[i].position, nearest_item_box[i], BattleLevelHeightChecksSquared[ci], ignore_item_box_height_check[ci], ci) != -1) //If an item box is found on the same level, target that, as long as bot is not hitting wall
+            if (FindNearestItemBox(GlobalPlayer[i].position, nearest_item_box[i], BattleLevelHeightCheckSquared, ignore_item_box_height_check[ci], ci) != -1) //If an item box is found on the same level, target that, as long as bot is not hitting wall
             {
                 rival_x = nearest_item_box[i][0]; //x,y,z coords of rival
                 rival_y = nearest_item_box[i][1];
@@ -630,25 +748,8 @@ void SeekerBattleBot(int i)
         }
 
     }
-    else if (game_mode == 4 && playerHoldingFlag[0] == -1) //If game mode is Keep Away and flag has dropped, all bots target flag
-    {
-        rival_x = currentFlagPositionsX[0]; //x,y,z coords of rival
-        rival_y = currentFlagPositionsHeight[0];
-        rival_z = currentFlagPositionsY[0];  
-    }
-    else if (game_mode == 4 && playerHoldingFlag[0] == i)
-    {
-        keepAwayBotRunAwayTimer = decrementTimerWrapper(keepAwayBotRunAwayTimer); //Give bots holding the flag random nodes to run away too
-        if (keepAwayBotRunAwayTimer <= 0)
-        {
-            keepAwayBotRunAwayTimer = 300 + MakeRandomLimmit(800);    
-            keepAwayBotRunAwayNode =  MakeRandomLimmit(LineCounts[ci][0]);
-        }    
-        rival_x = CoursePaths[ci][keepAwayBotRunAwayNode][0].Position[0];
-        rival_y = CoursePaths[ci][keepAwayBotRunAwayNode][0].Position[1];
-        rival_z = CoursePaths[ci][keepAwayBotRunAwayNode][0].Position[2];
-    }
     else if (bot_ai_type == RANDOM_AI || (game_mode==5 && (*(unsigned char*)(0x800F6991 + (0xDD8 * i)) != 0x50)))  //If bot AI mode is set to RANDOM or if in zombombs and player is not a bomb, run to a random node
+    // else if (bot_ai_type == RANDOM_AI && game_mode !=5)  //If bot AI mode is set to RANDOM or if in zombombs and player is not a bomb, run to a random node
     {
 
 
@@ -665,7 +766,7 @@ void SeekerBattleBot(int i)
         // objectPosition[0] = (float)rival_x;
         // objectPosition[1] = (float)rival_y;
         // objectPosition[2] = (float)rival_z;
-        // if (TestCollideSphere(objectPosition, turn_towards_rival_radius[ci], GlobalPlayer[i].position, turn_towards_rival_radius[ci]))
+        // if (TestCollideSphere(objectPosition, turn_towards_rival_radius, GlobalPlayer[i].position, turn_towards_rival_radius))
         // {
         //     keepAwayBotRunAwayTimer = 0;    
         // }
@@ -690,7 +791,7 @@ void SeekerBattleBot(int i)
     //     rival_z = furthest_node[i][2];         
                 
     // }
-    else if (game_mode == 3 && ctf_game_mode == 1) //If game mode is CTF 
+    else if (game_mode == 3) //If game mode is CTF 
     {
         if (ctf_game_mode == 0) //singleflag
         {
@@ -699,7 +800,7 @@ void SeekerBattleBot(int i)
                 bot_rival_p1[i] = getRival(i); //Grab a new rival
             }
             rival_x = currentFlagPositionsX[0];
-            rival_y = currentFlagPositionsHeight[0];
+            rival_y = currentFlagPositionsHeight[0] + 3;
             rival_z = currentFlagPositionsY[0];  
         }
         else //ctf_game_mode == 1, multiflag
@@ -713,9 +814,24 @@ void SeekerBattleBot(int i)
             }
             else
             {
-                int flagNumber = getBaseNumber(bot_rival_p1[i]);
+                int flagNumber;
+                if (ffa_or_teams == 0) //If FFA
+                {
+                    flagNumber = getBaseNumber(bot_rival_p1[i]);
+                }
+                else
+                {
+                    if (i < 2)
+                    {
+                        flagNumber = 2;
+                    }
+                    else
+                    {
+                        flagNumber = 0;
+                    }
+                }
                 rival_x = currentFlagPositionsX[flagNumber];
-                rival_y = currentFlagPositionsHeight[flagNumber];
+                rival_y = currentFlagPositionsHeight[flagNumber] + 3;
                 rival_z = currentFlagPositionsY[flagNumber];            
             }
         }
@@ -735,6 +851,11 @@ void SeekerBattleBot(int i)
 
 
 
+
+    if (ci == 8 && (checkItems(i) != 0 || (game_mode == 3 && isPlayerHoldingFlag(i))))
+    {
+        fortress_item_box[i] = -1;
+    }
 
     // if (bot_timer_p1[i] <= 0) //If bot timer is <= 0, roll the dice and maybe get a new rival
     // {
@@ -771,12 +892,20 @@ void SeekerBattleBot(int i)
         AIPathfinder[i].Target[0] = rival_x;
         AIPathfinder[i].Target[1] = rival_y;
         AIPathfinder[i].Target[2] = rival_z;
-        UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), BattleLevelPathSearchRadius[ci], CoursePaths[ci], CoursePathLengths[ci], LineCounts[ci][0], i, 0, BattleLevelHeightChecksSquared[ci]);       
-        if (AIPathfinder[i].TargetPath == -1)
+        if (ci == 8)
+        {
+            UpdateBKRoute(&AIPathfinder[i], GlobalPlayer[i].position, BattleLevelPathSearchRadius,
+                          BattleLevelHeightCheckSquared);
+        }
+        else
+        {
+            UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), BattleLevelPathSearchRadius, CoursePaths[ci], CoursePathLengths[ci], LineCounts[ci][0], i, 0, BattleLevelHeightCheckSquared);
+        }
+        if (AIPathfinder[i].TargetPath == -1 && ci != 8)
         {
             // int random_drop = MakeRandomLimmit(LineCounts[ci][2])
             float dropNodePosition[] = {0.,0.,0.};
-            int drop_path_index = FindNearestDropNode(GlobalPlayer[i].position, dropNodePosition, rival_y, CourseDrops[ci], CourseDropLengths[ci], LineCounts[ci][2], BattleLevelHeightChecksSquared[ci]);
+            int drop_path_index = FindNearestDropNode(GlobalPlayer[i].position, dropNodePosition, rival_y, CourseDrops[ci], CourseDropLengths[ci], LineCounts[ci][2], BattleLevelHeightCheckSquared);
             if (drop_path_index != -1) //crash catch
             {
                 AIPathfinder[i].LastPath = 0;
@@ -830,7 +959,7 @@ void SeekerBattleBot(int i)
 
                  //reset nearest marker                    
                 //if ((float)CoursePaths[ci][TargetPath][AIPathfinder[i].NearestMarker].Position[1] - bot_y > 25)
-                if (AIPathfinder[i].NearestMarkerHeight - bot_y > BattleLevelHeightChecks[ci])
+                if (AIPathfinder[i].NearestMarkerHeight - bot_y > BattleLevelHeightCheck)
                 {
                     //AI has fallen, reset paths.
                     AIPathfinder[i].TargetPath = -1;  
@@ -840,7 +969,7 @@ void SeekerBattleBot(int i)
                 {
                     for (int ThisMarker = 0; ThisMarker <= CoursePathLengths[ci][TargetPath]; ThisMarker++)
                     {
-                        if (pow(GlobalPlayer[i].position[1] - (float)CoursePaths[ci][TargetPath][ThisMarker].Position[1], 2) < BattleLevelHeightChecksSquared[ci]) //If height is not too far off
+                        if (pow(GlobalPlayer[i].position[1] - (float)CoursePaths[ci][TargetPath][ThisMarker].Position[1], 2) < BattleLevelHeightCheckSquared) //If height is not too far off
                         {   
                             GlobalFloatA =  pow(GlobalPlayer[i].position[0] - (float)CoursePaths[ci][TargetPath][ThisMarker].Position[0], 2) + 
                                             pow(GlobalPlayer[i].position[2] - (float)CoursePaths[ci][TargetPath][ThisMarker].Position[2], 2)   ;
@@ -871,7 +1000,7 @@ void SeekerBattleBot(int i)
                 // {
                     for (int ThisMarker = 0; ThisMarker <= CourseRampLengths[ci][TargetPath]; ThisMarker++)
                     {
-                        if (pow(GlobalPlayer[i].position[1] - (float)CourseRamps[ci][TargetPath][ThisMarker].Position[1], 2) < BattleLevelHeightChecksSquared[ci]*2.0)
+                        if (pow(GlobalPlayer[i].position[1] - (float)CourseRamps[ci][TargetPath][ThisMarker].Position[1], 2) < BattleLevelHeightCheckSquared*2.0)
                         {   
                             GlobalFloatA = pow(GlobalPlayer[i].position[0] - (float)CourseRamps[ci][TargetPath][ThisMarker].Position[0], 2) + 
                                             pow(GlobalPlayer[i].position[2] - (float)CourseRamps[ci][TargetPath][ThisMarker].Position[2], 2)   ;
@@ -908,7 +1037,7 @@ void SeekerBattleBot(int i)
                 // {
                     for (int ThisMarker = 0; ThisMarker <= CourseDropLengths[ci][TargetPath]; ThisMarker++)
                     {
-                        if (pow(GlobalPlayer[i].position[1] - (float)CourseDrops[ci][TargetPath][ThisMarker].Position[1], 2) < BattleLevelHeightChecksSquared[ci]*2.0)
+                        if (pow(GlobalPlayer[i].position[1] - (float)CourseDrops[ci][TargetPath][ThisMarker].Position[1], 2) < BattleLevelHeightCheckSquared*2.0)
                         {   
                             GlobalFloatA = pow(GlobalPlayer[i].position[0] - (float)CourseDrops[ci][TargetPath][ThisMarker].Position[0], 2) + 
                                             pow(GlobalPlayer[i].position[2] - (float)CourseDrops[ci][TargetPath][ThisMarker].Position[2], 2);
@@ -929,76 +1058,77 @@ void SeekerBattleBot(int i)
 
 
     
-    // if (i == 1) //Bot debugging wall o' text
-    // {
-    // //     DrawFPS2(20, 20);
+    if (i == 1) //Bot debugging wall o' text
+    {
+    //     DrawFPS2(20, 20);
 
-    //     loadFont();
-    // //     printString(0, 120, "P2 target");
+        loadFont();
+        displayPlayerPosition(3);
+    //     printString(0, 120, "P2 target");
 
-    //     printStringNumber(140, 10, "P1 x", GlobalPlayer[0].position[0]);
-    //     printStringNumber(140, 20, "P1 y", GlobalPlayer[0].position[1]);
-    //     printStringNumber(140, 30, "P1 z", GlobalPlayer[0].position[2]);
-
-
-    //     printStringUnsignedHex(50,40,"paths address",(uint)&CoursePaths[4]);
-    //     printStringUnsignedHex(50,50,"gcourseID", g_courseID);
-    //     printStringNumber(50, 60, "Course conversion", ci);
-    //     printStringNumber(50, 70, "RaceCoursePathLength", RaceCoursePathLength);
-    //     printStringUnsignedHex(50, 80, "P2 stick control", bot_x_stick[1]);
-    //     printStringUnsignedHex(50, 90, "P2 button control", bot_buttons[1]);
-
-    // //     // printStringNumber(50,0,"", PathLengthTable[0][0]);
-    // //     // printStringNumber(50,10,"",   PathLengthTable[1][0]);
-    // //     // printStringNumber(50,20,"",  PathLengthTable[2][0]);
-    // //     // printStringNumber(50,30,"",  PathLengthTable[3][0]);
-    // //     // printStringNumber(50,40,"",  PathLengthTable[4][0]);
-    // //     // printStringNumber(50,50,"",  PathLengthTable[5][0]);
-    // //     // printStringNumber(50,60,"",  PathLengthTable[6][0]);
-    // //     // printStringNumber(50,70,"",  PathLengthTable[7][0]);
-    // //     // printStringNumber(50,80,"",  PathLengthTable[8][0]);
-    // //     // printStringNumber(50,90,"",  PathLengthTable[9][0]);
-    // //     // printStringNumber(50,100,"",  PathLengthTable[10][0]);
-    // //     // printStringNumber(50,110,"",  PathLengthTable[11][0]);
-    // //     // printStringNumber(50,120,"",  PathLengthTable[12][0]);
-    // //     // printStringNumber(50,130,"",  PathLengthTable[13][0]);
-    // //     // printStringNumber(50,140,"",  PathLengthTable[14][0]);
-    // //     // printStringNumber(50,150,"",  PathLengthTable[15][0]);
-    // //     // printStringNumber(50,160,"",  PathLengthTable[16][0]);
-    // //     // printStringNumber(50,170,"",  PathLengthTable[17][0]);
-    // //     // printStringNumber(50,180,"",  PathLengthTable[18][0]);
-    // //     // printStringNumber(50,190,"",  PathLengthTable[19][0]);
-    // //     // printStringNumber(50,200,"",  PathLengthTable[20][0]);
+        printStringNumber(140, 10, "P1 x", GlobalPlayer[0].position[0]);
+        printStringNumber(140, 20, "P1 y", GlobalPlayer[0].position[1]);
+        printStringNumber(140, 30, "P1 z", GlobalPlayer[0].position[2]);
 
 
+        printStringUnsignedHex(50,40,"paths address",(uint)&CoursePaths[4]);
+        printStringUnsignedHex(50,50,"gcourseID", g_courseID);
+        printStringNumber(50, 60, "Course conversion", ci);
+        printStringNumber(50, 70, "RaceCoursePathLength", RaceCoursePathLength);
+        printStringUnsignedHex(50, 80, "P2 stick control", bot_x_stick[1]);
+        printStringUnsignedHex(50, 90, "P2 button control", bot_buttons[1]);
 
-    //     printStringNumber(0, 120, "Distance", AIPathfinder[i].Distance);
-    //     printStringNumber(0, 130, "Target[0]", AIPathfinder[i].Target[0]);
-    //     printStringNumber(0, 140, "Target[1]", AIPathfinder[i].Target[1]);
-    //     printStringNumber(0, 150, "Target[2]", AIPathfinder[i].Target[2]);
-    //     printStringNumber(0, 160, "Progression",  AIPathfinder[i].Progression);
-    //     printStringNumber(0, 170, "Nearest",  AIPathfinder[i].NearestMarker);
-    //     printStringNumber(0, 180, "Direction",  AIPathfinder[i].Direction);
-    //     printStringNumber(0, 190, "PathType",  AIPathfinder[i].PathType);
-    //     printStringNumber(0, 200, "TargetPath",  AIPathfinder[i].TargetPath);
-    //     printStringNumber(0, 210, "LastPath",  AIPathfinder[i].LastPath);
+    //     // printStringNumber(50,0,"", PathLengthTable[0][0]);
+    //     // printStringNumber(50,10,"",   PathLengthTable[1][0]);
+    //     // printStringNumber(50,20,"",  PathLengthTable[2][0]);
+    //     // printStringNumber(50,30,"",  PathLengthTable[3][0]);
+    //     // printStringNumber(50,40,"",  PathLengthTable[4][0]);
+    //     // printStringNumber(50,50,"",  PathLengthTable[5][0]);
+    //     // printStringNumber(50,60,"",  PathLengthTable[6][0]);
+    //     // printStringNumber(50,70,"",  PathLengthTable[7][0]);
+    //     // printStringNumber(50,80,"",  PathLengthTable[8][0]);
+    //     // printStringNumber(50,90,"",  PathLengthTable[9][0]);
+    //     // printStringNumber(50,100,"",  PathLengthTable[10][0]);
+    //     // printStringNumber(50,110,"",  PathLengthTable[11][0]);
+    //     // printStringNumber(50,120,"",  PathLengthTable[12][0]);
+    //     // printStringNumber(50,130,"",  PathLengthTable[13][0]);
+    //     // printStringNumber(50,140,"",  PathLengthTable[14][0]);
+    //     // printStringNumber(50,150,"",  PathLengthTable[15][0]);
+    //     // printStringNumber(50,160,"",  PathLengthTable[16][0]);
+    //     // printStringNumber(50,170,"",  PathLengthTable[17][0]);
+    //     // printStringNumber(50,180,"",  PathLengthTable[18][0]);
+    //     // printStringNumber(50,190,"",  PathLengthTable[19][0]);
+    //     // printStringNumber(50,200,"",  PathLengthTable[20][0]);
 
 
-    //     printStringNumber(140, 120, "ixbox x", nearest_item_box[1][0]);
-    //     printStringNumber(140, 130, "ixbox y", nearest_item_box[1][1]);
-    //     printStringNumber(140, 140, "ixbox z", nearest_item_box[1][2]);
-    //     printStringNumber(140, 150, "ixbox count", ItemBoxCount);
+
+        printStringNumber(0, 120, "Distance", AIPathfinder[i].Distance);
+        printStringNumber(0, 130, "Target[0]", AIPathfinder[i].Target[0]);
+        printStringNumber(0, 140, "Target[1]", AIPathfinder[i].Target[1]);
+        printStringNumber(0, 150, "Target[2]", AIPathfinder[i].Target[2]);
+        printStringNumber(0, 160, "Progression",  AIPathfinder[i].Progression);
+        printStringNumber(0, 170, "Nearest",  AIPathfinder[i].NearestMarker);
+        printStringNumber(0, 180, "Direction",  AIPathfinder[i].Direction);
+        printStringNumber(0, 190, "PathType",  AIPathfinder[i].PathType);
+        printStringNumber(0, 200, "TargetPath",  AIPathfinder[i].TargetPath);
+        printStringNumber(0, 210, "LastPath",  AIPathfinder[i].LastPath);
 
 
-    //     printStringNumber(140, 160, "bot x", bot_x);
-    //     printStringNumber(140, 170, "bot y", bot_y);
-    //     printStringNumber(140, 180, "bot z", bot_z);
-    //     printStringNumber(140, 190, "Rival", bot_rival_p1[i]);
-    //     printStringNumber(140, 200, "ProgressTimer", AIPathfinder[i].ProgressTimer);
+        printStringNumber(140, 120, "ixbox x", nearest_item_box[1][0]);
+        printStringNumber(140, 130, "ixbox y", nearest_item_box[1][1]);
+        printStringNumber(140, 140, "ixbox z", nearest_item_box[1][2]);
+        printStringNumber(140, 150, "ixbox count", ItemBoxCount);
 
-    // //     // printStringHex(140, 210, "The fuck?", *(unsigned int*)(0x8028EFF0));
-    // //     // *(unsigned int*)(0x8028EFF0) = 0x00000000;
-    // }
+
+        printStringNumber(140, 160, "bot x", bot_x);
+        printStringNumber(140, 170, "bot y", bot_y);
+        printStringNumber(140, 180, "bot z", bot_z);
+        printStringNumber(140, 190, "Rival", bot_rival_p1[i]);
+        printStringNumber(140, 200, "ProgressTimer", AIPathfinder[i].ProgressTimer);
+
+    //     // printStringHex(140, 210, "The fuck?", *(unsigned int*)(0x8028EFF0));
+    //     // *(unsigned int*)(0x8028EFF0) = 0x00000000;
+    }
 
 
     
@@ -1124,7 +1254,15 @@ void SeekerBattleBot(int i)
     
 
     float diff_y = rival_y - bot_y;
-    switch (AIPathfinder[i].PathType)
+    if (ci == 8)
+    {
+        if (PathfinderComplete(&AIPathfinder[i], CoursePathLengths[ci], CourseRampLengths[ci], CourseDropLengths[ci]))
+        {
+            UpdateBKRoute(&AIPathfinder[i], GlobalPlayer[i].position, BattleLevelPathSearchRadius,
+                          BattleLevelHeightCheckSquared);
+        }
+    }
+    else switch (AIPathfinder[i].PathType)
     {
         case FLATPATH:  //If bot is following a flat path
             if ( PathfinderComplete((BKPathfinder*)&AIPathfinder[i], CoursePathLengths[ci], CourseRampLengths[ci], CourseDropLengths[ci]) )
@@ -1141,23 +1279,29 @@ void SeekerBattleBot(int i)
                     // AIPathfinder[i].Target[0] = rival_x;
                     // AIPathfinder[i].Target[1] = rival_y;
                     // AIPathfinder[i].Target[2] = rival_z;
-                    UpdateRacePath((BKPathfinder*)(&AIPathfinder[i]), BattleLevelPathSearchRadius[ci], CoursePaths[ci], CoursePathLengths[ci], LineCounts[ci][0], i);                    
+                    UpdateRacePath((BKPathfinder*)(&AIPathfinder[i]), BattleLevelPathSearchRadius, CoursePaths[ci], CoursePathLengths[ci], LineCounts[ci][0], i);                    
                 }
-                else if (diff_y >= BattleLevelHeightChecks[ci] && LineCounts[ci][1] > 0) //If target is above bot and ramps exist, look for ramps
+                else if (diff_y >= BattleLevelHeightCheck && LineCounts[ci][1] > 0) //If target is above bot and ramps exist, look for ramps
                 {
                     float nodePosition[] = {0.,0.,0.};
+                    short ramp_marker;
                     int ramp_path_index;
                     //First find nearest ramp
-                    ramp_path_index = FindNearestRampNode(GlobalPlayer[i].position, nodePosition, rival_y, CourseRamps[ci], CourseRampLengths[ci], LineCounts[ci][1], BattleLevelHeightChecksSquared[ci]);
+                    ramp_path_index = FindNearestRampNode(GlobalPlayer[i].position, nodePosition, &ramp_marker, rival_y, CourseRamps[ci], CourseRampLengths[ci], LineCounts[ci][1], BattleLevelHeightCheckSquared);
                     //float diff_x = bot_x - nodePosition[0];
                     //float diff_z = bot_z - nodePosition[2];
 
                     if (ramp_path_index == -1) //If no path is found in the middle of a fall
                     {
+                        AIPathfinder[i].TargetPath = -1;
+                        nearest_item_box[i][0] = 0.0;
+                        nearest_item_box[i][1] = 0.0;
+                        nearest_item_box[i][2] = 0.0;
+                        StandardBattleBot(i);
                         return; //end function here to avoid errors
                     }
-                    //if (diff_x*diff_x + diff_z*diff_z < RAMPDISTANCESQUARE) //If bot is at ramp, use ramp
-                    if (PythagoreanTheorem(bot_x, nodePosition[0], bot_z, nodePosition[2]) < RAMPDISTANCESQUARE) //If bot is at ramp, use ramp
+                    //if (diff_x*diff_x + diff_z*diff_z < ScaledRampDistanceSquare) //If bot is at ramp, use ramp
+                    if (PythagoreanTheorem(bot_x, nodePosition[0], bot_z, nodePosition[2]) < ScaledRampDistanceSquare) //If bot is at ramp, use ramp
                     {
                         // AIPathfinder[i].Target[0] = rival_x;
                         // AIPathfinder[i].Target[1] = rival_y;
@@ -1166,38 +1310,36 @@ void SeekerBattleBot(int i)
                         //AIPathfinder[i].LastPath = TargetPath;
                         AIPathfinder[i].LastPath = -1;
                         AIPathfinder[i].TargetPath = ramp_path_index;
-                        AIPathfinder[i].Progression = 0;
-                        AIPathfinder[i].Direction = 1;
+                        AIPathfinder[i].Progression = ramp_marker;
+                        AIPathfinder[i].Direction = ramp_marker == 0 ? 1 : -1;
                         AIPathfinder[i].PathType = 1;
-                        AIPathfinder[i].NearestMarker = 0;
-                        AIPathfinder[i].NearestMarkerHeight = (float)CourseRamps[ci][ramp_path_index][0].Position[1];
+                        AIPathfinder[i].NearestMarker = ramp_marker;
+                        AIPathfinder[i].NearestMarkerHeight = (float)CourseRamps[ci][ramp_path_index][ramp_marker].Position[1];
                         AIPathfinder[i].ProgressTimer = 0;
                     }
                     else{// Else find path to nearest ramp
                         AIPathfinder[i].Target[0] = nodePosition[0];
                         AIPathfinder[i].Target[1] = nodePosition[1];
                         AIPathfinder[i].Target[2] = nodePosition[2];
-                        UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), BattleLevelPathSearchRadius[ci], CoursePaths[ci], CoursePathLengths[ci], LineCounts[ci][0], i, 0, BattleLevelHeightChecksSquared[ci]);                                            
+                        UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), BattleLevelPathSearchRadius, CoursePaths[ci], CoursePathLengths[ci], LineCounts[ci][0], i, 0, BattleLevelHeightCheckSquared);                                            
                     }
                 }
-                else if (diff_y <= -BattleLevelHeightChecks[ci] && (LineCounts[ci][1] > 0 || LineCounts[ci][2] > 0)) //If target is below bot and ramps or drops exist, look for ramps and drops
+                else if (diff_y <= -BattleLevelHeightCheck && (LineCounts[ci][1] > 0 || LineCounts[ci][2] > 0)) //If target is below bot and ramps or drops exist, look for ramps and drops
                 {
                     //FOR NOW JUST USE RAMPS, LATER WILL ADD RAMPS AND DROPS
                     float rampNodePosition[] = {0.,0.,0.};
                     float dropNodePosition[] = {0.,0.,0.};
+                    short ramp_marker;
                     //First find nearest ramp and drop
-                    int ramp_path_index = FindNearestRampNode(GlobalPlayer[i].position, rampNodePosition, rival_y, CourseRamps[ci], CourseRampLengths[ci], LineCounts[ci][1], BattleLevelHeightChecksSquared[ci]);
-                    int drop_path_index = FindNearestDropNode(GlobalPlayer[i].position, dropNodePosition, rival_y, CourseDrops[ci], CourseDropLengths[ci], LineCounts[ci][2], BattleLevelHeightChecksSquared[ci]);
+                    int ramp_path_index = FindNearestRampNode(GlobalPlayer[i].position, rampNodePosition, &ramp_marker, rival_y, CourseRamps[ci], CourseRampLengths[ci], LineCounts[ci][1], BattleLevelHeightCheckSquared);
+                    int drop_path_index = FindNearestDropNode(GlobalPlayer[i].position, dropNodePosition, rival_y, CourseDrops[ci], CourseDropLengths[ci], LineCounts[ci][2], BattleLevelHeightCheckSquared);
                     if (ramp_path_index == -1 && drop_path_index == -1)//If no path is found in the middle of a fall
                     {
-                        // nearest_item_box[i][0] = 0.0; //Reset nearest item box
-                        // nearest_item_box[i][1] = 0.0;
-                        // nearest_item_box[i][2] = 0.0;
-                        // AIPathfinder[i].Target[0] = rival_x; //Try to just do normal path finding
-                        // AIPathfinder[i].Target[1] = rival_y;
-                        // AIPathfinder[i].Target[2] = rival_z;
-                        // UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), PATHDISTANCECHECK, CoursePaths[ci], CoursePathLengths[ci], LineCounts[ci][0], i, 0);
-                        // break; //Break here to avoid errors
+                        AIPathfinder[i].TargetPath = -1;
+                        nearest_item_box[i][0] = 0.0;
+                        nearest_item_box[i][1] = 0.0;
+                        nearest_item_box[i][2] = 0.0;
+                        StandardBattleBot(i);
                         return; //End function here to avoid errors
                     }
 
@@ -1210,9 +1352,9 @@ void SeekerBattleBot(int i)
                     float dist_to_nearest_ramp = PythagoreanTheorem(GlobalPlayer[i].position[0], rampNodePosition[0], GlobalPlayer[i].position[2], rampNodePosition[2]);
                     float dist_to_nearest_drop = PythagoreanTheorem(GlobalPlayer[i].position[0], dropNodePosition[0], GlobalPlayer[i].position[2], dropNodePosition[2]);
                     //float dist_to_nearest_ramp = 99999999999;
-                    if (dist_to_nearest_ramp < dist_to_nearest_drop || drop_path_index == -1) //If a ramp is closer than a drop, use the ramp
+                    if (ramp_path_index != -1 && (dist_to_nearest_ramp < dist_to_nearest_drop || drop_path_index == -1)) //If a ramp is closer than a drop, use the ramp
                     {
-                        if (dist_to_nearest_ramp < RAMPDISTANCESQUARE) //If bot is at ramp, use ramp
+                        if (dist_to_nearest_ramp < ScaledRampDistanceSquare) //If bot is at ramp, use ramp
                         {
                             // AIPathfinder[i].Target[0] = rival_x;
                             // AIPathfinder[i].Target[1] = rival_y;
@@ -1221,23 +1363,23 @@ void SeekerBattleBot(int i)
                             //AIPathfinder[i].LastPath = TargetPath;
                             AIPathfinder[i].LastPath = -1;
                             AIPathfinder[i].TargetPath = ramp_path_index;
-                            AIPathfinder[i].Progression = CourseRampLengths[ci][ramp_path_index];
-                            AIPathfinder[i].Direction = -1;
+                            AIPathfinder[i].Progression = ramp_marker;
+                            AIPathfinder[i].Direction = ramp_marker == 0 ? 1 : -1;
                             AIPathfinder[i].PathType = 1;
-                            AIPathfinder[i].NearestMarker = CourseRampLengths[ci][ramp_path_index];
-                            AIPathfinder[i].NearestMarkerHeight = (float)CourseRamps[ci][ramp_path_index][CourseRampLengths[ci][ramp_path_index]].Position[1];
+                            AIPathfinder[i].NearestMarker = ramp_marker;
+                            AIPathfinder[i].NearestMarkerHeight = (float)CourseRamps[ci][ramp_path_index][ramp_marker].Position[1];
                             AIPathfinder[i].ProgressTimer = 0;
                         }
                         else{// Else find path to nearest ramp
                             AIPathfinder[i].Target[0] = rampNodePosition[0];
                             AIPathfinder[i].Target[1] = rampNodePosition[1];
                             AIPathfinder[i].Target[2] = rampNodePosition[2];
-                            UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), BattleLevelPathSearchRadius[ci], CoursePaths[ci], CoursePathLengths[ci], LineCounts[ci][0], i, 0, BattleLevelHeightChecksSquared[ci]);                                            
+                            UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), BattleLevelPathSearchRadius, CoursePaths[ci], CoursePathLengths[ci], LineCounts[ci][0], i, 0, BattleLevelHeightCheckSquared);                                            
                         }
                     }
                     else //else if a drop is closer than a ramp, use the drop
                     {
-                        if (dist_to_nearest_drop < RAMPDISTANCESQUARE) //If bot is at drop, use drop
+                        if (dist_to_nearest_drop < ScaledRampDistanceSquare) //If bot is at drop, use drop
                         {
                             // AIPathfinder[i].Target[0] = rival_x;
                             // AIPathfinder[i].Target[1] = rival_y;
@@ -1257,7 +1399,7 @@ void SeekerBattleBot(int i)
                             AIPathfinder[i].Target[0] = dropNodePosition[0];
                             AIPathfinder[i].Target[1] = dropNodePosition[1];
                             AIPathfinder[i].Target[2] = dropNodePosition[2];
-                            UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), BattleLevelPathSearchRadius[ci], CoursePaths[ci], CoursePathLengths[ci], LineCounts[ci][0], i, 0, BattleLevelHeightChecksSquared[ci]);                                            
+                            UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), BattleLevelPathSearchRadius, CoursePaths[ci], CoursePathLengths[ci], LineCounts[ci][0], i, 0, BattleLevelHeightCheckSquared);                                            
                         }
                     }
 
@@ -1267,7 +1409,7 @@ void SeekerBattleBot(int i)
                     // AIPathfinder[i].Target[0] = rival_x;
                     // AIPathfinder[i].Target[1] = rival_y;
                     // AIPathfinder[i].Target[2] = rival_z;
-                    UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), BattleLevelPathSearchRadius[ci], CoursePaths[ci], CoursePathLengths[ci], LineCounts[ci][0], i, 0, BattleLevelHeightChecksSquared[ci]);
+                    UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), BattleLevelPathSearchRadius, CoursePaths[ci], CoursePathLengths[ci], LineCounts[ci][0], i, 0, BattleLevelHeightCheckSquared);
                 }
             }
             break;
@@ -1280,7 +1422,7 @@ void SeekerBattleBot(int i)
                 // AIPathfinder[i].Target[0] = rival_x; //Done with the ramp so go back to a flat path
                 // AIPathfinder[i].Target[1] = rival_y;
                 // AIPathfinder[i].Target[2] = rival_z;
-                UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), BattleLevelPathSearchRadius[ci], CoursePaths[ci], CoursePathLengths[ci], LineCounts[ci][0], i, 0, BattleLevelHeightChecksSquared[ci]);                                   
+                UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), BattleLevelPathSearchRadius, CoursePaths[ci], CoursePathLengths[ci], LineCounts[ci][0], i, 0, BattleLevelHeightCheckSquared);                                   
             }
             break;
         case DROPPATH: //If bot is following a drop
@@ -1289,7 +1431,7 @@ void SeekerBattleBot(int i)
                 // AIPathfinder[i].Target[0] = rival_x; //Done with the ramp so go back to a flat path
                 // AIPathfinder[i].Target[1] = rival_y;
                 // AIPathfinder[i].Target[2] = rival_z;
-                UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), BattleLevelPathSearchRadius[ci], CoursePaths[ci], CoursePathLengths[ci], LineCounts[ci][0], i, 0, BattleLevelHeightChecksSquared[ci]);                                   
+                UpdateBKPath((BKPathfinder*)(&AIPathfinder[i]), BattleLevelPathSearchRadius, CoursePaths[ci], CoursePathLengths[ci], LineCounts[ci][0], i, 0, BattleLevelHeightCheckSquared);                                   
             }
             break;
     }
@@ -1305,7 +1447,8 @@ void SeekerBattleBot(int i)
         //AIPathfinder[i].ProgressTimer = 500; //Fix bug where PathfinderComplete wasn't return true when it should, now it always will
         StandardBattleBot(i);
     }
-    else if (TestCollideSphere(AIPathfinder[i].Target, turn_towards_rival_radius[ci], GlobalPlayer[i].position, turn_towards_rival_radius[ci]) && (pow(bot_y-rival_y, 2) < BattleLevelHeightChecksSquared[ci]*0.75))
+    else if ((ci != 8 || BKRouteAllowsDirectSteer(&AIPathfinder[i], 0.5f * BattleLevelHeightCheck)) &&
+             TestCollideSphere(AIPathfinder[i].Target, turn_towards_rival_radius, GlobalPlayer[i].position, turn_towards_rival_radius) && (pow(bot_y-rival_y, 2) < BattleLevelHeightCheckSquared*0.75))
     {   
         nearest_item_box[i][0] = 0.0; //Reset nearest item box
         nearest_item_box[i][1] = 0.0;
@@ -1317,23 +1460,25 @@ void SeekerBattleBot(int i)
     }
     else{
         ProSteeringPlus(i, ci, CoursePaths[ci], CourseRamps[ci], CourseDrops[ci]);
+        //Occasionally fire weapon, more often if in RANDOM AI
+        // int multiplier = 5;
+        if (bot_ai_type == RANDOM_AI)
+        {
+            //multiplier = 1;
+            botFiringTimers[i] = decrementTimerWrapper(botFiringTimers[i]); //decrement the current bot's timer
+            if (botFiringTimers[i] <= 0)
+            {
+                bot_pressed[i] = BTN_Z;
+                bot_buttons[i] = BTN_A + BTN_Z;
+                botFiringTimers[i] = (250 + MakeRandomLimmit(500)); //* multiplier;
+            }
+            
+        }
+
+
     }
     
 
-    //Occasionally fire weapon, more often if in RANDOM AI
-    int multiplier = 5;
-    if (bot_ai_type == RANDOM_AI)
-    {
-        multiplier = 1;
-    }
-    botFiringTimers[i] = decrementTimerWrapper(botFiringTimers[i]); //decrement the current bot's timer
-    if (botFiringTimers[i] <= 0)
-    {
-        bot_pressed[i] = BTN_Z;
-        bot_buttons[i] = BTN_A + BTN_Z;
-        botFiringTimers[i] = (250 + MakeRandomLimmit(500)) * multiplier;
-    }
-        
 
 
 
@@ -1858,4 +2003,3 @@ int getRival(int currentPlayer) //Note current player is 1,2,3,4, NOT 0,1,2,3
     return(bot_rival_p1[currentPlayer]);
     //return(getEnemy(currentPlayer));
 }
-
